@@ -28,11 +28,11 @@
 
   {% else %}
 
-    <h1>Přihlaste se prosím</h1>
+    <h1>Přihlaste se</h1>
 
     <p><strong style="color:red;">
     {% if spatne is defined %}
-      Neplatné přihlašovací údaje.  
+      Neplatné přihlašovací údaje. Zaregistrujte se nejdřív.
     {% endif %}
     {% if url is defined %}
       Stránka 
@@ -41,14 +41,16 @@
     {% endif %}
     </strong></p>
 
-    <form method="post" action="{{url_for('login')}}">
+    <form method="post" action="">
       <p class="login">
-        uživatelské jméno: <input type="text" name="login" /> <br />
+        uživatelské jméno: <input type="text" name="login" value="ucitel" /> <br />
         heslo: <input type="password" name="passwd" /> <br />
       {% if url is defined %}
         <input type="hidden" name="url" value="{{url}}" /> 
-      {% endif %}
-        <input class="submit" type="submit" name="ok" value="Přihlásit se" /> 
+      {% endif %}      
+        <input class="submit" type="submit" name="ok" value="Přihlásit se" /><br>
+        <strong><a href="{{url_for('registrace')}}">Zaregistrovat se</a></strong><br>
+        <strong><a href="{{url_for('databaze')}}">Databáze</a></strong><br>
       </p>
     </form>
   {% endif %}

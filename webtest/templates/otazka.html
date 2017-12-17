@@ -22,31 +22,32 @@
 
     <div class="rendruj">
     {% block rendruj %}
-      {{rendruj(otazka.obecne_zadani)}}
+      {{rendruj(otazka.obecneZadani)}}
     {% endblock rendruj %}
     
     <p style="margin-top: 2em;">
-    {%if otazka.spravna_odpoved%}
-      <span class="spravna_odpoved">{{otazka.spravna_odpoved}}</span>
+    {%if otazka.SprO%}
+      <span class="odpoved spravna">{{otazka.SprO}}</span>
     {%endif%}
-    {%if otazka.spatna_odpoved1%}
-      | <span class="spatna_odpoved">{{otazka.spatna_odpoved1}}</span>
+    {%if otazka.SPO1%}
+    | <span class="odpoved spatna">{{otazka.SPO1}}</span>
     {%endif%}
-    {%if otazka.spatna_odpoved2%}
-      | <span class="spatna_odpoved">{{otazka.spatna_odpoved2}}</span>
+    {%if otazka.SPO2%}
+    | <span class="odpoved spatna">{{otazka.SPO2}}</span>
     {%endif%}
-    {%if otazka.spatna_odpoved3%}
-      | <span class="spatna_odpoved">{{otazka.spatna_odpoved3}}</span>
+    {%if otazka.SPO3%}
+    | <span class="odpoved spatna">{{otazka.SPO3}}</span>
     {%endif%}
-    {%if otazka.spatna_odpoved4%}
-      | <span class="spatna_odpoved">{{otazka.spatna_odpoved4}}</span>
+    {%if otazka.SPO4%}
+    | <span class="odpoved spatna">{{otazka.SPO4}}</span>
     {%endif%}
-    {%if otazka.spatna_odpoved5%}
-      | <span class="spatna_odpoved">{{otazka.spatna_odpoved5}}</span>
+    {%if otazka.SPO5%}
+    | <span class="odpoved spatna">{{otazka.SPO5}}</span>
     {%endif%}
-    {%if otazka.spatna_odpoved6%}
-      | <span class="spatna_odpoved">{{otazka.spatna_odpoved6}}</span>
+    {%if otazka.SPO6%}
+    | <span class="odpoved spatna">{{otazka.SPO6}}</span>
     {%endif%}
+             
     </p>
     </div>
 

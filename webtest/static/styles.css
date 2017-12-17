@@ -294,6 +294,13 @@ p.dobre {
     float: right;
     margin-right: 20px; }
 
+
+  .logo {
+    width: 150px;
+    height: 150px;
+  }
+
+
 /*@import 'responsive';*/
 
 /*# sourceMappingURL=styles.css.map */

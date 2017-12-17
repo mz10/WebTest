@@ -20,7 +20,7 @@ var listFilter = {
         });
         // odstavec
         listFilter.p = $('<p>').addClass('j-filterp');
-        listFilter.p.html('Filter pro otázky <br />')
+        listFilter.p.html('Filtr pro otázky <br />')
         // input  
         listFilter.input = $("<input>").attr({
             "class":"j-filterinput",

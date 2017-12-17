@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block menu %} {% endblock menu %}
+
+{% block main %}
+
+<h1>Zaregistrovat se</h1>
+
+<p><strong style="color:red;">
+{% if spatne is defined %}
+  Neplatné přihlašovací údaje.  
+{% endif %}
+
+</strong></p>
+
+<form method="post">
+  <p class="login">
+    <input type="text" name="login" placeholder="Login"><br>
+    <input type="text" name="jmeno" placeholder="Jméno"><br>
+    <input type="text" name="prijmeni" placeholder="Přijmení"><br>   
+    <input type="password" name="heslo" placeholder="Heslo"><br>
+  {% if url is defined %}
+    <input type="hidden" name="url" value="{{url}}"><br>
+  {% endif %}
+  <input class="submit" type="submit" name="ok" value="Ucitel">
+  <input class="submit" type="submit" name="ok" value="Student">
+  </p>
+</form>
+{% endblock main %}

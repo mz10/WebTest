@@ -1,0 +1,47 @@
+{% extends "ucitel.html" %}
+{% block main %}
+<style>
+        html,body {
+        background:url("cary.png");
+        }
+    
+        table {
+        border-collapse: collapse;
+        border: 2px solid orange;
+        margin: 0 auto;
+        padding:2px;
+        }
+    
+        .tabulka {
+        font-size: 1em;
+        font-weight:bold;
+        }
+    
+        th,td {
+        border: 2px solid orange;
+        padding: 0 10px 0 10px;
+        }
+    
+        tr {
+            padding-right:10px;
+        }
+
+        th {
+        text-align:left;
+        background:linear-gradient(white,orange); 
+        color:brown;border:transparent;
+        height:22px;
+        vertical-align:center;
+        }
+    
+    </style>
+    <meta http-equiv="Refresh" content="4">
+    
+    <h1>Seznam tabulek</h1>
+    <form method="get" action="{{url_for('uklidDb')}}">
+        <input type="submit" name="smaz" value="Smazat všechno">
+    </form>
+    <br>
+    {{html}}
+
+{% endblock main %}
