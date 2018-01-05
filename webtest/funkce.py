@@ -34,6 +34,10 @@ def vysledky1():
         seznam_testu = select((u.jmeno, u.id) for u in DbTest)
         return render_template('vysledky.html', seznam_testu=seznam_testu)
 
+def nahodne(a,b):
+    return str(random.randint(a,b))
+
+
 def upload1():
     """upload souboru se zadáním
     """
@@ -199,7 +203,7 @@ class Otazka:
                     otazka.ucitel = get(u for u in DbUcitel
                                         if u.login == session['ucitel'])
                     otazka.jmeno = F['jmeno']
-                    otazka.typ_otazky = 'O'
+                    otazka.typTtazky = 'O'
                     otazka.obecneZadani = F['obecne_zadani']
                     return redirect(url_for('otazky'))
                 elif F['typ_otazky'] == 'C' and F['spravna_odpoved']:
@@ -208,7 +212,7 @@ class Otazka:
                     otazka.jmeno = F['jmeno']
                     otazka.typOtazky = 'C'
                     otazka.obecneZadani = F['obecne_zadani']
-                    otazka.spravnaOdpoved = F['spravna_odpoved']
+                    otazka.SprO = F['spravna_odpoved']
                     return redirect(url_for('otazky'))
                 # TODO!
             else:
@@ -227,6 +231,7 @@ class Otazka:
 
     def zobraz(id):
         otazka = DbOtazka[id]
+        otazka.SPO1 = otazka.SprO.replace("nahodne",nahodne(2,50))
         return render_template('otazka.html', otazka=otazka, rendruj=rendruj)
 
     def pridat():
@@ -323,7 +328,7 @@ class Testy:
                     ucitel=get(u for u in DbUcitel if u.login == session['ucitel']),
                     zobrazenoOd=datum_od, zobrazenoDo=datum_do)
                 for otazka in checked:
-                    OtazkaTestu(poradi=0, test=get(u for u in DbTest
+                    DbOtazkaTestu(poradi=0, test=get(u for u in DbTest
                                                     if u.jmeno == nazev_testu),
                                 otazka=get(o for o in DbOtazka
                                             if o.jmeno == otazka))
@@ -438,7 +443,7 @@ class Student:
                             casZahajeni=zacatek_testu,
                             casUkonceni=konec_testu)
             for ch in checked:
-                zadani = select((u.obecneZadani, u.spravnaOdpoved)
+                zadani = select((u.obecneZadani, u.SprO)
                                 for u in DbOtazka if u.id is ch).get()
                 konk_odpoved = request.form.get("%s" % ch)
                 if not konk_odpoved:
@@ -588,7 +593,9 @@ class Ostatni:
 
         sql.close()
         db.close()
-        return render_template('tabulky.html', html=Markup(html)) 
+        
+        return Markup(html)
+        #return render_template('tabulky.html', html=Markup(html)) 
 
     def smazTabulku():
         R = request

@@ -17,12 +17,116 @@
         <a href="{{url_for('otazky_ucitel', login=ucitel_login)}}">{{ucitel_jmeno}}</a>
         <a href="{{url_for('otazka_zobrazit', id=id)}}">zobrazit</a>
         <a href="{{url_for('otazka_editovat', id=id)}}">editovat</a>
-        <a href="{{url_for('otazka_smazat', id=id)}}">smazat</a></br>
+        <a class="smazat" hlaska="Smazat?" href="{{url_for('otazka_smazat', id=id)}}">smazat</a></br>
       </span>
     </header>
     <p>{{zadani[:80]}}</p>
   </section></li>
 {%endfor%}
 </ul>
+
+<script>
+
+$(function() {
+  $(".smazat").click(function(e){
+    var smazat = false;
+    
+    dialog('Smazat otázku?',
+      function() {//ano
+          smazat = true;
+          var odkaz = $(".smazat").attr("href");
+          location.href = odkaz;
+
+      },
+      function() {//ne
+        hlaska("aaaaaaaaaaaaaa",10);
+      }
+    );
+
+    return false;
+  });
+
+  function dialog(hlaska, ano, ne) {    
+      var div = document.createElement("div");
+      div.className = "potvrdit";
+      div.style.display = "block";
+      var content = document.createElement("div");
+      content.innerHTML = hlaska;
+      var potvrdit = document.createElement("button");
+      potvrdit.innerHTML = "Ano";
+      var zrusit = document.createElement("button");
+      zrusit.innerHTML = "Ne";
+
+      div.appendChild(content);
+      div.appendChild(potvrdit);
+      div.appendChild(zrusit );
+      document.body.appendChild(div);
+
+      potvrdit.onclick = function() {
+        document.body.removeChild(div);
+        ano();
+      }
+
+      zrusit.onclick = function() {
+        document.body.removeChild(div);
+        ne();
+      };
+  }
+
+
+  function hlaska(text, cas) {
+    var casovac;
+    var div = document.createElement("div");   
+    div.innerHTML = text;
+    div.id = "hlaska";
+    div.className = "zobrazit";       
+    document.body.appendChild(div);   
+    
+    clearTimeout(casovac);
+
+    casovac = setTimeout(function() {
+      document.body.removeChild(div);
+    }, cas * 1000);
+  }
+});
+
+
+</script>
+
+<style>
+
+  .potvrdit {
+      position: fixed; 
+      width: 200px; 
+      height: 50px; 
+      padding: 1em; 
+      background: #0D6AB7; 
+      color: #fff; 
+      display: none; 
+      top: 0; 
+      left: 0; 
+      bottom: 0; 
+      right: 0; 
+      margin: auto;
+  }
+
+  #hlaska {background: green; 
+    color: #fff; 
+    position: absolute; 
+    width: 50%; 
+    top: 0; 
+    left: 50%; 
+    margin-left: -25%; 
+    padding: .5em; 
+    top: -3em; 
+    transition: top 1s;
+  }
+
+  #hlaska.zobrazit {top: 0}
+
+
+
+</style>
+
 
 {% endblock main %}

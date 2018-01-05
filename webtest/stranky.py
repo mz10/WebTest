@@ -8,8 +8,7 @@
 # from __future__ import division, print_function, unicode_literals
 ############################################################################
 
-from flask import (Flask, render_template, Markup,
-                   request, url_for, redirect, session, Blueprint, abort)
+from flask import *
 from . import app
 from werkzeug.routing import BaseConverter
 from typogrify.filters import typogrify
@@ -22,6 +21,7 @@ import functools
 from .funkce import *                
 import random
 import sys
+import json
 
 from jinja2 import TemplateNotFound
 
@@ -88,6 +88,10 @@ def SmazTabulku():
 @app.route('/tabulky/uklid/')
 def uklidDb(): 
     return Ostatni.uklidDb()
+
+@app.route('/db/')
+def db(): 
+    return render_template('db.html') 
 
 @app.route('/vytvor/')
 def NovaTabulka1(): 
@@ -195,3 +199,28 @@ def student_vysledek():
 @db_session
 def upload():  
     return upload1()
+
+
+@app.errorhandler(404)
+def nenalezeno(ch):
+    return render_template('404.html', e=ch), 404
+
+
+# json test
+@app.route('/test/')
+def ttt():  
+    js= ['gggg', {'hhhh': ('bbb', None, 1.5, 2)}]
+
+    jsf = {
+        'seznam': [1, 2, 3, 'test'],
+        12: "abc",
+    }
+
+    return Response(response=json.dumps(js),status=200,mimetype="application/json")
+
+@app.route('/test2/')
+def tt():
+     return render_template('ajax.html')
+
+
+

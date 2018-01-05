@@ -1,7 +1,11 @@
 {% extends "ucitel.html" %}
-
 {% block main %}
-<h1>Přidat otázku</h1>
+<link rel="stylesheet" href="/static/simplemde/simplemde.min.css">
+<script src="/static/simplemde/simplemde.min.js"></script>
+<script src="/static/simplemde/lista.js"></script>
+<link rel="stylesheet" href="/static/simplemde/font-awesome.min.css">
+
+<h1>Přidat</h1>
 
 {% if chyba is defined %}
 <p class="spatne">{{chyba}}</p>
@@ -29,7 +33,7 @@
       <option value="C" {{c}}>Číselná</option>
     </select>
     <br>
-    <textarea name="obecne_zadani" placeholder="Zadání" rows="15" cols="40">bla bla bla</textarea><br>
+    <textarea name="obecne_zadani" id="pridat" placeholder="Zadání" rows="15" cols="40">bla bla bla</textarea><br>
     <input class="dobre"  type="text" placeholder="Správná odpověď" name="spravna_odpoved" value="aaa"><br>
     <input class="spatne" type="text" placeholder="Špatná odpověď 1" name="spatna_odpoved1" value="bbb"><br>
     <input class="spatne" type="text" placeholder="Špatná odpověď 2" name="spatna_odpoved2" value="ccc"><br>
@@ -39,4 +43,9 @@
     <input class="spatne" type="text" placeholder="Špatná odpověď 6" name="spatna_odpoved6" value="{{request.form.spatna_odpoved6}}"> <br>
     <input type="submit" name="vlozit" value="Vložit otázku">
 </form>
+<script>
+  editor("pridat");
+</script>
+
+
 {% endblock main %}

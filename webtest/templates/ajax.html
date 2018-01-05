@@ -1,0 +1,28 @@
+{% extends "ucitel.html" %}
+
+{% block main %}
+
+<h1>Ajax</h1>
+
+<button id="ajaxTest">Poslat</button>
+	
+<div id="ttt"></div>
+
+<script>
+
+$(function() {
+	/*
+	$("#ajaxTest").click(function(e) {
+		$.getJSON("/test/", function(json) {
+			console.log(hodnota);	
+		}); 
+	});	
+*/
+
+	$("#ttt").load("/tabulky/");
+
+});
+
+</script>
+
+{% endblock main %}

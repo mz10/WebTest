@@ -3,10 +3,27 @@
 <head>
   <title>WebTest{% block title %}{% endblock %}</title>
   <meta charset="utf-8">
-  <link rel="stylesheet" 
-                     href="{{ url_for('static', filename='styles.css') }}">
-  <link rel="shortcut icon" 
-                     href="{{ url_for('static', filename='favico.svg') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <link rel="shortcut icon" href="{{ url_for('static', filename='favico.svg') }}" />
+  <script src="{{ url_for('static', filename='jquery-3.2.1.min.js') }}"></script>
+
+
+  <script>
+    // menu nahore:
+
+    $("document").ready(function($){
+			var menu = $('nav');
+			var pozice = menu.offset().top;				
+		
+			$(window).scroll(function() {
+				var fix = ($(this).scrollTop() > pozice) ? true : false;	
+				menu.toggleClass("menu", fix);
+				$('body').toggleClass("body-menu", fix);			
+		});
+	});
+
+  </script>
+
 
   {% macro mathjaxheader() %}
     <script type="text/x-mathjax-config">
@@ -19,7 +36,6 @@
     </script>
   {% endmacro %}
   {% macro jqueryheader() %}
-    <script src="http://code.jquery.com/jquery-2.1.3.min.js"></script>
     <script src="{{ url_for('static', filename='oujeee.js') }}"></script>
   {% endmacro %}
   {% macro kalendarheader() %}
@@ -28,9 +44,6 @@
 
   {% block head %}{% endblock %} 
 
-  <!--[if IE]>
-  <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-  <![endif]-->
 </head>
 
 <body><div id="body">

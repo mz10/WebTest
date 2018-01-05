@@ -38,6 +38,177 @@
 		<div id="kalendar2"></div>
 	</div>
 
+	<h4>Hodnocení:</h4>
+	<select id="hodnoceni">
+		<option value="0">Rovnoměrně</option>
+		<option value="1">Mírné</option>
+		<option value="2">Přísné</option>
+		<option value="3">Nejtěžší</option>
+		<option value="4">Nehodnotit</option>		
+	</select>
+	
+	<br><br>
+	<span id="znamky">	
+		<span class="znamka" id="jednicka">0</span>
+		<span class="znamka" id="dvojka">0</span>		
+		<span class="znamka" id="trojka">0</span>
+		<span class="znamka" id="ctverka">0</span>
+		<span class="znamka" id="petka">0</span>
+	</span>
+
+	<style>
+		#znamky {
+			background-color: #DD5500;
+			width: 500px;
+			height: 10px;			
+			display:block;
+			padding: 0px;
+			margin: 0px;
+			position: relative;
+		}
+
+		.znamka {
+			width: 25px;
+			height: 20px;			
+			display: block;
+			padding: 0px;
+			margin: 0px;
+			position: absolute;
+			top:-5px;
+			font-size: 16px;
+			text-align:center;
+			cursor: e-resize; 
+		}
+
+		.znamka:active{
+			background-color: black;
+		}
+
+		#jednicka{
+			z-index: 11;
+			background-color: green;
+			color: white;
+		}
+
+		#dvojka{
+			z-index: 12;
+			background-color: yellow;
+		}
+
+		#trojka{
+			z-index: 13;
+			background-color: blue;
+			color: white;
+		}
+
+		#ctverka{
+			z-index: 14;
+			background-color: purple;
+			color: white;
+		}		
+
+		#petka{
+			z-index: 15;
+			background-color: cyan;
+		}
+
+
+	</style>
+	<script>
+		$(function() {
+			neoznacovat("#znamky");
+			nastavZnamky(1);
+
+			function neoznacovat(el) {
+				$(el).css({
+					"user-select": "none",
+					"-moz-user-select": "none",
+					"-webkit-user-select": "none",
+					"-ms-select": "none"				
+				}); 
+			}
+
+			function oznacovat(el) {
+				$(el).css({
+					"user-select": "auto",
+					"-moz-user-select": "auto",
+					"-webkit-user-select": "auto",
+					"-ms-select": "auto"				
+				}); 
+			}
+
+			$("#hodnoceni").change(function(e) {
+				var hodnota = $("#hodnoceni option:selected").val();
+				nastavZnamky(hodnota);
+				console.log(e);
+			});	
+
+			function nastavZnamky(h) {
+				var hodnoceni = [];				
+				var znamky = ["#jednicka", "#dvojka", "#trojka", "#ctverka", "#petka"];
+
+				hodnoceni[0] = [80,60,40,20,0];
+				hodnoceni[1] = [85,70,50,25,0];
+				hodnoceni[2] = [94,87,76,66,0];
+				hodnoceni[3] = [98,92,84,75,0];										
+
+				for(var i=0;i<znamky.length;i++) {
+					pohyb(znamky[i]);
+					nastavPozici(znamky[i],hodnoceni[h][i]);
+				}
+			}
+
+			function nastavPozici(el,procento) {
+				var sirkaListy = $("#znamky").innerWidth();
+				pixely = sirkaListy*procento/100;
+		
+				$(el).css("left", pixely + "px"); 
+				$(el).text(parseFloat(procento).toFixed(0));
+			}
+
+			function pohyb(el) {					
+				var aktivni = null;
+
+				//nastavit prvek jako aktivni pokud se na to klikne
+				$(el).mousedown(function(e){
+					aktivni = el;
+				});
+			
+				//zacit presouvat po stisknuti mysi
+				$(document).mousedown(function(e){
+					if (aktivni) {						
+						neoznacovat("html");
+						neoznacovat("body");
+						document.onmousemove = hybat;
+					}
+				});
+
+				//zrusit presouvani
+				$(document).mouseup(function(e) {
+					if (aktivni) {
+						aktivni = null;
+						oznacovat("html");
+						oznacovat("body");						
+						document.onmousemove = null;
+					}
+				});	
+
+				function hybat(e) {
+					var zacatekListy = $("#znamky").offset().left;
+					var rozdil = e.pageX-zacatekListy;
+					var sirkaListy = $("#znamky").innerWidth();
+					var procento = 100*rozdil/sirkaListy;
+
+					if(procento>=0 && procento<=100.0) {				
+						$(el).css("left", rozdil + "px"); 
+						$(el).text(parseFloat(procento).toFixed(0));
+					}
+				}
+			}
+		});
+	</script>
+
+
 	<h4>Otázky:</h4>
 	<ul class="seznam_otazek">
 	{%for id, ucitel_login, ucitel_jmeno, jmeno, zadani in otazky %}

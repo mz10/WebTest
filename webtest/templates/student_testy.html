@@ -12,43 +12,85 @@ src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorM
 
 {% block main %}
 
+
 {% if zprava is defined %}
 <p class="dobre"> {{zprava}} </p>
 {% endif%}
 
 <h1>Otazky testu</h1>
-	
+<p id="odpocet" limit="2"></p>
+<button id="start">Start</button>
+
+
 <form method="POST" action="">
 
-{% for x in otazka_testu %}
-<li>{{x[2]}}</li>
-{% if x[1]== 'U' %}
-	{% for z in x[3:] %}
-		{% if z != '' %}
-		<input type="radio" name="{{x[0]}}" value="{{z}}">{{z}}
-			<br />
-		{% endif %}
-	{% endfor %}
+{% for otazka in otazkaTestu %}
+	<li>{{otazka[2]}}</li>
+	
+	{% if otazka[1]== 'U' %}
+		{% for moznost in otazka[3:] %}
+			{% if moznost != '' %}
+				<input type="radio" name="{{otazka[0]}}" value="{{moznost}}">{{moznost}}<br>
+			{% endif %}
+		{% endfor %}
 
-	<input type="radio" name="{{x[0]}}" value="Nevyplneno"
-	style="display:none" checked />
+	<input type="radio" name="{{otazka[0]}}" value="Nevyplneno" style="display:none" checked><br>
+	{% endif %}
 
-	<br />
-{% endif %}
+	{% if otazka[1]== 'O' %}
+		<textarea rows="4" cols="50" name="{{otazka[0]}}"></textarea>
+		<br />
+		<br />
+	{% endif %}
 
-{% if x[1]== 'O' %}
-<textarea rows="4" cols="50" name="{{x[0]}}"></textarea>
-<br />
-<br />
- {% endif %}
-
- {% if x[1]== 'C' %}
- <input type="text" name="{{x[0]}}"><br />
- {% endif %}
+	{% if otazka[1]== 'C' %}
+		<input type="text" name="{{otazka[0]}}"><br />
+	{% endif %}
 
 {% endfor %}
 
 <input type="submit" value="odeslat">
 </form>
+
+<script>	
+	function odpocet() {
+		var vterina = 1000;
+		var minuta = vterina * 60;
+		var hodina = minuta * 60;
+		var el = document.getElementById('odpocet');
+		var rozdil = el.getAttribute("limit")*60000;
+		
+		setInterval(function() {tik(el)}, vterina);   
+		
+		function tik(el) {
+			//var ted = new Date() + limit;
+			
+			rozdil-=vterina;
+			
+			if (rozdil < vterina) {
+				el.innerHTML = "Konec testu!!!"
+				return;
+			}
+			var zbyva = {
+				hodin: Math.floor((rozdil / hodina) ),
+				minut: Math.floor((rozdil % hodina) / minuta),
+				vterin: Math.floor((rozdil % minuta) / vterina)
+			}
+			
+			if(zbyva.hodin < 10) zbyva.hodin = "0" + zbyva.hodin;
+			if(zbyva.minut < 10) zbyva.minut = "0" + zbyva.minut;
+			if(zbyva.vterin < 10) zbyva.vterin = "0" + zbyva.vterin;
+			
+			if(zbyva.hodin<1)
+				el.innerHTML = zbyva.minut + ":" + zbyva.vterin;
+			else
+				el.innerHTML = zbyva.hodin + ":" + zbyva.minut + ":" + zbyva.vterin;
+			
+		}
+	}
+
+	odpocet()	
+</script>
+
 
 {% endblock main %}

@@ -1,0 +1,11 @@
+{% extends "ucitel.html" %}
+
+{% block main %}
+
+<h1>{{e.code}} Tohle tu teda fakt nemáme.</h1>
+
+<img src="{{url_for('static', filename='robot.png')}}" alt="" width="400" height="472" style="float:right;" >
+
+<p><strong>Rozbil jsi Internet!</strong></p>
+	
+{% endblock main %}
