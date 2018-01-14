@@ -43,4 +43,4 @@ if len(sys.argv) > 1:
     app.run(host='0.0.0.0', port=PORT, debug=False, threaded=True)
 else:
     # Run web local server
-    app.run(host='127.0.0.1', port=PORT, debug=True)
+    app.run(host='127.0.0.1', port=PORT, debug=True, threaded=True)

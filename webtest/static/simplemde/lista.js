@@ -1,5 +1,7 @@
+var Simplemde;
+
 function editor(el) {
-    new SimpleMDE({
+    Simplemde = new SimpleMDE({
         element: document.getElementById(el),
         spellChecker: false,
         autofocus: true,

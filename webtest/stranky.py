@@ -21,7 +21,7 @@ import functools
 from .funkce import *                
 import random
 import sys
-import json
+import json as _json
 
 from jinja2 import TemplateNotFound
 
@@ -54,15 +54,20 @@ def prihlasit(klic):
         return wrapper
     return decorator
 
-def prihlasit0(klic):
-    #Dekoruje funkce, které vyžadují přihlášení
-    #@prihlasit(klic)
-    #klic: je klic ve slovniku session, který se kontroluje.
+def prihlasitJSON(klic):
+    def decorator(function):
+        @functools.wraps(function)
+        def wrapper(*args, **kwargs):
+            if klic in session:
+                return function(*args, **kwargs)
+            else:
+                return json({"chyba":"Nejsi přihlášen!"})
+        return wrapper
+    return decorator
 
-    if not klic in session:
-        return redirect(url_for('login', url=request.path))
-    return False
-    
+def json(js):
+    return Response(response=_json.dumps(js),status=200,mimetype="application/json")
+
 @app.route('/')
 def index():
     if 'student' in session:
@@ -71,6 +76,8 @@ def index():
         return render_template('ucitel.html')
     else:
         return redirect(url_for('login'))
+
+
 
 @app.route('/registrace/', methods=['GET', 'POST'])
 @db_session
@@ -123,8 +130,8 @@ def vypracovan_testi(id):
 def zobraz_test_studenta(id):
     return Ucitel.zobrazTest(id)
 
-@app.route('/otazky/', methods=['GET', 'POST'])
-@prihlasit('ucitel')
+@app.route('/json/otazky/', methods=['GET', 'POST'])
+@prihlasitJSON('ucitel')
 @db_session
 def otazky():
     return Otazky.zobraz()
@@ -135,8 +142,8 @@ def otazky():
 def otazky_ucitel(login):
     return Otazky.ucitel(login)
 
-@app.route('/otazky/zobrazit/<id>', methods=['GET'])
-@prihlasit('ucitel')
+@app.route('/json/otazky/<id>', methods=['GET'])
+@prihlasitJSON('ucitel')
 @db_session
 def otazka_zobrazit(id):
     return Otazka.zobraz(id)
@@ -158,7 +165,7 @@ def otazka_smazat(id):
 def pridat_otazku():  
     return Otazka.pridat()
 
-@app.route('/testy/', methods=['GET', 'POST'])
+@app.route('/json/testy/', methods=['GET', 'POST'])
 @prihlasit('ucitel')
 @db_session
 def testy():
@@ -205,22 +212,56 @@ def upload():
 def nenalezeno(ch):
     return render_template('404.html', e=ch), 404
 
+@app.route('/vzory/testy/')
+def testy1(): 
+    return render_template('upravit_test1.html') 
 
-# json test
-@app.route('/test/')
-def ttt():  
-    js= ['gggg', {'hhhh': ('bbb', None, 1.5, 2)}]
+@app.route('/vzory/otazky/')
+def otazky1(): 
+    return render_template('upravit_otazku1.html') 
 
-    jsf = {
-        'seznam': [1, 2, 3, 'test'],
-        12: "abc",
+
+@app.route('/json/akce/<typAkce>/<vec>/', methods=['GET'])
+@prihlasitJSON('ucitel')
+@db_session
+def akce(typAkce,vec):
+    js = {
+        "akce":typAkce,
+        "vec":vec,
     }
 
-    return Response(response=json.dumps(js),status=200,mimetype="application/json")
-
-@app.route('/test2/')
-def tt():
-     return render_template('ajax.html')
+    return json(js)
 
 
+@app.route('/json/post/', methods=['POST'])
+@prihlasitJSON('ucitel')
+@db_session
+def akceP(): 
+    J = request.json
+    akce = J["akce"]
+    co = J["co"]
+    odpoved = "zadna akce"
 
+    if(co == "otazka"):
+        if akce == "smazat":
+            idOtazky = J["id"]
+            DbOtazka[idOtazky].delete()
+            odpoved = "Otázka s id " + idOtazky + " byla smazána"
+        elif akce == "pridat":
+            odpoved = Otazka.pridat(J)
+        elif akce == "upravit":
+            odpoved = Otazka.editovat(J)
+    elif(co == "tabulka"):
+        if akce == "smazat":
+            Ostatni.smazTabulku(J["nazev"],"smazat")
+            odpoved = "Tabulka " + J["nazev"] + " byla smazána."
+        elif akce == "vysypat":
+            Ostatni.smazTabulku(J["nazev"],"vysypat")
+            odpoved = "Tabulka " + J["nazev"] + " byla vysypána."
+
+    js = {
+        "odpoved":odpoved,
+        "stav":"ok",
+    }           
+
+    return json(js)

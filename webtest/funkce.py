@@ -1,4 +1,4 @@
-from flask import (Flask, render_template, Markup, request, redirect, session, flash, Markup, url_for)
+from flask import (Flask, render_template, Markup, request, redirect, session, flash, Markup, url_for, Response)
 from werkzeug.routing import BaseConverter
 from typogrify.filters import typogrify
 from markdown import markdown
@@ -12,6 +12,7 @@ import functools
 import random
 import sys
 from webtest.db import *
+import json as _json
 
 udaje = "host='localhost' user='postgres' password='a' dbname='webtest'"
 
@@ -37,6 +38,8 @@ def vysledky1():
 def nahodne(a,b):
     return str(random.randint(a,b))
 
+def json(js):
+    return Response(response=_json.dumps(js),status=200,mimetype="application/json")
 
 def upload1():
     """upload souboru se zadáním
@@ -50,7 +53,7 @@ def upload1():
 
         # prevede polozky seznamu na UNICODE
         spatna = [unicode(i) for i in spatna]
-        Otazka(ucitel=ucitel, 
+        DbOtazka(ucitel=ucitel, 
                jmeno=nazev_otazky, 
                typOtazky=typ,
                obecneZadani='10', 
@@ -174,13 +177,29 @@ class Ucitel:
             return render_template('vysledky.html', seznamTestu=seznam_testu)
 
 class Otazky:
-    def zobraz():
+    def zobraz0():
         #: Zobrazí všechny otázky a nabídne příslušné akce
         if request.method == 'GET':
             otazky = select((o.id, o.ucitel.login, o.ucitel.jmeno, o.jmeno, o.obecneZadani) for o in DbOtazka)
             return render_template('otazky.html', otazky=otazky.order_by(1))
         elif request.method == 'POST':
             return redirect(url_for('/'))
+
+    def zobraz():
+        seznamOtazek = []
+        otazky = select(o for o in DbOtazka).order_by(1)
+
+        for ot in otazky:
+            seznamOtazek.append({
+                'id': ot.id,
+                'jmeno': ot.jmeno,
+                'typ': ot.typOtazky,
+                'zadani': ot.obecneZadani,
+                'autor': ot.ucitel.jmeno,
+            })
+
+        return json({"otazky": seznamOtazek})
+
 
     def ucitel(login):
         #: Zobrazí všechny otázky jednoho zadávajícího učitele
@@ -190,35 +209,26 @@ class Otazky:
         return render_template('otazky.html', otazky=otazky)
 
 class Otazka:
-    def editovat(id):
-        if request.method == 'GET':
-            otazka = DbOtazka[id]
-            return render_template('otazka_editovat.html', otazka=otazka, rendruj=rendruj)
-        if request.method == 'POST':
-            r = request
-            F = r.form
-            if F['jmeno'] and F['typ_otazky'] and F['obecne_zadani']:
-                if F['typ_otazky'] == 'O':
-                    otazka = DbOtazka[id]
-                    otazka.ucitel = get(u for u in DbUcitel
-                                        if u.login == session['ucitel'])
-                    otazka.jmeno = F['jmeno']
-                    otazka.typTtazky = 'O'
-                    otazka.obecneZadani = F['obecne_zadani']
-                    return redirect(url_for('otazky'))
-                elif F['typ_otazky'] == 'C' and F['spravna_odpoved']:
-                    otazka = DbOtazka[id]
-                    otazka.ucitel = get(u for u in DbUcitel if u.login == session['ucitel'])
-                    otazka.jmeno = F['jmeno']
-                    otazka.typOtazky = 'C'
-                    otazka.obecneZadani = F['obecne_zadani']
-                    otazka.SprO = F['spravna_odpoved']
-                    return redirect(url_for('otazky'))
-                # TODO!
-            else:
-                zprava = "Nebyla zadána všechna požadovaná data."
-                otazka = DbOtazka[id]
-                return render_template('otazka_editovat.html', chyba=zprava, otazka=otazka)
+    def editovat(J):
+        idOtazky = int(J['id'])
+
+        if J['jmeno'] and J['typ'] and J['zadani']:
+            otazka = DbOtazka[idOtazky]
+            otazka.ucitel = get(u for u in DbUcitel if u.login == session['ucitel'])
+            otazka.jmeno = J['jmeno']
+            otazka.typTtazky = J['typ']
+            otazka.obecneZadani = J['zadani']            
+                       
+            if J['typ'] == 'O':
+                return "Otevřená otázka byla upravena."
+            elif J['typ'] == 'C' and J['spravne'][0]:
+                otazka.SprO = J['spravne'][0]
+                return "Číselná otázka byla upravena."
+            elif J['typ'] == 'U':
+                otazka.SprO = J['spravne'][0]
+                return "Uzavřená otázka byla upravena."                       
+        else:
+            return "Nebyly zadány všechny požadované údaje."
 
     def smazat(id):
         #: Zobrazí všechny otázky a nabídne příslušné akce
@@ -230,86 +240,102 @@ class Otazka:
             return redirect(url_for('otazky'))
 
     def zobraz(id):
-        otazka = DbOtazka[id]
-        otazka.SPO1 = otazka.SprO.replace("nahodne",nahodne(2,50))
-        return render_template('otazka.html', otazka=otazka, rendruj=rendruj)
+        try:
+            otazka = DbOtazka[id]
+            otazka.SPO1 = otazka.SprO.replace("nahodne",nahodne(2,50))
 
-    def pridat():
-        # otazka je evidovana do databaze
-        # POZN.:  Spravna_odpoved musi byt VZDY uvedena, protoze je v
-        #         dalsi tabulce tento parametr vyzadovan!!!
-        r = request
-        F = r.form
-        if r.method == 'GET':
-            if 'ok' in r.args:
-                zprava = 'Proběhlo vložení otázky "' + r.args['ok'] + '".'
-                return render_template('pridat_otazku.html', vlozeno=zprava)
-            else:
-                return render_template('pridat_otazku.html')
-        elif r.method == 'POST':
-            if F['jmeno'] and F['typ_otazky'] and F['obecne_zadani']:
-                if F['typ_otazky'] == 'O':
-                    with db_session:
-                        DbOtazka(ucitel=get(u for u in DbUcitel if u.login == session['ucitel']),
-                            jmeno=F['jmeno'],
-                            typOtazky='O',
-                            obecneZadani=F['obecne_zadani'],
-                            SprO='Otevrena otazka')
-                    return redirect(url_for('pridat_otazku', ok=F['jmeno']))
-                elif F['typ_otazky'] == 'C' and F['spravna_odpoved']:
-                    with db_session:
-                        DbOtazka(ucitel=get(u for u in DbUcitel if u.login == session['ucitel']),
-                            jmeno=F['jmeno'],
-                            typOtazky='C',
-                            obecneZadani=F['obecne_zadani'],
-                            SprO=F['spravna_odpoved'])
-                    return redirect(url_for('pridat_otazku', ok=F['jmeno']))
-                elif F['typ_otazky'] == 'U' and F['spravna_odpoved']:
-                    # Musím dát všechny špatné odpovědi těsně za sebe
-                    KLICE = ('spatna_odpoved1', 'spatna_odpoved2',
-                            'spatna_odpoved3', 'spatna_odpoved4',
-                            'spatna_odpoved5', 'spatna_odpoved6')
-                    odpovedi = []
-                    for klic in KLICE:
-                        if F[klic]:
-                            odpovedi.append(F[klic])
-                    parametry = {}
-                    i = 1
-                    html= ""
-                    for odpoved in odpovedi:
-                        parametry['SPO' + str(i)] = odpoved
-                        i=i+1
+            jsOtazka = {
+                'id':       otazka.id,
+                'jmeno':    otazka.jmeno,
+                'typ':      otazka.typOtazky,
+                'zadani':   otazka.obecneZadani,
+                'spravne': [
+                    otazka.SprO,
+                ],
+                'spatne': [
+                    otazka.SPO1,
+                    otazka.SPO2,
+                    otazka.SPO3,
+                    otazka.SPO4,
+                    otazka.SPO5,
+                    otazka.SPO6,
+                ]
+            }
 
-                    # Chce to alespoň jednu špatnou odpověď
-                    if len(parametry) < 1:
-                        zprava = "... alespoň jednu špatnou odpověď!"
-                        return render_template('pridat_otazku.html', chyba=zprava)
-                    with db_session:
-                        spravnaOdpoved = F['spravna_odpoved']
-                        if F['spravna_odpoved'] == '':
-                            spravnaOdpoved = 'Nespecifikovano'
-                        DbOtazka(ucitel=get(u for u in DbUcitel if u.login == session['ucitel']),
-                            jmeno=F['jmeno'],
-                            typOtazky='U',
-                            obecneZadani=F['obecne_zadani'],
-                            SprO=spravnaOdpoved, **parametry)
-                    return redirect(url_for('pridat_otazku', ok=F['jmeno']))
-                else:
-                    zprava = "U číselné otázky musí být zadán správná odpověď."\
-                            " U uzavrené otázky i špatná odpověď."
-                    return render_template('pridat_otazku.html', chyba=zprava)
+            return json({'otazka': jsOtazka})
+
+        except:
+            return json({'chyba': 'Otázka s id: ' + id + ' neexistuje!'})
+
+    def pridat(J):
+        with db_session:
+            if J["typ"] == 'O':
+                DbOtazka(
+                    ucitel=get(u for u in DbUcitel if u.login == session['ucitel']),
+                    jmeno=J['jmeno'],
+                    typOtazky='O',
+                    obecneZadani=J['zadani'],
+                    SprO='Otevrena otazka'
+                )
+                return "Otevřená otázka byla přidána."
+            elif J["typ"] == 'C':
+                DbOtazka(
+                    ucitel=get(u for u in DbUcitel if u.login == session['ucitel']),
+                    jmeno=J['jmeno'],
+                    typOtazky='C',
+                    obecneZadani=J['zadani'],
+                    SprO=J["spravne"][0]
+                )
+                return "Číselná otázka byla přidána."
+            elif J["typ"] == 'U':
+                spatne = {}
+                i=1
+                for spatna in J["spatne"]:
+                    spatne['SPO' + str(i)] = spatna
+                    i=i+1
+
+                spravnaOdpoved = J["spravne"][0]
+                if J["spravne"][0] == '':
+                    spravnaOdpoved = 'Nespecifikovano'
+                DbOtazka(
+                    ucitel=get(u for u in DbUcitel if u.login == session['ucitel']),
+                    jmeno=J['jmeno'],
+                    typOtazky='U',
+                    obecneZadani=J['zadani'],
+                    SprO=spravnaOdpoved, 
+                    **spatne
+                )
+                return "Uzavřená otázka byla přidána. " + J['zadani']
             else:
-                zprava = "Nebyla zadána všechna požadovaná data."
-                return render_template('pridat_otazku.html', chyba=zprava)
+                return "Špatně zadaný typ otázky!"
+
 
 class Testy:
-    def zobraz():
+    def zobraz0():
         #seznam testu
         if request.method == 'GET':
             testy = select((u.id, u.jmeno) for u in DbTest)
             return render_template('testy.html', testy=testy)
         elif request.method == 'POST':
             return redirect(url_for('/'))
+
+    def zobraz():
+        seznam = []
+        testy = select(o for o in DbTest)
+
+        for p in testy:
+            seznam.append({
+                'id': p.id,
+                'jmeno': p.jmeno,
+                'od': str(p.zobrazenoOd),
+                'do': str(p.zobrazenoDo),
+                'autor': p.ucitel.jmeno,
+            })
+
+        return json({"testy": seznam})
+
+
+
 
     def uprav(id_test):
         #uprava vytvoreneho testu
@@ -347,16 +373,18 @@ class Testy:
                         for u in DbTest if u.id is id_test).get()
             datum_od, cas_od = (datum[0]).strftime("%d.%m.%Y %H:%M").split()
             datum_do, cas_do = (datum[1]).strftime("%d.%m.%Y %H:%M").split()
+            
             # vyber ucitelem zvolene testy
             testy = select((u.otazka.id, u.otazka.ucitel.login,
                             u.otazka.ucitel.jmeno, u.otazka.jmeno,
                             u.otazka.obecneZadani)for u in DbOtazkaTestu if
                         u.test.id is id_test)
+           
             # vyber vsechny testy
-            otazky_all = select((u.id, u.ucitel.login, u.ucitel.jmeno, u.jmeno,
-                                u.obecneZadani) for u in DbOtazka if u.id
-                                not in select(ot.otazka.id for ot in DbOtazkaTestu
-                                            if ot.test.id is id_test))
+            otazky_all = select((u.id, u.ucitel.login, u.ucitel.jmeno, u.jmeno,u.obecneZadani) 
+                                    for u in DbOtazka if u.id not in select(ot.otazka.id 
+                                        for ot in DbOtazkaTestu if ot.test.id is id_test)
+                                )
             return render_template('upravit_test.html', test=test,
                                 otazky=testy, casOd=cas_od, casDo=cas_do,
                                 datumOd=datum_od, datumDo=datum_do,
@@ -566,9 +594,9 @@ class Ostatni:
         sql.execute("select * from pg_tables where schemaname = 'public';")
         for radek in sql.fetchall():
             tabulka = radek[1]  
-            html += '\n<form method="post">\n<b>' + tabulka + '</b>\n<input type="hidden" name="tabulka" value="' + tabulka + '">'
-            html += '<input type="submit" name="ok" value="Smazat">\n'
-            html += '<input type="submit" name="ok" value="Vysypat">\n</form>\n'
+            html += '<span class="tbNazev">' + tabulka + '</span>'
+            html += '<button class="tbSmazat" value="' + tabulka + '">Smazat</button>'
+            html += '<button class="tbVysypat" value="' + tabulka + '">Vysypat</button>'
 
             #sloupce
             sql.execute("select * from information_schema.columns where table_name=%s;", (tabulka,))
@@ -597,23 +625,16 @@ class Ostatni:
         return Markup(html)
         #return render_template('tabulky.html', html=Markup(html)) 
 
-    def smazTabulku():
-        R = request
-        F = R.form
-        tabulka = F['tabulka']
+    def smazTabulku(tabulka,akce):
+        db = psycopg2.connect(udaje)
+        sql = db.cursor()
+        db.autocommit = True
 
-        if R.method == 'POST':
-            db = psycopg2.connect(udaje)
-            sql = db.cursor()
-            db.autocommit = True
+        if akce == "smazat":
+            sql.execute('DROP TABLE "' + tabulka + '" CASCADE;')
+        elif akce == "vysypat":
+            sql.execute('TRUNCATE TABLE "' + tabulka + '" CASCADE;')
 
-            if F['ok'] == "Smazat":
-                sql.execute('DROP TABLE "' + tabulka + '" CASCADE;')
-            elif F['ok'] == "Vysypat":
-                sql.execute('TRUNCATE TABLE "' + tabulka + '" CASCADE;')
-
-        return redirect('/tabulky/')
-    
     def registrace():   
         R = request
         F = R.form

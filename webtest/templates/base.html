@@ -6,23 +6,13 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
   <link rel="shortcut icon" href="{{ url_for('static', filename='favico.svg') }}" />
   <script src="{{ url_for('static', filename='jquery-3.2.1.min.js') }}"></script>
-
-
-  <script>
-    // menu nahore:
-
-    $("document").ready(function($){
-			var menu = $('nav');
-			var pozice = menu.offset().top;				
-		
-			$(window).scroll(function() {
-				var fix = ($(this).scrollTop() > pozice) ? true : false;	
-				menu.toggleClass("menu", fix);
-				$('body').toggleClass("body-menu", fix);			
-		});
-	});
-
-  </script>
+  <script src="{{ url_for('static', filename='cssrefresh.js') }}"></script>
+  
+  <script src="/static/simplemde/simplemde.min.js"></script>
+  <script src="/static/simplemde/lista.js"></script>
+  <script src="{{ url_for('static', filename='hlavni.js') }}"></script>
+  <link rel="stylesheet" href="/static/simplemde/simplemde.min.css">
+  <link rel="stylesheet" href="/static/simplemde/font-awesome.min.css">
 
 
   {% macro mathjaxheader() %}
@@ -70,36 +60,18 @@
 
     <nav role="navigation">
     {% block menu %}
-      <ul>
-        <li><a href="#">Jabka</a></li>
-        <li><a href="#">Hrušky</a></li>
-        <li><a href="#">Zelí</a></li>
-      </ul>
+
+
     {% endblock menu %}
     </nav>
   {% endblock header %}
   </header>
 
-<main role="main">
 {% block main %}
 
-    <article>
-
-			<h1>My article</h1>
-
-      <nav role="navigation">
-      </nav>
-
-			<p>Content</p>
-
-		</article>
-	
-		<aside>
-			<p>More information</p>
-		</aside>
+<div id="stranka"></div>
 
 {% endblock main %}
-</main>
 
 
 {% block footer %}
