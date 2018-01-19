@@ -497,3 +497,63 @@ table {
   position:relative; 
   top:-2px;
 }
+
+
+
+
+/*************lista - hodnoceni **********************/
+
+#znamky {
+  background-color: #DD5500;
+  width: 500px;
+  height: 10px;			
+  display:block;
+  padding: 0px;
+  margin: 0px;
+  position: relative;
+}
+
+.znamka {
+  width: 25px;
+  height: 20px;			
+  display: block;
+  padding: 0px;
+  margin: 0px;
+  position: absolute;
+  top:-5px;
+  font-size: 16px;
+  text-align:center;
+  cursor: e-resize; 
+}
+
+.znamka:active{
+  background-color: black;
+}
+
+#jednicka{
+  z-index: 11;
+  background-color: green;
+  color: white;
+}
+
+#dvojka{
+  z-index: 12;
+  background-color: yellow;
+}
+
+#trojka{
+  z-index: 13;
+  background-color: blue;
+  color: white;
+}
+
+#ctverka{
+  z-index: 14;
+  background-color: purple;
+  color: white;
+}		
+
+#petka{
+  z-index: 15;
+  background-color: cyan;
+}

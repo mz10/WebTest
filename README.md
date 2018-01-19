@@ -12,28 +12,25 @@ zaměřuje hlavně na (elektro-)technické úlohy. Tento projekt nabízí:
   zapsat jako vzorec. 
 
 
+Proměnné
+--------
+Do editoru jdou zadávat proměnné, které můžeme použít v odpovědi jako vzorec. Proměnná musí být písmeno a-z a v odpovědi musí proměnná začínat znakem §.
+V odpovědi může být výraz a můžeme použít proměnné definované v zadání. Výraz musí začínat znakem =
+
+=§a+§b+5
+
 Příklad zápisu úlohy
 --------------------
+Kolik je [a,20] + [b,-5,100] - [c=§b*2] ?
 
-    ::task Dělič I.
-    Vypočítejte výstupní napětí nezatíženého děliče 
-    $R_1=4,2k\Omega$, $R_2=4,2k\Omega$, kde vstupní napětí $U_1=12V$.
-    ::close
-    :- 12V
-    :- -12V
-    :+ 6V
-    :- 0V
-
-    ::task Dělič II.
-    Vypočítejte výstupní napětí nezatíženého děliče $R_1=4,2k\Omega$, 
-    $R_2=4,2k\Omega$, kde vstupní napětí $U_1=12V$.
-    ::number 6,000 0,010
-
-    ::task Dělič III.
-    Vypočítejte výstupní napětí nezatíženého děliče $R_1=4,2k\Omega$,
-    $R_2=4,2k\Omega$, kde vstupní napětí $U_1=12V$.
-    ::open
-
+Typy proměnných
+---------------
+[a]		      nejjednodušší definice proměnné, studentovi se ukáže jako číslo od 0 do 1000
+[b,20] 		  číslo od 0 do 20
+[c,-20]		  záporné číslo od -20 do 0
+[d,5,100]	  číslo od 5 do 100
+[e,20,30,3]	desetinné číslo od 20 do 30, zaokrouhlené na 3 desetinná místa – např. 21.463
+[f=§a+5]    do proměnné f se přiřadí proměnná a + 5
 
 Závislosti
 -----------

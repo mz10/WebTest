@@ -22,6 +22,7 @@ from .funkce import *
 import random
 import sys
 import json as _json
+from sympy import *
 
 from jinja2 import TemplateNotFound
 
@@ -76,8 +77,6 @@ def index():
         return render_template('ucitel.html')
     else:
         return redirect(url_for('login'))
-
-
 
 @app.route('/registrace/', methods=['GET', 'POST'])
 @db_session
@@ -134,13 +133,13 @@ def zobraz_test_studenta(id):
 @prihlasitJSON('ucitel')
 @db_session
 def otazky():
-    return Otazky.zobraz()
+    return Otazka.zobrazOtazky()
 
 @app.route('/otazky/ucitel/<login>', methods=['GET'])
 @prihlasit('ucitel')
 @db_session
 def otazky_ucitel(login):
-    return Otazky.ucitel(login)
+    return Otazka.ucitel(login)
 
 @app.route('/json/otazky/<id>', methods=['GET'])
 @prihlasitJSON('ucitel')
@@ -152,7 +151,7 @@ def otazka_zobrazit(id):
 @prihlasit('ucitel')
 @db_session
 def otazka_editovat(id):
-    return Otazka.editovat(id)
+    return Otazka.upravit(id)
 
 @app.route('/otazky/smazat/<id>', methods=['GET', 'POST'])
 @prihlasit('ucitel')
@@ -250,7 +249,7 @@ def akceP():
         elif akce == "pridat":
             odpoved = Otazka.pridat(J)
         elif akce == "upravit":
-            odpoved = Otazka.editovat(J)
+            odpoved = Otazka.upravit(J)
     elif(co == "tabulka"):
         if akce == "smazat":
             Ostatni.smazTabulku(J["nazev"],"smazat")

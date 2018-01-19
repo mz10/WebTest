@@ -11,8 +11,12 @@ import os
 import functools
 import random
 import sys
+import re
 from webtest.db import *
 import json as _json
+import sympy
+from sympy import init_printing
+init_printing()
 
 udaje = "host='localhost' user='postgres' password='a' dbname='webtest'"
 
@@ -23,8 +27,6 @@ def pswd_check(pswd, encript):
     return encript == crypt(pswd, salt)
 """
 
-def rendruj(m):
-    return Markup(typogrify(markdown(m)))
 ############################################################################
 
 def pswd_check(pswd, encript):
@@ -37,6 +39,18 @@ def vysledky1():
 
 def nahodne(a,b):
     return str(random.randint(a,b))
+
+def vypocitej(text,promenne):
+    if text[:1] != "=": return text
+    text=text[1:]
+
+    #nahradi promenne ze zadani jeji hodnotou
+    for promenna, hodnota in sorted(promenne.items()):
+        text = text.replace("§" + promenna, hodnota)
+    
+    #vypocita zadany vyraz s dosazenyma hodnotama
+    vysledek = sympy.simplify(text)
+    return str(vysledek)
 
 def json(js):
     return Response(response=_json.dumps(js),status=200,mimetype="application/json")
@@ -176,25 +190,136 @@ class Ucitel:
             seznam_testu = select((u.jmeno, u.id) for u in DbTest)
             return render_template('vysledky.html', seznamTestu=seznam_testu)
 
-class Otazky:
-    def zobraz0():
-        #: Zobrazí všechny otázky a nabídne příslušné akce
-        if request.method == 'GET':
-            otazky = select((o.id, o.ucitel.login, o.ucitel.jmeno, o.jmeno, o.obecneZadani) for o in DbOtazka)
-            return render_template('otazky.html', otazky=otazky.order_by(1))
-        elif request.method == 'POST':
-            return redirect(url_for('/'))
+class Otazka:
+    def vytvorZadani(m):
+        promenne = {}
 
-    def zobraz():
+        def nahraditPromenne(m):
+            rozdeleno = m.groups(0)[0].split(",")
+            promenna = rozdeleno[0]
+
+            #overi jestli promenna uz existuje
+            #pokud jo, tak ji nahradi stejnou hodnotou   
+            if promenna in promenne:
+                return promenne[promenna] 
+
+            try:
+                vysledek = "[spatne zadano]"
+                
+                if len(rozdeleno) == 1:
+                    vysledek = random.randint(0,1000)
+                elif len(rozdeleno) == 2:
+                    od = int(rozdeleno[1])
+                    
+                    if od < 0:
+                        vysledek = random.randint(od,0)
+                    else:
+                        vysledek = random.randint(0,od)
+                elif len(rozdeleno) == 3:
+                    od = int(rozdeleno[1])
+                    do = int(rozdeleno[2]) 
+                    
+                    if od>do:
+                        vysledek = random.randint(do,od)
+                    else:
+                        vysledek = random.randint(od,do)
+                elif len(rozdeleno) == 4:
+                    od = float(rozdeleno[1])
+                    do =  float(rozdeleno[2])  
+                    zaokrouhlit = int(rozdeleno[3])
+                    
+                    if od>do:
+                        vysledek = random.uniform(do,od)     
+                    else:
+                        vysledek = random.uniform(od,do)
+                    
+                    vysledek = round(vysledek,zaokrouhlit)
+                
+            except:
+                promenne[promenna] = 0
+                return "[chyba ve vyrazu]"
+                
+            promenne[promenna] = str(vysledek)
+            return str(vysledek)
+
+        def nahraditPromenne2(m):
+            promenna = m.group(1)
+            vyraz = m.group(2)
+            
+            #dosadit promenne do vyrazu
+            for p, hodnota in sorted(promenne.items()):
+                vyraz = vyraz.replace("§" + p,hodnota)    
+            
+            #vypocitat vyraz 
+            try:
+                vysledek = str(sympy.simplify(vyraz))
+            except:
+                promenne[promenna] = "0"
+                return "[chyba ve vyrazu]"
+            
+            #pridat vysledek do seznamu promennych
+            promenne[promenna] = vysledek
+            return vysledek
+
+        #nahradi textove promenne v [] nahodnymi cisly
+        m = re.compile('\[§*([a-z][,\-*\d+[.d+]*]*)\]').sub(nahraditPromenne,m)
+        #nahradi textove promenne vypocitanym vyrazem
+        m = re.compile('\[§*([a-z])\=(.*?)\]').sub(nahraditPromenne2,m)
+        #prevede markdown do HTML
+        m = typogrify(markdown(m))
+        #nahradi \n novym radkem <br>
+        m = m.replace("\n","<br>")
+
+        hotovo = {}
+        hotovo["promenne"] = promenne
+        hotovo["html"] = Markup(m)
+
+        return hotovo
+
+    def zobraz(id):
+        #try:
+        otazka = DbOtazka[id]
+        otazka.SPO1 = otazka.SprO.replace("nahodne",nahodne(2,50))
+        zadani = Otazka.vytvorZadani(otazka.obecneZadani)
+        
+        jsOtazka = {
+            'id':       otazka.id,
+            'jmeno':    otazka.jmeno,
+            'typ':      otazka.typOtazky,
+            'zadani':   otazka.obecneZadani,
+            'zadaniHTML': zadani["html"],
+            'spravne': [
+                vypocitej(otazka.SprO,zadani["promenne"]),
+            ],
+            'spatne': [
+                vypocitej(otazka.SPO1,zadani["promenne"]),
+                vypocitej(otazka.SPO2,zadani["promenne"]),
+                vypocitej(otazka.SPO3,zadani["promenne"]),
+                vypocitej(otazka.SPO4,zadani["promenne"]),
+                vypocitej(otazka.SPO5,zadani["promenne"]),
+                vypocitej(otazka.SPO6,zadani["promenne"]),
+            ]
+        }
+
+        return json({'otazka': jsOtazka})
+
+        #except:
+        #    return json({'chyba': 'Otázka s id: ' + id + ' neexistuje!'})
+
+
+    def zobrazOtazky():
         seznamOtazek = []
         otazky = select(o for o in DbOtazka).order_by(1)
 
         for ot in otazky:
+            zadani = Otazka.vytvorZadani(ot.obecneZadani)
+
             seznamOtazek.append({
                 'id': ot.id,
                 'jmeno': ot.jmeno,
                 'typ': ot.typOtazky,
                 'zadani': ot.obecneZadani,
+                'zadaniHTML': zadani["html"],
                 'autor': ot.ucitel.jmeno,
             })
 
@@ -208,8 +333,7 @@ class Otazky:
                         if o.ucitel.login == login)
         return render_template('otazky.html', otazky=otazky)
 
-class Otazka:
-    def editovat(J):
+    def upravit(J):
         idOtazky = int(J['id'])
 
         if J['jmeno'] and J['typ'] and J['zadani']:
@@ -238,34 +362,6 @@ class Otazka:
             if 'ano' in request.form and request.form['ano'] == 'Ano':
                 DbOtazka[id].delete()
             return redirect(url_for('otazky'))
-
-    def zobraz(id):
-        try:
-            otazka = DbOtazka[id]
-            otazka.SPO1 = otazka.SprO.replace("nahodne",nahodne(2,50))
-
-            jsOtazka = {
-                'id':       otazka.id,
-                'jmeno':    otazka.jmeno,
-                'typ':      otazka.typOtazky,
-                'zadani':   otazka.obecneZadani,
-                'spravne': [
-                    otazka.SprO,
-                ],
-                'spatne': [
-                    otazka.SPO1,
-                    otazka.SPO2,
-                    otazka.SPO3,
-                    otazka.SPO4,
-                    otazka.SPO5,
-                    otazka.SPO6,
-                ]
-            }
-
-            return json({'otazka': jsOtazka})
-
-        except:
-            return json({'chyba': 'Otázka s id: ' + id + ' neexistuje!'})
 
     def pridat(J):
         with db_session:

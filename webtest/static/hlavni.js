@@ -85,7 +85,7 @@ $("document").ready(function($){
                 '<div class="otazka" cislo="' + o.id + '">\
                     <span class="otId">' + o.id + '. </span>\
                     <span class="otNazev">' + o.jmeno + '</span>\
-                    <span class="otZadani">' + o.zadani + '</span>\
+                    <span class="otZadani">' + o.zadaniHTML.replace("\n","<br>") + '</span>\
                 </div>';
         });
 
@@ -251,6 +251,7 @@ $("document").ready(function($){
 
     function testyVytvorit() {        
         $("#stranka").load("/vzory/testy/",function(){
+            nastavZnamky(1);
             var datum = dnes();
             stranka.find('h1#upravitTest').text("Přidat test");
             stranka.find('#ttOd').val(datum);
