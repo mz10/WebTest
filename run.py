@@ -3,6 +3,7 @@
 ############################################################################
 from webtest import app
 import sys
+#from OpenSSL import SSL
 
 PORT = 5000
 
@@ -40,7 +41,8 @@ if len(sys.argv) > 1:
     now = datetime.datetime.now()
     logger.info(now.strftime("%Y-%m-%d %H:%M:%S"))
     # Run web public server
-    app.run(host='0.0.0.0', port=PORT, debug=False, threaded=True)
+    app.run(host='0.0.0.0', port=PORT, debug=False, threaded=True, ssl_context=('klice/cert.pem', 'klice/key.pem'))
 else:
     # Run web local server
+    #app.run(host='127.0.0.1', port=PORT, debug=True, threaded=True, ssl_context=('klice/cert.pem', 'klice/key.pem'))   
     app.run(host='127.0.0.1', port=PORT, debug=True, threaded=True)

@@ -65,10 +65,7 @@ $(function() {
                 $("html").css("cursor","e-resize");
                 document.onmousemove = hybat;
             }
-        });
-
-        //zrusit presouvani
-        $(document).mouseup(function(e) {
+        }).mouseup(function(e) {//zrusit presouvani
             if (aktivni) {
                 aktivni = null;
                 oznacovat("html");

@@ -271,33 +271,28 @@ p.dobre {
   text-align: center;
   margin-bottom: 2em; }
 
-.bar, .bar0, .bar1, .bar2, .bar3, .bar4, .bar5, .bar6 {
+.logo2 {
+  font-size: 0;
+  width:85px;
+  display: inline-block;
+}
+
+ .bar, .bar0, .bar1, .bar2, .bar3, .bar4, .bar5, .bar6 {
   background-color: #DD5500;
   width: 10px;
-  display: inline-block;
   padding: 0px;
-  margin: 1px; }
+  display: inline-block;  
+  margin-right: 1px;
+  transition: 3s;
+  }
 
-.bar0 {
-  height: 22px; }
-
-.bar1 {
-  height: 11px; }
-
-.bar2 {
-  height: 40px; }
-
-.bar3 {
-  height: 60px; }
-
-.bar4 {
-  height: 30px; }
-
-.bar5 {
-  height: 17px; }
-
-.bar6 {
-  height: 50px; }
+.bar0 {height: 22px; }
+.bar1 {height: 11px; }
+.bar2 {height: 40px; }
+.bar3 {height: 60px; }
+.bar4 {height: 30px; }
+.bar5 {height: 17px; }
+.bar6 {height: 50px; }
 
 .clear {
   clear: both; }
@@ -309,15 +304,15 @@ p.dobre {
   margin-bottom: 1em; 
 }
 
-.kalendar1 input, .kalendar2 input {
+.kalendar1 input {
   width: 10em; 
 }
 
 #kalendar1, #kalendar2 {
-  position: relative; 
+  position: absolute; 
 }
   
-  #kalendar1 table, #kalendar2 table {
+  #kalendar1 table {
     border-collapse: collapse;
     border: 1px solid brown;
     background-color: #FAFAD2;
@@ -326,54 +321,53 @@ p.dobre {
     left: calc(11em + 10px); 
   }
   
-  #kalendar1 th, #kalendar2 th {
+  #kalendar1 th {
     color: brown;
     border-bottom: 1px solid brown; 
   }
   
-  #kalendar1 th, #kalendar1 td, #kalendar2 th, #kalendar2 td {
+  #kalendar1 th, #kalendar1 td {
     font-size: 12px;
     text-align: center;
     padding: 2px 3px 2px 2px; 
   }
   
-  #kalendar1 thead th, #kalendar2 thead th {
+  #kalendar1 thead th {
     text-align: center;
     color: #FAFAD2;
     background-color: brown; 
   }
   
   #kalendar1 thead th:first-child,
-  #kalendar1 thead th + th + th, #kalendar2 thead th:first-child,
-  #kalendar2 thead th + th + th {
+  #kalendar1 thead th + th + th, {
     background-color: #C00000;
     cursor: pointer; 
   }
   
-  #kalendar1 .dnes, #kalendar2 .dnes {
+  #kalendar1 .dnes {
     color: #FAFAD2;
     background-color: brown; 
   }
   
-  #kalendar1 .akt, #kalendar2 .akt {
+  #kalendar1 .akt {
     color: #FAFAD2;
     background-color: red; 
   }
   
-    #kalendar1 td, #kalendar2 td {
+    #kalendar1 td {
     cursor: pointer; 
   }
   
-    #kalendar1 #content, #kalendar2 #content {
+    #kalendar1 #content {
     padding-bottom: 120px; 
   }
   
-    #kalendar1 #main, #kalendar2 #main {
+    #kalendar1 #main {
     position: relative;
     z-index: 1; 
   }
   
-    #kalendar1 input.ukazka, #kalendar2 input.ukazka {
+    #kalendar1 input.ukazka {
     float: right;
     margin-right: 20px; 
   }
@@ -556,4 +550,10 @@ table {
 #petka{
   z-index: 15;
   background-color: cyan;
+}
+
+
+.otTlacitka {
+  float: right;
+  display: none;
 }

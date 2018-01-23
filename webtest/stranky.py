@@ -250,6 +250,13 @@ def akceP():
             odpoved = Otazka.pridat(J)
         elif akce == "upravit":
             odpoved = Otazka.upravit(J)
+    if(co == "test"):
+        if akce == "smazat":
+            odpoved = "Test s id " + idTestu + " byl smazán"
+        elif akce == "pridat":
+            odpoved = "a"
+        elif akce == "upravit":
+            odpoved = "b"
     elif(co == "tabulka"):
         if akce == "smazat":
             Ostatni.smazTabulku(J["nazev"],"smazat")

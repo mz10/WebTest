@@ -12,8 +12,15 @@ $("document").ready(function($){
             menu.toggleClass("menu", fix);
             $('body').toggleClass("body-menu", fix);			
         });
+
     }
 
+    function nahodneLogo() {
+        for(i=0;i<7;i++) {
+            var nahodneC = Nahodne(5,60);
+            $(".bar" + i).css("height",nahodneC);
+        }
+    }
 
     function dnes() {
         var tik = new Date();      
@@ -29,6 +36,15 @@ $("document").ready(function($){
         return vysledek;
     }
 
+    function zaRok() {
+        var tik = new Date(new Date().setFullYear(new Date().getFullYear() + 1));   
+        var den = tik.getDate();
+        var mesic = tik.getMonth()+1;
+        var rok = tik.getFullYear();
+        return den + "." + mesic + "." + rok + " 00:00";
+    }
+
+
     function nazevStranky() {
         var hash = "index";
         if(window.location.hash)
@@ -41,6 +57,8 @@ $("document").ready(function($){
         var hash = nazevStranky();
         if(intervalDb) clearInterval(intervalDb);
         
+        //if(!nacti) return;
+
         if(hash=="DB") {
             $("#stranka").load("/tabulky/");
             intervalDb = setInterval(function() {
@@ -49,7 +67,7 @@ $("document").ready(function($){
         }
         else if(hash=="Otazky"){
             $.getJSON("/json/otazky/", function(json) {
-                otazkyZobraz(json.otazky);	
+                otazkyZobraz("#stranka",json.otazky);	
             });
         }
         else if(hash=="Testy"){
@@ -71,25 +89,27 @@ $("document").ready(function($){
     }
 
     /************OTAZKY***************/
-    function otazkyZobraz(otazky) {
+    function otazkyZobraz(div, otazky) {
         var text = "";
 
         var tlacitka =  
             '<span class="otTlacitka">\
-                <button class="tlUpravit">Upravit</button>\
                 <button class="tlSmazat">Smazat</button>\
+                <button class="tlKostka">Kostka</button>\
+                <button class="tlZadani">Zadání</button>\
             </span>';
 
         $.each(otazky, function(i, o) {
-            text +=     
+            text += 
                 '<div class="otazka" cislo="' + o.id + '">\
+                    ' + tlacitka + '\
                     <span class="otId">' + o.id + '. </span>\
                     <span class="otNazev">' + o.jmeno + '</span>\
                     <span class="otZadani">' + o.zadaniHTML.replace("\n","<br>") + '</span>\
                 </div>';
         });
 
-        $("#stranka").html(text);
+        $(div).html(text);
     }
 
     function otazkyUprav(idOtazky) {
@@ -116,6 +136,7 @@ $("document").ready(function($){
     function otazkyPridat() {
         $("#stranka").load("/vzory/otazky/",function() {
             $("#stranka").find('h1#upravitOtazku').text("Přidat otázku"); 
+            $("#stranka").find('#otSmazat').css("display","none");
         });
     }
 
@@ -159,6 +180,37 @@ $("document").ready(function($){
         );
     }
 
+    function testyOdeslat() {
+        var idTestu = stranka.find('#ttId').text();
+        var ukol = "pridat";      
+
+        if(idTestu)
+            ukol = "upravit";
+
+        var json = {
+            akce: ukol, 
+            co: 'test',
+            id: idTestu,
+            jmeno: stranka.find('#ttNazev').val(),
+            od: stranka.find('#ttOd').val(),
+            do: stranka.find('#ttDo').val(),
+        };
+
+        postJSON(json, 
+            function(o) {
+                console.log(o); 
+                if(o.status != 500) {
+                    hlaska(o.odpoved,8); 
+                    //window.location.hash = "Otazky";
+                }
+                else
+                    hlaska(chybaServeru(o),0);
+            }
+        );
+    }
+
+
+
     function otazkySmazat(idOtazky) {       
         dialog('Smazat otázku?',
             function() {//ano              
@@ -173,7 +225,10 @@ $("document").ready(function($){
                         console.log(o); 
                         if(o.status != 500) {
                             hlaska(o.odpoved,8); 
-                            window.location.hash = "Otazky"; 
+                            //window.location.hash = "Otazky"; 
+                            $.getJSON("/json/otazky/", function(json) {
+                                otazkyZobraz("#stranka",json.otazky);	
+                            });
                         }
                         else
                             hlaska(chybaServeru(o),0);
@@ -218,7 +273,7 @@ $("document").ready(function($){
         var text = "";
 
         var tlacitka =  
-            '<span class="otTlacitka">\
+            '<span class="ttTlacitka">\
                 <button class="tlUpravit">Upravit</button>\
                 <button class="tlSmazat">Smazat</button>\
             </span>';
@@ -245,7 +300,7 @@ $("document").ready(function($){
                     stranka.find('#ttOd').val(t.od);
                     stranka.find('#ttDo').val(t.do);                    
                 }
-            });             	
+            });           	
         });   
     }
 
@@ -253,11 +308,45 @@ $("document").ready(function($){
         $("#stranka").load("/vzory/testy/",function(){
             nastavZnamky(1);
             var datum = dnes();
+            var dalsiRok = zaRok();
             stranka.find('h1#upravitTest').text("Přidat test");
             stranka.find('#ttOd').val(datum);
-            stranka.find('#ttDo').val(datum);
+            stranka.find('#ttDo').val(dalsiRok);
+            
+            stranka.find('#ttSmazat').css("display","none");
+
+            $.getJSON("/json/otazky/", function(json) {
+                otazkyZobraz("#ttDostupne",json.otazky);	
+            });
+          
         });
     }
+
+    function zobrazitKalendar(umisteni) {
+        var inputId = "#" + umisteni;
+        var inputText = $(inputId).val();
+        var hledat = inputText.match(/(\d+).(\d+).(\d+) (\d+):(\d+)/);
+        var hodiny = " ";
+        var kalMesic = 0;
+        var kalRok = 0;
+
+        if(!hledat) {
+            var d = new Date();
+            hodiny = " " + d.getHours() + ":" + d.getMinutes();
+        } 
+
+        else if(hledat.length >= 6) {
+            hodiny = " " + hledat[4] + ":" + hledat[5];
+            kalMesic = hledat[2];
+            kalRok = hledat[3];
+        }
+
+        kalendar(umisteni, kalMesic, kalRok, function(datum){
+            var text = datum.den + "." + datum.mesic + "." + datum.rok + hodiny;
+            $(inputId).val(text);
+        });
+    }
+
 
     /****************UDALOSTI*********************/
 
@@ -281,10 +370,22 @@ $("document").ready(function($){
         otazkyOdeslat();
     });
 
+    $(document).on("click", "#ttOdeslat", function(e) {
+        testyOdeslat();
+    });
+
+
     $(document).on("click", ".otazka", function(e) {
+        if(e.target.localName == "button") return false;
         window.location.hash = "OtazkyUpravit";
         var idOtazky = e.currentTarget.attributes.cislo.value;
         otazkyUprav(idOtazky);
+    });
+
+    $(document).on("mouseenter", ".otazka", function(e) {
+        $(this).children('.otTlacitka').css("display","block");
+    }).on("mouseleave", ".otazka", function(e) {
+        $(this).children('.otTlacitka').css("display","none");
     });
 
     $(document).on("click", ".test", function(e) {
@@ -298,10 +399,47 @@ $("document").ready(function($){
     }); 
 
     $(document).on("click", ".tbVysypat", function(e) {
-        console.log(e);
         tabulka(e.target.value,"vysypat");
     }); 
-            
+      
+    $(document).on("click", ".kalendar", function(e) {
+        var umisteni = e.currentTarget.attributes.input.value;
+        zobrazitKalendar(umisteni);
+    });
+    
+    $(document).on("mouseenter", ".logo2", function(e) {
+        nahodneLogo();
+    });
+
+    $(document).on("click", ".otTlacitka .tlSmazat", function(e) {
+        var idOtazky =  e.target.parentElement.parentElement.attributes.cislo.value;
+        otazkySmazat(idOtazky);
+    });
+
+    $(document).on("click", ".otTlacitka .tlKostka", function(e) {
+        var idOtazky =  e.target.parentElement.parentElement.attributes.cislo.value;
+        
+        $.getJSON("/json/otazky/" + idOtazky, function(json) {         
+            var zadani = json.otazka.zadaniHTML;
+            $(".otazka[cislo=" + idOtazky + "] .otZadani").html(zadani);
+        });
+    });
+
+    var zadaniJakoHTML = false;
+
+    $(document).on("click", ".otTlacitka .tlZadani", function(e) {
+        var idOtazky =  e.target.parentElement.parentElement.attributes.cislo.value;
+
+        $.getJSON("/json/otazky/" + idOtazky, function(json) {         
+            var zadani = json.otazka.zadani.replace(/\n/g,"<br>")
+            if(zadaniJakoHTML)
+                zadani = json.otazka.zadaniHTML;
+               
+            zadaniJakoHTML = !zadaniJakoHTML;
+            $(".otazka[cislo=" + idOtazky + "] .otZadani").html(zadani);
+        });
+    });
+
     /***********ZAKLADNI FUNKCE***************/
 
     function postJSON(json, odeslano) {
@@ -376,6 +514,10 @@ $("document").ready(function($){
         }
     }
 
+    function Nahodne(zacatek,konec) {
+        return Math.floor((Math.random() * konec) + zacatek);
+    }
+
     window.onhashchange = zmenHash;
     window.addEventListener("error", zobrazitChybu, true);
     
@@ -386,17 +528,6 @@ $("document").ready(function($){
             hlaska("error: " + e.type + " from element: " + (e.srcElement || e.target));
     }
 
-
-
-
-    
-
-
-
-
-
-
-
-
+    cl = console.log;
 
 });
