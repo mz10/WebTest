@@ -75,11 +75,11 @@ class DbOtazka(db.Entity):
     otazkyTestu = Set("DbOtazkaTestu")
 
 class DbOdpoved(db.Entity):
-    #Vazební tabulka mezi výsledkem testu a otázkami testu.
-    #Obsahuje znovu (redundantně) zadání a odpověď. Je to proto, že otázku
-    #může učitel editovat a není možné hodnotit odpověď na změněnou otázku.
-    #Dále se řeší problém, kdy je v otázce náhodné číslo: je nutno uchovat
-    #konkretní zadání i očekávaný výsledek
+    # Vazební tabulka mezi výsledkem testu a otázkami testu.
+    # Obsahuje znovu (redundantně) zadání a odpověď. Je to proto, že otázku
+    # může učitel editovat a není možné hodnotit odpověď na změněnou otázku.
+    # Dále se řeší problém, kdy je v otázce náhodné číslo: je nutno uchovat
+    # konkretní zadání i očekávaný výsledek
     
     _table_ = "Odpoved"
     id = PrimaryKey(int, column="idOdpoved", auto=True)

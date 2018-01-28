@@ -7,9 +7,17 @@ function kalendar(umisteni, mesic, rok, potvrdit) {
 	if(rok!=0) {
 		mesicDnes = mesic;
 		rokDnes = rok;
+
+		//test jestli datum zacina 0
+		if (mesicDnes.substring(0,1) == "0") {
+			mesicDnes = mesicDnes.substring(1);
+		}
+		
+		if (rokDnes.substring(0,1) == "0")
+			rokDnes = rokDnes.substring(1);				
 	}
 
-	zobrazSkryjKalendar(umisteni, mesic, rok);
+	zobrazSkryjKalendar(umisteni, mesicDnes, rokDnes);
 
 	//funkce spuštěna při kliknutí na ikonu kalendáře ve formuláři
 	function zobrazSkryjKalendar(umisteni,mesic,rok) {

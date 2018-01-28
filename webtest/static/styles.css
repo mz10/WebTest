@@ -454,6 +454,22 @@ table {
 
 #hlaska.zobrazit {top: 0}
 
+#hlaskaIframe {
+  position: fixed;
+  top: 0px;
+  background: rgba(255, 115, 0, 0.822);
+  padding: 20px;
+  border-radius: 20px;
+  margin-left: 10%;
+  z-index: 198;
+}
+
+#hlaskaIframe iframe {
+  width: 600px;
+  height: 400px;
+}
+
+
 .skryty {
   display: none;
 }
@@ -480,6 +496,9 @@ table {
   }
 
 
+  .otazka.vybrana {
+    background: yellow;
+  }
 
 #stranka {
   display: block;
@@ -553,7 +572,11 @@ table {
 }
 
 
-.otTlacitka {
+.otTlacitka, .ttTlacitka {
   float: right;
   display: none;
+}
+
+.ttAutor, .ttOd, .ttDo {
+  padding-right: 10px; 
 }
