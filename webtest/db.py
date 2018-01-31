@@ -52,7 +52,11 @@ class DbTest(db.Entity):
     otazkyTestu = Set("DbOtazkaTestu")
     vysledkyTestu = Set("DbVysledekTestu")
     zobrazenoOd = Optional(datetime, column="zobOd")
-    zobrazenoDo = Optional(datetime, column="zobDo")
+    zobrazenoDo = Optional(datetime, column="zobDo")  
+    limit = Optional(str, 20)
+    pokusu = Optional(str, 20)
+    skryty = Optional(bool)
+    hodnoceni = Optional(str, 100)
 
 class DbOtazka(db.Entity):
     #Obecná otázka:

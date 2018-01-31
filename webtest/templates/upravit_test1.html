@@ -1,21 +1,14 @@
 <div class="UpravitTest">
     <h1 id="upravitTest">Upravit test</h1>
     <h4>Název testu:</h4>	
-    <input type="text" id="ttNazev" placeholder="Název"><br>	
-    
-    
+    <input type="text" id="ttNazev" placeholder="Název">	
+    <span id="ttId"></span>
+    <br>
     <h4>Platnost:</h4>
     <input type="text" id="ttOd" placeholder='od'>
     <img src="/static/kalendar.png" input="ttOd" class="kalendar">
     <input type="text" id="ttDo" placeholder='do'>
     <img src="/static/kalendar.png" input="ttDo" class="kalendar">    
-
-    <h4>Otázky:</h4>
-    
-    <h6>Dostupné:</h3>
-    <div id="ttDostupne"></div>
-    <h6>Zvolené:</h3>
-    <div id="ttZvolene"></div>
 
     <h4>Hodnocení:</h4>
     <select id="hodnoceniTyp">
@@ -44,10 +37,18 @@
         <span class="znamka" id="petka">0</span>
     </span>
     <br><br>
-    <input type="checkbox"> Skrýt test<br><br>
-    <input type="text" placeholder="Počet pokusů"><br>
-    <br>
+    <input type="checkbox" id="ttSkryt">Skrýt test<br><br>
+    <input type="text" id="ttPokusu" placeholder="Počet pokusů"><br>
+    <input type="text" id="ttLimit" placeholder="Čas na test (min)"><br>
+    <br>    
     <button id="ttOdeslat">Odeslat</button>
     <button id="ttVybrat">Vybrat otázky</button>    
     <button id="ttSmazat">Smazat</button>
+    <button id="ttSkrytZadani">Zobrazit zadání</button>
+
+    <h4>Otázky:</h4>    
+    <h6>Dostupné:</h3>
+    <div id="ttDostupne"></div>
+    <h6>Zvolené:</h3>
+    <div id="ttZvolene"></div>
 </div>

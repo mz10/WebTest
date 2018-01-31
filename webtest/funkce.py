@@ -54,6 +54,13 @@ def vypocitej(text,promenne):
 def json(js):
     return Response(response=_json.dumps(js),status=200,mimetype="application/json")
 
+def jsonStahnout(js,jmeno):
+    js = _json.dumps(js,sort_keys = True, indent = 1, ensure_ascii=False)
+    js = js.replace('\n', '\r\n')
+    r = Response(response=js,status=200,mimetype="application/json")
+    r.headers["Content-Disposition"] = 'attachment; filename="' + jmeno + '"'
+    return r
+
 def upload1():
     """upload souboru se zadáním
     """

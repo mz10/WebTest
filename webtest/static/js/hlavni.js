@@ -1,19 +1,3 @@
-spustJS("dalsiFunkce");
-spustJS("zaklad");  
-spustJS("udalosti");    
-spustJS("hodnoceni"); 
-spustJS("kalendar");
-
-$(window).on('load', function() {
-    //alert("haha");
-    zmenHash();
-});
-
-//document.onreadystatechange
-
-
-var stranka = "#stranka";
-var intervalDb;
 
 /*****************OTÁZKY*****************/
 function otazkyZobraz(div, otazky) {
@@ -23,7 +7,7 @@ function otazkyZobraz(div, otazky) {
         '<span class="otTlacitka">\
             <button class="tlSmazat">Smazat</button>\
             <button class="tlKostka">Kostka</button>\
-            <button class="tlZadani">Zadání</button>\
+            <button class="tlZobrazOdpovedi">Odpovědi</button>\
         </span>';
 
     //onsole.log(otazky);
@@ -35,8 +19,19 @@ function otazkyZobraz(div, otazky) {
                 <span class="otId">' + o.id + '. </span>\
                 <span class="otNazev">' + o.jmeno + '</span>\
                 <span class="otZadani">' + o.zadaniHTML.replace("\n","<br>") + '</span>\
+                <div class="otOdpovedi"></div>\
             </div>';
     });
+
+    if(div == stranka) {
+        text = 
+            '<h1>Otázky</h1>\
+            <span class="otPridat">Přidat | </span>\
+            <span class="otSmazatVsechny">Smazat všechny | </span>\
+            <span class="otUpravitVsechny">Upravit všechny | </span>\
+            ' + text + '\
+            <div class="otPridat">Přidat</div>';
+    }
 
     $(div).html(text);
 }
@@ -54,15 +49,75 @@ function otazkyUprav(idOtazky) {
         $(stranka).find('#otJmeno').val(o.jmeno);
         Simplemde.value(o.zadani), //soubor lista.js
         $(stranka).find('#otId').text(o.id);
-        $(stranka).find('#SPRO').val(o.spravne[0]);
-        $(stranka).find('#SPO1').val(o.spatne[0]);
-        $(stranka).find('#SPO2').val(o.spatne[1]);
-        $(stranka).find('#SPO3').val(o.spatne[2]);
-        $(stranka).find('#SPO4').val(o.spatne[3]);
-        $(stranka).find('#SPO5').val(o.spatne[4]);
-        $(stranka).find('#SPO6').val(o.spatne[5]);
+        $(stranka).find('#otTyp').val(o.typ);
+        $(stranka).find('#SPRO').val(o.spravneZadano[0]);
+        $(stranka).find('#SPO1').val(o.spatneZadano[0]);
+        $(stranka).find('#SPO2').val(o.spatneZadano[1]);
+        $(stranka).find('#SPO3').val(o.spatneZadano[2]);
+        $(stranka).find('#SPO4').val(o.spatneZadano[3]);
+        $(stranka).find('#SPO5').val(o.spatneZadano[4]);
+        $(stranka).find('#SPO6').val(o.spatneZadano[5]);
     }
 }   
+
+function otazkyUpravVsechny(e) {
+    var otazky = $(".otazka");
+    $.each(otazky, foreach);
+
+    function foreach(i, o) {
+        cl(o);
+        var input = $("<input />");
+        var zadani = o.children[2];
+        $(zadani).replaceWith(input);
+        var text = $(zadani).html();
+        input.val(text);
+
+        //$(zadani).replaceWith(input);
+    }
+}
+
+
+
+
+
+function otazkyKostka(e) {
+    var otazka = e.currentTarget.parentElement.parentElement;
+    var idOtazky = otazka.attributes.cislo.value;
+    var otOdpoved = $(".otazka[cislo=" + idOtazky + "] .otOdpovedi");
+    var kod = "";
+
+    $.getJSON("/json/otazky/" + idOtazky, gj).fail(chybaIframe);
+
+    function gj(json) {
+        cl(json.otazka);
+        var o = json.otazka;
+        
+        var zadani = o.zadaniHTML;
+        $(".otazka[cislo=" + idOtazky + "] .otZadani").html(zadani);
+
+        kod+= o.spravne[0] + "<br>";
+        kod+= o.spatne[0] + "<br>";
+        kod+= o.spatne[1] + "<br>";
+        kod+= o.spatne[2] + "<br>";
+        kod+= o.spatne[3] + "<br>";
+        kod+= o.spatne[4] + "<br>";
+        kod+= o.spatne[5] + "<br>";   
+        
+        otOdpoved.html(kod);
+    }
+}
+
+function otazkyZobrazOdpovedi(e) {
+    var otazka = e.currentTarget.parentElement.parentElement;
+    var idOtazky = otazka.attributes.cislo.value;
+    var otOdpoved = $(".otazka[cislo=" + idOtazky + "] .otOdpovedi");
+
+    if(otOdpoved.text() == "") {
+        otazkyKostka(e);
+    }
+
+    otOdpoved.toggle();
+}
 
 function otazkyPridat() {
     $(stranka).load("/vzory/otazky/",function() {
@@ -123,6 +178,8 @@ function otazkyOdeslat() {
         ]
     };
 
+    cl(json);
+
     postJSON(json, odpoved);
 
     function odpoved(o) {
@@ -150,12 +207,13 @@ function testyOdeslat() {
         od: $(stranka).find('#ttOd').val(),
         do: $(stranka).find('#ttDo').val(),
         hodnoceni: null,
-        pokusu: 1,
-        skryty: false,           
+        pokusu: $("#ttPokusu").val(),
+        limit: $("#ttLimit").val(),
+        skryty:  $("#ttSkryt")[0].checked,          
         otazky: testyVyberOtazky()
     };
 
-    cl(json);
+    //cl(json);
 
     postJSON(json, odpoved);
 
@@ -169,7 +227,6 @@ function testyOdeslat() {
     }
 }
 
-/*****************TESTY*******************/
 function testyZobraz(json) {
     var text = "";
 
@@ -193,45 +250,90 @@ function testyZobraz(json) {
             </div>';
     });
     
+    text = 
+    '<h1>Testy</h1>\
+    <div class="ttPridat">Přidat</div>\
+    ' + text + '\
+    <div class="ttPridat">Přidat</div>';
+
     $(stranka).html(text);
 }
 
-function testyUprav(idTestu) {
+function testyUprava(akce,idTestu) {
+    //kód je asynchroní!
+
     $(stranka).load("/vzory/testy/", nacteno);
 
-    function nacteno() {    
+    function nacteno() { 
+        nastavZnamky(1);  
         $.getJSON("/json/testy/", zpracujJSON).fail(chybaIframe);
     }
 
+    var seznamOtazek = [];
+
     function zpracujJSON(json) {
-        $.each(json.testy, foreach);
+        if(akce == "uprav")
+            $.each(json.testy, foreach);
+        else if(akce == "pridat")
+            pridatTest();
+        
+        nactiOtazky();
+    }
+
+    function pridatTest() {
+        var datum = dnes();
+        var dalsiRok = zaRok();
+        $(stranka).find('h1#upravitTest').text("Přidat test");
+        $(stranka).find('#ttSmazat').hide();
+        $(stranka).find('#ttOd').val(datum);
+        $(stranka).find('#ttDo').val(dalsiRok);        
     }
 
     function foreach(i, t) {
         if(t.id==idTestu) {
             $(stranka).find('#ttNazev').val(t.jmeno);
+            $(stranka).find('#ttId').text(t.id); 
             $(stranka).find('#ttOd').val(t.od);
-            $(stranka).find('#ttDo').val(t.do);                    
+            $(stranka).find('#ttDo').val(t.do); 
+            seznamOtazek = t.otazky;
+            return;           
         }        
     }
-}
 
-function testyVytvorit() {        
-    $(stranka).load("/vzory/testy/",function(){
-        nastavZnamky(1);
-        var datum = dnes();
-        var dalsiRok = zaRok();
-        $(stranka).find('h1#upravitTest').text("Přidat test");
-        $(stranka).find('#ttOd').val(datum);
-        $(stranka).find('#ttDo').val(dalsiRok);
-        
-        $(stranka).find('#ttSmazat').css("display","none");
-
+    function nactiOtazky() {
         $.getJSON("/json/otazky/", function(json) {
-            otazkyZobraz("#ttDostupne",json.otazky);	
-        }).fail(chybaIframe);
+            otazkyZobraz("#ttDostupne",json.otazky);
+            otazkyZobraz("#ttZvolene",json.otazky);	   
+            
+            var dostupne = $("#ttDostupne")[0].childNodes;
+            var zvolene = $("#ttZvolene")[0].childNodes;
+
+            $.each(dostupne, zobrazOtazky); 
+            $.each(zvolene, skryjOtazky); 
         
-    });
+        }).fail(chybaIframe);
+    }
+
+    function zobrazOtazky(i, otazka) {
+        if (jeVSeznamu(otazka.attributes.cislo.value))
+            otazka.style.display = "none";
+    }
+
+    function skryjOtazky(i, otazka) {
+        if (!jeVSeznamu(otazka.attributes.cislo.value))      
+            otazka.style.display = "none";
+    }
+
+    function jeVSeznamu(id) {
+        var vysledek = false;
+        $.each(seznamOtazek, function(i, idO) {
+            if(id==idO) {
+                vysledek = true;
+                return false;
+            }
+        });
+        return vysledek;
+    }
 }
 
 function testySmazat(idTestu) {
@@ -258,7 +360,7 @@ function testySmazat(idTestu) {
 
 function testyVyberOtazky() {
     var cislaOtazek = [];
-    var vybrane = $(".otazka.vybrana");
+    var vybrane = $("#ttZvolene .otazka:visible");
     
     $.each(vybrane, function(i, v) {
         cislaOtazek[i] = v.attributes.cislo.value*1;
@@ -267,6 +369,21 @@ function testyVyberOtazky() {
     return cislaOtazek;
 }
 
+function testyVymenOtazky() {
+    var dostupne = $("#ttDostupne .otazka.vybrana");
+    var zvolene = $("#ttZvolene .otazka.vybrana");
+
+    $.each(dostupne, function(i, otazka) { skryt(otazka,"#ttZvolene") });
+    $.each(zvolene,  function(i, otazka) { skryt(otazka,"#ttDostupne") });
+
+    function skryt(otazka, div) {
+        $(otazka).removeClass("vybrana");
+        otazka.style.display = "none";
+        idOtazky = otazka.attributes.cislo.value;
+        $(div + " .otazka[cislo=" + idOtazky + "]").show();        
+    }
+
+}
 
 /************DATABÁZE*************/
 function tabulka(tabulka,ukol){       
@@ -318,13 +435,4 @@ function zobrazitKalendar(umisteni) {
         var text = datum.den + "." + datum.mesic + "." + datum.rok + hodiny;
         $(inputId).val(text);
     });
-}
-
-
-/*****************************/
-function spustJS(jsSoubor) {
-    var js = document.createElement("script");
-    js.type = "text/javascript";
-    js.src = "/static/js/" + jsSoubor + ".js";
-    document.head.appendChild(js);
 }

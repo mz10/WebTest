@@ -1,7 +1,3 @@
-/***********ZAKLADNI FUNKCE***************/
-
-//alert("zzzzzz");
-
 function postJSON(json, odeslano) {
     $.ajax({
         url: '/json/post/',
@@ -13,6 +9,33 @@ function postJSON(json, odeslano) {
         success: odeslano,
         error: odeslano
     });
+}
+
+function zmenHash() {
+    var hash = nazevStranky();
+    if(intervalDb) clearInterval(intervalDb);
+    
+    //if(!nacti) return;
+
+    if(hash=="DB") {
+        $(stranka).load("/tabulky/");
+        intervalDb = setInterval(function() {
+            $(stranka).load("/tabulky/");
+        }, 3000);
+    }
+    else if(hash=="Otazky"){
+        $.getJSON("/json/otazky/", function(json) {
+            otazkyZobraz("#stranka",json.otazky);	
+        }).fail(chybaIframe);
+    }
+    else if(hash=="Testy")
+        $.getJSON("/json/testy/", testyZobraz).fail(chybaIframe);
+    else if(hash=="Nahrat")
+        $(stranka).load("/upload/");  
+    else if(hash=="TestyVytvorit")
+        testyUprava("pridat");
+    else if(hash=="OtazkyPridat")
+        otazkyPridat();
 }
 
 function chybaServeru(ch) {
@@ -51,6 +74,14 @@ function dialog(zprava, ano, ne) {
         ano();
     }
 
+    document.onkeyup = function(e) {
+        if (e.keyCode == 13) {//enter
+            document.onkeyup = null;            
+            document.body.removeChild(div);
+            ano();
+        }
+    }
+
     zrusit.onclick = function() {
         document.body.removeChild(div);
         ne();
@@ -70,6 +101,9 @@ function hlaska(text, cas) {
     div.onclick = function() {
         document.body.removeChild(div);
     }
+
+
+
 
     if(cas>0) {
         casovac = setTimeout(function() {

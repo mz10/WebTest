@@ -22,14 +22,8 @@ $(document).on("click", "#otVlozit", otazkyOdeslat);
 //odeslat test
 $(document).on("click", "#ttOdeslat", testyOdeslat);
 
-
-$(document).on("click", "#ttVybrat", function() {
-    var s = testyVyberOtazky();
-
-    cl(s);
-});
-
-
+//vymenit otazky - dostupne <-> zvolene
+$(document).on("click", "#ttVybrat", testyVymenOtazky);
 
 //kliknout na otazku
 $(document).on("click", stranka + " > .otazka", function(e) {
@@ -44,14 +38,23 @@ $(document).on("click", "#ttDostupne > .otazka", function(e) {
     $(this).toggleClass("vybrana");
 });
 
+//kliknout na zvolene otazky
+$(document).on("click", "#ttZvolene > .otazka", function(e) {
+    $(this).toggleClass("vybrana");
+});
 
 //kliknout na test
 $(document).on("click", ".test", function(e) {
     if(e.target.localName == "button") return false;
     window.location.hash = "TestyUpravit";   
     var idTestu = e.currentTarget.attributes.cislo.value;    
-    testyUprav(idTestu);
+    testyUprava("uprav",idTestu);
 }); 
+
+$(document).on("click", "#ttSkrytZadani", function(e) {
+    $(".otZadani").toggle();
+}); 
+
 
 //zobrazit tlacitka po najeti mysi - u otazek
 $(document).on("mouseenter", stranka + " > .otazka", function(e) {
@@ -97,15 +100,10 @@ $(document).on("click", ".ttTlacitka .tlSmazat", function(e) {
 
 
 //vygenerovat nove zadani u otazky
-$(document).on("click", ".otTlacitka .tlKostka", function(e) {
-    var idOtazky =  e.target.parentElement.parentElement.attributes.cislo.value;
-    
-    $.getJSON("/json/otazky/" + idOtazky, function(json) {         
-        var zadani = json.otazka.zadaniHTML;
-        $(".otazka[cislo=" + idOtazky + "] .otZadani").html(zadani);
-    });
-});
+$(document).on("click", ".otTlacitka .tlKostka", otazkyKostka);
 
+//kliknout na odpovědi u otázek
+$(document).on("click", ".otTlacitka .tlZobrazOdpovedi", otazkyZobrazOdpovedi);
 
 //zobrazit puvodni zadani u otazky
 var zadaniJakoHTML = false;
@@ -120,4 +118,26 @@ $(document).on("click", ".otTlacitka .tlZadani", function(e) {
         zadaniJakoHTML = !zadaniJakoHTML;
         $(".otazka[cislo=" + idOtazky + "] .otZadani").html(zadani);
     });
+});
+
+
+
+$(document).on("click", "#ttPokusu", function(e) {
+    var skrk = $("#ttSkryt")[0].checked;
+    cl(skrk);
+});
+
+
+$(document).on("click", ".ttPridat", function(e) {
+    window.location.hash = "TestyVytvorit"; 
+    //testyUprava("pridat");
+});
+
+$(document).on("click", ".otPridat", function(e) {
+    window.location.hash = "OtazkyPridat"; 
+    //otazkyPridat();
+});
+
+$(document).on("click", ".otUpravitVsechny", function(e) {
+    otazkyUpravVsechny(e);
 });

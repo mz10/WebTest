@@ -42,42 +42,10 @@ function zaRok() {
     return den + "." + mesic + "." + rok + " 00:00";
 }
 
-
 function nazevStranky() {
     var hash = "index";
     if(window.location.hash)
         hash = window.location.hash.substring(1);
 
     return hash;    
-}
-
-function zmenHash() {
-    var hash = nazevStranky();
-    if(intervalDb) clearInterval(intervalDb);
-    
-    //if(!nacti) return;
-
-    if(hash=="DB") {
-        $(stranka).load("/tabulky/");
-        intervalDb = setInterval(function() {
-            $(stranka).load("/tabulky/");
-        }, 3000);
-    }
-    else if(hash=="Otazky"){
-        $.getJSON("/json/otazky/", function(json) {
-            otazkyZobraz("#stranka",json.otazky);	
-        }).fail(chybaIframe);
-    }
-    else if(hash=="Testy"){
-        $.getJSON("/json/testy/", testyZobraz).fail(chybaIframe);
-    } 
-    else if(hash=="Nahrat"){
-        $(stranka).load("/upload/");
-    }        
-    else if(hash=="TestyVytvorit"){
-        testyVytvorit();
-    } 
-    else if(hash=="OtazkyPridat"){
-        otazkyPridat();
-    }
 }

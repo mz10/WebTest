@@ -9,9 +9,13 @@ import re
 import random
 import sympy
 
-from .funkce import (nahodne, json, vypocitej)
+from .funkce import (nahodne, json, jsonStahnout, vypocitej)
+
+class Objekt(object):
+    pass
 
 class Otazka:
+
     def vytvorZadani(m):
         promenne = {}
 
@@ -99,34 +103,45 @@ class Otazka:
         return hotovo
 
     def zobraz(id):
-        #try:
-        otazka = DbOtazka[id]
-        otazka.SPO1 = otazka.SprO.replace("nahodne",nahodne(2,50))
-        zadani = Otazka.vytvorZadani(otazka.obecneZadani)
-        
-        jsOtazka = {
-            'id':       otazka.id,
-            'jmeno':    otazka.jmeno,
-            'typ':      otazka.typOtazky,
-            'zadani':   otazka.obecneZadani,
-            'zadaniHTML': zadani["html"],
-            'spravne': [
-                vypocitej(otazka.SprO,zadani["promenne"]),
-            ],
-            'spatne': [
-                vypocitej(otazka.SPO1,zadani["promenne"]),
-                vypocitej(otazka.SPO2,zadani["promenne"]),
-                vypocitej(otazka.SPO3,zadani["promenne"]),
-                vypocitej(otazka.SPO4,zadani["promenne"]),
-                vypocitej(otazka.SPO5,zadani["promenne"]),
-                vypocitej(otazka.SPO6,zadani["promenne"]),
-            ]
-        }
+        try:
+            otazka = DbOtazka[id]
+            zadani = Otazka.vytvorZadani(otazka.obecneZadani)
+            prom = zadani["promenne"]
 
-        return json({'otazka': jsOtazka})
+            jsOtazka = {
+                'id':       otazka.id,
+                'jmeno':    otazka.jmeno,
+                'typ':      otazka.typOtazky,
+                'zadani':   otazka.obecneZadani,
+                'zadaniHTML': zadani["html"],
+                'spravneZadano': [
+                    otazka.SprO
+                ],
+                'spatneZadano': [
+                    otazka.SPO1,
+                    otazka.SPO2,
+                    otazka.SPO3,
+                    otazka.SPO4,
+                    otazka.SPO5,
+                    otazka.SPO6,                                                                                                                                          
+                ],
+                'spravne': [
+                    vypocitej(otazka.SprO,prom),
+                ],
+                'spatne': [
+                    vypocitej(otazka.SPO1,prom),
+                    vypocitej(otazka.SPO2,prom),
+                    vypocitej(otazka.SPO3,prom),
+                    vypocitej(otazka.SPO4,prom),
+                    vypocitej(otazka.SPO5,prom),
+                    vypocitej(otazka.SPO6,prom),
+                ],
+            }
 
-        #except:
-        #    return json({'chyba': 'Otázka s id: ' + id + ' neexistuje!'})
+            return json({'otazka': jsOtazka})
+
+        except:
+            return json({'chyba': 'Otázka s id: ' + id + ' neexistuje!'})
 
 
     def zobrazOtazky():
@@ -147,6 +162,31 @@ class Otazka:
 
         return json({"otazky": seznamOtazek})
 
+    def export():
+        seznamOtazek = []
+        otazky = select(o for o in DbOtazka).order_by(1)
+
+        for ot in otazky:
+            seznamOtazek.append({
+                'id': ot.id,
+                'jmeno': ot.jmeno,
+                'typ': ot.typOtazky,
+                'zadani': ot.obecneZadani,
+                'spravne': [
+                    ot.SprO
+                ],
+                'spatne': [
+                    ot.SPO1,
+                    ot.SPO2,
+                    ot.SPO3,
+                    ot.SPO4,
+                    ot.SPO5,
+                    ot.SPO6,                                                                                                                                          
+                ],                
+            })
+
+        return jsonStahnout(seznamOtazek,"otazky.txt")
+
 
     def ucitel(login):
         #: Zobrazí všechny otázky jednoho zadávajícího učitele
@@ -154,27 +194,6 @@ class Otazka:
                         o.obecneZadani) for o in DbOtazka
                         if o.ucitel.login == login)
         return render_template('otazky.html', otazky=otazky)
-
-    def upravit(J):
-        idOtazky = int(J['id'])
-
-        if J['jmeno'] and J['typ'] and J['zadani']:
-            otazka = DbOtazka[idOtazky]
-            otazka.ucitel = get(u for u in DbUcitel if u.login == session['ucitel'])
-            otazka.jmeno = J['jmeno']
-            otazka.typTtazky = J['typ']
-            otazka.obecneZadani = J['zadani']            
-                       
-            if J['typ'] == 'O':
-                return "Otevřená otázka byla upravena."
-            elif J['typ'] == 'C' and J['spravne'][0]:
-                otazka.SprO = J['spravne'][0]
-                return "Číselná otázka byla upravena."
-            elif J['typ'] == 'U':
-                otazka.SprO = J['spravne'][0]
-                return "Uzavřená otázka byla upravena."                       
-        else:
-            return "Nebyly zadány všechny požadované údaje."
 
     def smazat(id):
         #: Zobrazí všechny otázky a nabídne příslušné akce
@@ -187,42 +206,67 @@ class Otazka:
 
     def pridat(J):
         with db_session:
+            otazka = {}          
+            otazka["ucitel"] = get(u for u in DbUcitel if u.login == session['ucitel'])
+            otazka["jmeno"] = J['jmeno']
+            otazka["obecneZadani"] = J['zadani']
+            otazka["SprO"] = J["spravne"][0]
+
             if J["typ"] == 'O':
-                DbOtazka(
-                    ucitel=get(u for u in DbUcitel if u.login == session['ucitel']),
-                    jmeno=J['jmeno'],
-                    typOtazky='O',
-                    obecneZadani=J['zadani'],
-                    SprO='Otevrena otazka'
-                )
+                otazka["typOtazky"] = 'O'
+                otazka["SprO"] = 'Otevrena otazka'
+                DbOtazka(**otazka)
                 return "Otevřená otázka byla přidána."
+            
             elif J["typ"] == 'C':
-                DbOtazka(
-                    ucitel=get(u for u in DbUcitel if u.login == session['ucitel']),
-                    jmeno=J['jmeno'],
-                    typOtazky='C',
-                    obecneZadani=J['zadani'],
-                    SprO=J["spravne"][0]
-                )
+                otazka["typOtazky"] = 'C'
+                DbOtazka(**otazka)
                 return "Číselná otázka byla přidána."
-            elif J["typ"] == 'U':
+            
+            elif J["typ"] == 'U':           
                 spatne = {}
                 i=1
                 for spatna in J["spatne"]:
                     spatne['SPO' + str(i)] = spatna
                     i=i+1
-
-                spravnaOdpoved = J["spravne"][0]
-                if J["spravne"][0] == '':
-                    spravnaOdpoved = 'Nespecifikovano'
-                DbOtazka(
-                    ucitel=get(u for u in DbUcitel if u.login == session['ucitel']),
-                    jmeno=J['jmeno'],
-                    typOtazky='U',
-                    obecneZadani=J['zadani'],
-                    SprO=spravnaOdpoved, 
-                    **spatne
-                )
+                
+                otazka["typOtazky"] = 'U'
+                DbOtazka(**otazka, **spatne)              
                 return "Uzavřená otázka byla přidána. " + J['zadani']
+
+            else:
+                return "Špatně zadaný typ otázky!"
+
+
+    def upravit(J):
+            idOtazky = int(J['id'])
+            otazka = DbOtazka[idOtazky]       
+            
+            otazka.ucitel = get(u for u in DbUcitel if u.login == session['ucitel'])
+            otazka.jmeno = J['jmeno']
+            otazka.obecneZadani = J['zadani']
+            otazka.SprO = J["spravne"][0]
+
+            if J["typ"] == 'O':
+                otazka.typOtazky = 'O'
+                otazka.SprO = 'Otevrena otazka'
+                return "Otevřená otázka byla upravena."
+            
+            elif J["typ"] == 'C':
+                otazka.typOtazky = 'C'
+                return "Číselná otázka byla upravena."
+            
+            elif J["typ"] == 'U':                
+                otazka.typOtazky = 'U'
+                otazka.SPO1 = J["spatne"][0]
+                otazka.SPO2 = J["spatne"][1]
+                otazka.SPO3 = J["spatne"][2]
+                otazka.SPO4 = J["spatne"][3]
+                otazka.SPO5 = J["spatne"][4]
+                otazka.SPO6 = J["spatne"][5]
+            
+                #otazka(**spatne)
+                return "Uzavřená otázka byla upravena. " + J['zadani']
+
             else:
                 return "Špatně zadaný typ otázky!"

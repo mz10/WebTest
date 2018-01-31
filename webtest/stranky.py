@@ -45,11 +45,10 @@ class RegexConverter(BaseConverter):
 app.url_map.converters['regex'] = RegexConverter
 
 def prihlasit(klic):
-    """Dekoruje funkce, které vyžadují přihlášení
-
-    @prihlasit(klic)
-    klic: je klic ve slovniku session, který se kontroluje.
-    """
+    #Dekoruje funkce, které vyžadují přihlášení
+    #@prihlasit(klic)
+    #klic: je klic ve slovniku session, který se kontroluje.
+    
     def decorator(function):
         @functools.wraps(function)
         def wrapper(*args, **kwargs):
@@ -70,9 +69,6 @@ def prihlasitJSON(klic):
                 return json({"chyba":"Nejsi přihlášen!"})
         return wrapper
     return decorator
-
-def json(js):
-    return Response(response=_json.dumps(js),status=200,mimetype="application/json")
 
 @app.route('/')
 def index():
@@ -124,20 +120,10 @@ def vypracovan_testi(id): return Ucitel.vyplneno(id)
 @db_session
 def zobraz_test_studenta(id): return Ucitel.zobrazTest(id)
 
-@app.route('/json/otazky/', methods=['GET', 'POST'])
-@prihlasitJSON('ucitel')
-@db_session
-def otazky(): return Otazka.zobrazOtazky()
-
 @app.route('/otazky/ucitel/<login>', methods=['GET'])
 @prihlasit('ucitel')
 @db_session
 def otazky_ucitel(login): return Otazka.ucitel(login)
-
-@app.route('/json/otazky/<id>', methods=['GET'])
-@prihlasitJSON('ucitel')
-@db_session
-def otazka_zobrazit(id): return Otazka.zobraz(id)
 
 @app.route('/otazky/editovat/<id>', methods=['GET', 'POST'])
 @prihlasit('ucitel')
@@ -152,11 +138,6 @@ def otazka_smazat(id): return Otazka.smazat(id)
 @app.route('/pridat/otazku/', methods=['GET', 'POST'])
 @prihlasit('ucitel')
 def pridat_otazku(): return Otazka.pridat()
-
-@app.route('/json/testy/', methods=['GET', 'POST'])
-@prihlasit('ucitel')
-@db_session
-def testy(): return Testy.zobraz()
 
 @app.route('/pridat/test/', methods=['GET', 'POST'])
 @prihlasit('ucitel')
@@ -198,6 +179,29 @@ def testy1(): return render_template('upravit_test1.html')
 @app.route('/vzory/otazky/')
 def otazky1(): return render_template('upravit_otazku1.html') 
 
+
+################JSON#################
+
+@app.route('/json/testy/', methods=['GET', 'POST'])
+@prihlasitJSON('ucitel')
+@db_session
+def testy(): return Testy.zobraz()
+
+@app.route('/json/otazky/', methods=['GET', 'POST'])
+@prihlasitJSON('ucitel')
+@db_session
+def otazky(): return Otazka.zobrazOtazky()
+
+@app.route('/json/otazky/export/', methods=['GET', 'POST'])
+@prihlasitJSON('ucitel')
+@db_session
+def otazkyE(): return Otazka.export()
+
+@app.route('/json/otazky/<id>', methods=['GET'])
+@prihlasitJSON('ucitel')
+@db_session
+def otazka_zobrazit(id): return Otazka.zobraz(id)
+
 @app.route('/json/akce/<typAkce>/<vec>/', methods=['GET'])
 @prihlasitJSON('ucitel')
 @db_session
@@ -236,7 +240,7 @@ def akceP():
         elif akce == "pridat":
             odpoved = Testy.pridat(J)
         elif akce == "upravit":
-            odpoved = "b"
+            odpoved = Testy.uprav(J)
     elif(co == "tabulka"):
         if akce == "smazat":
             Ostatni.smazTabulku(J["nazev"],"smazat")
