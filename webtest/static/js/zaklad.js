@@ -36,6 +36,9 @@ function zmenHash() {
         testyUprava("pridat");
     else if(hash=="OtazkyPridat")
         otazkyPridat();
+    else if(hash=="Slovnik")
+        slovnik();
+
 }
 
 function chybaServeru(ch) {

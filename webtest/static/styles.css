@@ -1,6 +1,9 @@
+/*
 @import url(reset.css);
+
 @import url(http://fonts.googleapis.com/css?family=Bree+Serif&subset=latin,latin-ext);
 @import url(http://fonts.googleapis.com/css?family=Lora:400,400italic,700,700italic&subset=latin,latin-ext);
+*/
 
 body {
   width: 100%;
@@ -185,12 +188,6 @@ body .vysledek_True{
   font-family: "Lora", Georgia, "Times New Roman", "DejaVu Serif", serif;
   font-size: 110%;
   max-width: 100%; }
-
-input.dobre {
-  border: green solid 2px; }
-
-input.spatne {
-  border: red solid 2px; }
 
 p.spatne, p.dobre {
   color: red;
@@ -507,6 +504,7 @@ table {
   vertical-align:bottom; 
   position:relative; 
   top:-2px;
+  z-index: 100;
 }
 
 
@@ -586,4 +584,88 @@ table {
   padding: 5px;
   border-radius: 5px;
   display: none;
+}
+
+.txOtazka {
+  display: block;
+  min-width: 500px;
+  overflow: hidden;
+}
+
+ol.odpovedi {
+  display: block;
+  /*list-style-type: decimal;*/
+}
+
+
+li.odpoved {
+  display: list-item;
+  list-style: pismena;
+  margin-left: 30px;  
+}
+
+
+@counter-style pismena {
+    symbols: 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j';
+}
+
+.inputLista{
+  cursor: pointer; 
+}
+
+input.dobre {
+  border: green solid 2px; 
+}
+
+input.spatne {
+  border: red solid 2px; 
+}
+
+input.otevrena {
+  border: blue solid 2px; 
+}
+
+input.seda {
+  border: grey solid 2px; 
+}
+
+.odOtevrena {
+  color: blue;
+}
+
+.inputSpravna, .odDobre {
+  color: green;
+}
+
+.inputSpatna, .odSpatne, .inputSmazat {
+  color: red;
+}
+
+.inputSpravna, .inputSpatna, .inputSmazat {
+  padding-left: 5px;
+}
+
+.inputTlacitka {
+  display: none;
+}
+
+.odpoved {
+  cursor: pointer;
+}
+
+.odpoved:hover {
+  background: yellow;
+}
+
+.odpoved.oznacena {
+  background: orange;
+}
+
+#obnovJS {
+  cursor: pointer;
+}
+
+
+#obnovJS:hover {
+  //background: yellow;
 }

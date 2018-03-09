@@ -31,6 +31,7 @@ function otazkyZobraz(div, otazky) {
             <span class="otUpravitVsechny">Upravit všechny | </span>\
             ' + text + '\
             <div class="otPridat">Přidat</div>';
+        
     }
 
     $(div).html(text);
@@ -41,24 +42,37 @@ function otazkyUprav(idOtazky) {
 
     function nacteno() {
         $.getJSON("/json/otazky/" + idOtazky, function(otazka) {     
-            $.each(otazka, foreach);
+            $.each(otazka, nactiOtazku);
         }).fail(chybaIframe);
     }
 
-    function foreach(i, o) {
+    function nactiOtazku(i, o) {
         $(stranka).find('#otJmeno').val(o.jmeno);
         Simplemde.value(o.zadani), //soubor lista.js
         $(stranka).find('#otId').text(o.id);
         $(stranka).find('#otTyp').val(o.typ);
-        $(stranka).find('#SPRO').val(o.spravneZadano[0]);
-        $(stranka).find('#SPO1').val(o.spatneZadano[0]);
-        $(stranka).find('#SPO2').val(o.spatneZadano[1]);
-        $(stranka).find('#SPO3').val(o.spatneZadano[2]);
-        $(stranka).find('#SPO4').val(o.spatneZadano[3]);
-        $(stranka).find('#SPO5').val(o.spatneZadano[4]);
-        $(stranka).find('#SPO6').val(o.spatneZadano[5]);
+        $(stranka).find('#otBodu').val(o.bodu);
+
+        $(o.spravneZadano).each(function(i, o)  {vlozitOdpoved("dobre",o); });
+        $(o.spatneZadano).each(function(i, o)   {vlozitOdpoved("spatne",o); });
+        $(o.otevrenaZadano).each(function(i, o) {vlozitOdpoved("otevrena",o); });        
+
+        vlozitOdpoved("seda","");
     }
 }   
+
+function vlozitOdpoved(trida, text) {   
+    var div = '<div class="inputLista">\
+                <input class="' + trida + '" type="text" value="' + text + '">\
+                <span class="inputTlacitka">\
+                    <span class="inputSpatna">o</span>\
+                    <span class="inputSpravna">o</span>\
+                    <span class="inputSmazat">x</span>\
+                </span>\
+            </div>';
+    
+    $("#vlozitOtazky").append(div);        
+}
 
 function otazkyUpravVsechny(e) {
     var otazky = $(".otazka");
@@ -66,19 +80,26 @@ function otazkyUpravVsechny(e) {
 
     function foreach(i, o) {
         cl(o);
-        var input = $("<input />");
-        var zadani = o.children[2];
-        $(zadani).replaceWith(input);
-        var text = $(zadani).html();
-        input.val(text);
+        var zadani = o.children[3];
+        var typ = zadani.localName;      
+        
+        var textarea = $('<textarea />', {
+            type: 'text',
+            class: 'txOtazka',
+            html: $(zadani).html()
+        });
+ 
+        var span = $('<span />', {
+            class: 'otZadani',
+            html: $(zadani).val()
+        });
 
-        //$(zadani).replaceWith(input);
+        if(typ=="span")
+            $(zadani).replaceWith(textarea);
+        else if(typ=="textarea")
+            $(zadani).replaceWith(span); 
     }
 }
-
-
-
-
 
 function otazkyKostka(e) {
     var otazka = e.currentTarget.parentElement.parentElement;
@@ -95,14 +116,18 @@ function otazkyKostka(e) {
         var zadani = o.zadaniHTML;
         $(".otazka[cislo=" + idOtazky + "] .otZadani").html(zadani);
 
-        kod+= o.spravne[0] + "<br>";
-        kod+= o.spatne[0] + "<br>";
-        kod+= o.spatne[1] + "<br>";
-        kod+= o.spatne[2] + "<br>";
-        kod+= o.spatne[3] + "<br>";
-        kod+= o.spatne[4] + "<br>";
-        kod+= o.spatne[5] + "<br>";   
-        
+        $(o.spravne).each(function(i, o) {
+            kod += '<div class="odDobre">' + o + '</div>';
+        });
+
+        $(o.spatne).each(function(i, o) {
+            kod += '<div class="odSpatne">' + o + '</div>';
+        });
+  
+        $(o.otevrena).each(function(i, o) {
+            kod += '<div class="odOtevrena">' + o + '</div>';
+        });
+
         otOdpoved.html(kod);
     }
 }
@@ -123,6 +148,8 @@ function otazkyPridat() {
     $(stranka).load("/vzory/otazky/",function() {
         $(stranka).find('h1#upravitOtazku').text("Přidat otázku"); 
         $(stranka).find('#otSmazat').css("display","none");
+        vlozitOdpoved("otevrena","");
+        vlozitOdpoved("seda","");   
     });
 }
 
@@ -155,6 +182,22 @@ function otazkyOdeslat() {
     var idOtazky = $(stranka).find('#otId').text();
     var ukol = "pridat";      
 
+    var seznamSpatne = [];
+    var seznamDobre = [];  
+    var seznamOtevrena = [];
+
+    $(stranka).find('input.spatne').each(function(i, o) {
+        seznamSpatne[i] = $(o).val();
+    });
+
+    $(stranka).find('input.dobre').each(function(i, o) {
+        seznamDobre[i] = $(o).val();
+    });  
+
+    $(stranka).find('input.otevrena').each(function(i, o) {
+        seznamOtevrena[i] = $(o).val();
+    });  
+
     if(idOtazky)
         ukol = "upravit";
 
@@ -164,18 +207,11 @@ function otazkyOdeslat() {
         id: idOtazky,
         jmeno: $(stranka).find('#otJmeno').val(),
         typ: $(stranka).find('#otTyp').val(),
+        bodu: $(stranka).find('#otBodu').val(),
         zadani: Simplemde.value(), //soubor lista.js
-        spravne: [
-            $(stranka).find('#SPRO').val()  
-        ],
-        spatne: [
-            $(stranka).find('#SPO1').val(),
-            $(stranka).find('#SPO2').val(),
-            $(stranka).find('#SPO3').val(),
-            $(stranka).find('#SPO4').val(),
-            $(stranka).find('#SPO5').val(),
-            $(stranka).find('#SPO6').val(),                
-        ]
+        spravne: seznamDobre,
+        spatne: seznamSpatne,
+        otevrena: seznamOtevrena
     };
 
     cl(json);
@@ -207,13 +243,13 @@ function testyOdeslat() {
         od: $(stranka).find('#ttOd').val(),
         do: $(stranka).find('#ttDo').val(),
         hodnoceni: null,
-        pokusu: $("#ttPokusu").val(),
+        pokusu: $("#ttPokusu").val(),       
         limit: $("#ttLimit").val(),
         skryty:  $("#ttSkryt")[0].checked,          
         otazky: testyVyberOtazky()
     };
 
-    //cl(json);
+    cl(json);
 
     postJSON(json, odpoved);
 
@@ -259,6 +295,65 @@ function testyZobraz(json) {
     $(stranka).html(text);
 }
 
+function testyVyzkouset(idTestu) {
+    $.getJSON("/json/testy/" + idTestu, zpracujJSON).fail(chybaIframe);
+    text = "";
+
+    function zpracujJSON(json) {
+        var test = json.test;
+
+        text += "<h1>" + test.jmeno + "</h1>";
+        $.each(test.otazky, zpracujOtazky);
+        text += '<button id="odeslatTest">Odeslat</button>';
+        $(stranka).html(text);
+    }
+
+    function zpracujOtazky(i, o) {
+        odpovedi = "";
+        
+        $.each(o.odpovedi, function(y, odpoved){
+
+            if(odpoved == "_OTEVRENA_")
+                odpoved = '<input type="text" class="odpovedOt">';
+            else
+                odpoved = "<li class='odpoved' >" + odpoved + "</li>";
+
+            odpovedi += odpoved;      
+        });  
+        
+        text +=
+            "<h2 cislo='" + o.id + "'>" + o.jmeno + "</h1>\
+            <div class='zadani'>" + o.zadani + "</div>\
+            <ol type='a' class='odpovedi' vyber='1' otazka='" + o.id + "'>" + odpovedi + "</ol>";
+    }
+}
+
+function testyVyzkouset2(idTestu) {
+    $.getJSON("/json/testy/" + idTestu, zpracujJSON).fail(chybaIframe);
+    text = "";
+
+    function zpracujJSON(json) {
+        var test = json.test;
+
+        text += "<h1>" + test.jmeno + "</h1>";
+        $.each(test.otazky, zpracujOtazky);
+        $(stranka).html(text);
+    }
+
+    function zpracujOtazky(i, o) {
+        odpovedi = "";
+        
+        $.each(o.odpovedi, function(y, odpoved){
+            odpovedi += "<li class='odpoved'>" + odpoved + "</li>";        
+        });  
+        
+        text +=
+            "<h2 cislo='" + o.id + "'>" + o.jmeno + "</h1>\
+            <div class='zadani'>" + o.zadani + "</div>\
+            <ol type='a' class='odpovedi'>" + odpovedi + "</ol>";
+    }
+}
+
 function testyUprava(akce,idTestu) {
     //kód je asynchroní!
 
@@ -295,6 +390,9 @@ function testyUprava(akce,idTestu) {
             $(stranka).find('#ttId').text(t.id); 
             $(stranka).find('#ttOd').val(t.od);
             $(stranka).find('#ttDo').val(t.do); 
+            $(stranka).find('#ttPokusu').val(t.pokusu); 
+            $(stranka).find('#ttLimit').val(t.limit); 
+            $(stranka).find('#ttLimit').checked = t.skryty;
             seznamOtazek = t.otazky;
             return;           
         }        
@@ -435,4 +533,39 @@ function zobrazitKalendar(umisteni) {
         var text = datum.den + "." + datum.mesic + "." + datum.rok + hodiny;
         $(inputId).val(text);
     });
+}
+
+
+
+
+
+/*************slovnik **********/
+
+function slovnik() {
+    $(stranka).load("/static/slovnik.html");
+} 
+
+
+function slovnikOdeslat() {
+    var json = {
+        akce: "pridat", 
+        co: 'slovnik',
+        slovo1: $(stranka).find('#slJazyk1').val(),
+        slovo2: $(stranka).find('#slJazyk2').val(),
+        kategorie: $(stranka).find('#slKategorie').val(),
+        jazyk: $(stranka).find('#slTyp').val()
+    };
+
+    cl(json);
+
+    postJSON(json, odpoved);
+
+    function odpoved(o) {
+        console.log(o); 
+        if(o.status != 500) {
+            hlaska(o.odpoved,8); 
+            //window.location.hash = "Otazky";
+        }
+        else chybaIframe(o);
+    }
 }

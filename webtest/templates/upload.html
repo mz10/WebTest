@@ -2,7 +2,7 @@
 <p>Na tomto místě můžete hromadně vložit několik úloh nebo celý test. Formát souboru je JSON</p>
 
 <input type="radio" name="typ" value="nahratOtazky"> 
-Nahrát otázky.<br>
+Nahrát otázky<br>
 <input type="radio" name="typ" value="nahratTest"> 
 Nahrát celý test<br>
 <br>
@@ -10,11 +10,17 @@ Nahrát celý test<br>
 <a href="/json/otazky/export/">Stáhnout otázky</a><br>
 <a href="/json/testy/export/">Stáhnout testy</a><br>
 
-Vybrat soubor:<br> 
-<input type="file" name="datafile"><br>
-<input type="submit" name="odeslat" value="Odeslat">
+<h2>Nahrát otázky</h2>
+<input id="upSoubor" class="skryty" type="file" accept=".txt, .json">
+<button id="upProchazet">Procházet</button>
+<button id="upOdeslat" class="skryty">Odeslat</button>
+<span id="upSJmeno"></span>
+<div id="upKontrola"></div>
+
+<textarea id="upravaJSON" class="skryty"></textarea>
 
 <h2>Příklad</h2>
-<pre><code>
-
-</code></pre>
+<pre>
+    <code>
+    </code>
+</pre>

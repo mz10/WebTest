@@ -183,27 +183,32 @@ def otazky1(): return render_template('upravit_otazku1.html')
 ################JSON#################
 
 @app.route('/json/testy/', methods=['GET', 'POST'])
-@prihlasitJSON('ucitel')
+#@prihlasitJSON('ucitel')
 @db_session
 def testy(): return Testy.zobraz()
 
+@app.route('/json/testy/<id>', methods=['GET', 'POST'])
+#@prihlasitJSON('ucitel')
+@db_session
+def testy2(id): return Testy.zobrazTest(id)
+
 @app.route('/json/otazky/', methods=['GET', 'POST'])
-@prihlasitJSON('ucitel')
+#@prihlasitJSON('ucitel')
 @db_session
 def otazky(): return Otazka.zobrazOtazky()
 
 @app.route('/json/otazky/export/', methods=['GET', 'POST'])
-@prihlasitJSON('ucitel')
+#@prihlasitJSON('ucitel')
 @db_session
 def otazkyE(): return Otazka.export()
 
 @app.route('/json/otazky/<id>', methods=['GET'])
-@prihlasitJSON('ucitel')
+#@prihlasitJSON('ucitel')
 @db_session
 def otazka_zobrazit(id): return Otazka.zobraz(id)
 
 @app.route('/json/akce/<typAkce>/<vec>/', methods=['GET'])
-@prihlasitJSON('ucitel')
+#@prihlasitJSON('ucitel')
 @db_session
 def akce(typAkce,vec):
     js = {
@@ -248,6 +253,10 @@ def akceP():
         elif akce == "vysypat":
             Ostatni.smazTabulku(J["nazev"],"vysypat")
             odpoved = "Tabulka " + J["nazev"] + " byla vysypána."
+    elif(co == "slovnik"):
+        if akce == "pridat":
+            Slovnik.pridat(J)
+            odpoved = "Slovo bylo přidáno."
 
     js = {
         "odpoved":odpoved,

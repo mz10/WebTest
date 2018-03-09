@@ -40,16 +40,32 @@ def nahodne(a,b):
     return str(random.randint(a,b))
 
 def vypocitej(text,promenne):
-    if text[:1] != "=": return text
-    text=text[1:]
+    #najde a vypocita vyraz v [ ]
+    def nahraditVyrazy(m):
+        vyraz = m.group(1)
 
-    #nahradi promenne ze zadani jeji hodnotou
-    for promenna, hodnota in sorted(promenne.items()):
-        text = text.replace("§" + promenna, hodnota)
+        #nahradi promenne ze zadani a dosadi jeji hodnotou
+        for promenna, hodnota in sorted(promenne.items()):
+            vyraz = vyraz.replace("$" + promenna, hodnota)    
+        try:
+            vyraz = re.compile("Prumer\((.*?)\)").sub(prumer,vyraz)
+            vyraz = str(sympy.simplify(vyraz))
+        except:
+            return "[Sympy - chybny vyraz]"    
+        return vyraz   
     
-    #vypocita zadany vyraz s dosazenyma hodnotama
-    vysledek = sympy.simplify(text)
-    return str(vysledek)
+    def prumer(m):
+        cisla = m.group(1).split(","); 
+        soucet=0
+        for c in cisla:
+            soucet += float(c)
+
+        return str(float(soucet/len(cisla)))
+
+    #regularni vyraz - funkce nahore
+    text = re.compile("\[(.*?)\]").sub(nahraditVyrazy,text)
+
+    return str(text)
 
 def json(js):
     return Response(response=_json.dumps(js),status=200,mimetype="application/json")
@@ -61,67 +77,12 @@ def jsonStahnout(js,jmeno):
     r.headers["Content-Disposition"] = 'attachment; filename="' + jmeno + '"'
     return r
 
-def upload1():
-    """upload souboru se zadáním
-    """
-    def add(typ, nazev_otazky, cislo, otazka, spravna, spatna):
-        """zapis do databaze
-        """
-        ucitel = get(u for u in Ucitel if u.login == session['ucitel'])
-        while len(spatna) < 7:  # doplni hodnoty NULL do nevyuzitych mist
-            spatna.append('Null')
+def seznam(s):
+    vysledek = []
+    for polozky in s:
+        vysledek.append(polozky)
 
-        # prevede polozky seznamu na UNICODE
-        spatna = [unicode(i) for i in spatna]
-        DbOtazka(ucitel=ucitel, 
-               jmeno=nazev_otazky, 
-               typOtazky=typ,
-               obecneZadani='10', 
-               SprO=spravna,
-               SPO1=spatna[0],
-               SPO2=spatna[1],
-               SPO3=spatna[2],
-               SPO4=spatna[3],
-               SPO5=spatna[4],
-               SPO6=spatna[5])
-        # Obecne_zadani nastaveno perma na 10
-
-    if request.method == 'GET':
-        return render_template('upload.html')
-    elif request.method == 'POST':
-        if 'datafile' in request.files:
-            fil = request.files['datafile']
-            typ = cislo = nazev_otazky = otazka = spravna = ""
-            spatna = []  # seznam spatnych odpovedi
-            for line in fil:
-                radek = line.strip().decode('UTF-8')
-                if line != '\n':  # ignoruj prazdne radky
-                    if radek.split()[0] == '::date':
-                        #  datum = " ".join(radek.split()[1:])
-                        pass
-                    elif radek.split()[0] == '::number':
-                        typ = 'C'
-                        spravna = " ".join(radek.split()[1:])
-                    elif radek.split()[0] == ':+':
-                        spravna = " ".join(radek.split()[1:])
-                    elif radek.split()[0] == ':-':
-                        spatna.append(radek.split()[1:])
-                    elif radek.split()[0] == '::task':
-                        nazev_otazky = " ".join(radek.split()[1:])
-                    elif radek.split()[0] == '::open':
-                        typ = 'O'
-                    elif radek.split()[0] == '::close':
-                        typ = 'U'
-                    else:
-                        otazka = otazka + line
-                else:  # kdyz je mezera(oddeleni otazek), udelej zapis do DB
-                    # ignoruj 1.mezeru či  nekor. otazky
-                    if nazev_otazky and otazka:
-                        add(typ, nazev_otazky, cislo, otazka, spravna, spatna)
-                    # vynuluj
-                    typ = nazev_otazky = cislo = otazka = spravna = ""
-                    spatna = []
-        return redirect(url_for('upload'))
+    return vysledek
 
 class Prihlaseni:
     def prihlasit():
@@ -196,3 +157,14 @@ class Ucitel:
         if request.method == 'GET':
             seznam_testu = select((u.jmeno, u.id) for u in DbTest)
             return render_template('vysledky.html', seznamTestu=seznam_testu)
+
+class Slovnik:
+    def pridat(J):
+        DbSlovnik(
+            slovo1 = J["slovo1"],
+            slovo2 = J["slovo2"],
+            kategorie = J["kategorie"],           
+            jazyk = J["jazyk"]
+        )
+        
+        return

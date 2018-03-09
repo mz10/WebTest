@@ -14,14 +14,21 @@ zaměřuje hlavně na (elektro-)technické úlohy. Tento projekt nabízí:
 
 Proměnné
 --------
-Do editoru jdou zadávat proměnné, které můžeme použít v odpovědi jako vzorec. Proměnná musí být písmeno a-z a v odpovědi musí proměnná začínat znakem §.
-V odpovědi může být výraz a můžeme použít proměnné definované v zadání. Výraz musí začínat znakem =
+Do editoru jdou zadávat proměnné, které můžeme použít v odpovědi jako vzorec. Proměnná musí začínat znakem $.
+V odpovědi může být výraz a můžou se použít proměnné definované v zadání. Výraz musí být mezi [] :
 
-=§a+§b+5
+[$a+$b+5]
+
+Jdou také použít funkce Min, Max a Prumer:
+[Prumer($a,$b,$c)]
+
 
 Příklad zápisu úlohy
 --------------------
-Kolik je [a,20] + [b,-5,100] - [c=§b*2] ?
+Kolik je [a,20] + [b,-5,100] - [c=$b*2] ?
+
+Jako správnou odpověď uvedeme např:
+[$a + $b - $c]
 
 Typy proměnných
 ---------------
@@ -30,7 +37,7 @@ Typy proměnných
 * [c,-20]		  záporné číslo od -20 do 0
 * [d,5,100]	  číslo od 5 do 100
 * [e,20,30,3]	desetinné číslo od 20 do 30, zaokrouhlené na 3 desetinná místa – např. 21.463
-* [f=§a+5]    do proměnné f se přiřadí proměnná a + 5
+* [f=$a+5]    do proměnné f se přiřadí proměnná a + 5
 
 Závislosti
 -----------
@@ -39,28 +46,26 @@ Závislosti
 * [Python-Markdown](http://pythonhosted.org/Markdown/) --- Python implementace pro
   [Markdown](http://daringfireball.net/projects/markdown/) Johnyho Grubera.
 * [psycopg](http://initd.org/psycopg/) --- 
-  [PostgreSQL](http://www.postgresql.org/) adaptér
-  pro [Python](https://www.python.org/).
+  [PostgreSQL](http://www.postgresql.org/) adaptér pro [Python](https://www.python.org/).
 * [Pony](http://ponyorm.com/) ---
-  [ORM](http://cs.wikipedia.org/wiki/Objektově_relační_mapování) 
-  pro [Python](https://www.python.org/).
-* [Typogrify](https://github.com/mintchaos/typogrify) --- typografická
-  vylepšení pro HTML.
-
+  [ORM](http://cs.wikipedia.org/wiki/Objektově_relační_mapování) pro [Python](https://www.python.org/).
+* [Typogrify](https://github.com/mintchaos/typogrify) --- typografická vylepšení pro HTML.
+* [Sympy](http://www.sympy.org/cs/) --- kalkulačka pro Python - počítá výrazy
+* [SimpleMDE](https://simplemde.com/) --- editor v JS pro Markdown
+    
 
 Databáze
 --------
 
-* [ERD]() databáze: <https://editor.ponyorm.com/user/tlapicka/WebTest>.
-* Definice databázových tabulek je v modulu `wtdb.py`.
+* [ERD]() databáze: <https://editor.ponyorm.com/user/mz10/webtest3/>.
+* Definice databázových tabulek je v modulu `db.py`.
 
 ### Přihlášení do databáze
 
-Přihlášení se děje pomocí modulu `wtconf.py`. Soubor může vypadat takto:
-
+Přihlášení se děje pomocí modulu `spojeni.py`. Soubor může vypadat takto:
 
     # -*- coding: utf8 -*-
-    "Přihlašovací údaje k databázy."
+    "Přihlašovací údaje k databázi."
     DB = {
         "host": "localhost",
         "user": "webtest",

@@ -6,8 +6,10 @@ from pony.orm import (sql_debug, get, select, db_session)
 from datetime import datetime as dt
 from webtest.db import *
 import json as _json
+import random
 
-from .funkce import (json)
+from .funkce import (nahodne, json, jsonStahnout, vypocitej)
+from .otazka import Otazka, Odpovedi
 
 formatCasu = "%d.%m.%Y %H:%M"
 
@@ -28,12 +30,126 @@ class Testy:
                 'od': t.zobrazenoOd.strftime(formatCasu),
                 'do': t.zobrazenoDo.strftime(formatCasu),
                 'autor': t.ucitel.login,
+                'limit': t.limit,
+                'pokusu': t.pokusu,
+                'skryty': t.skryty,
                 'otazky': seznamOtazek
             })
 
         return json({"testy": seznam})
 
-    def zobrazit(id):
+    def zobrazTest(id):
+        test = DbTest[id]
+        seznamOtazek = []
+
+        #ziskat seznam otazek v testu
+        for o in select(o for o in DbOtazkaTestu if o.test.id is test.id):
+            otazka = DbOtazka[o.otazka.id]
+            zadani = Otazka.vytvorZadani(otazka.obecneZadani)
+            prom = zadani["promenne"]
+
+            odpovedi = Odpovedi(otazka.id, zadani["promenne"])
+            dobre = odpovedi.vypocitat("D")
+            spatne = odpovedi.vypocitat("S")
+            otevrena = ["_OTEVRENA_" for i in odpovedi.tridit("O")]
+            
+            seznamOdpovedi = dobre + spatne + otevrena        
+            random.shuffle(seznamOdpovedi)
+
+            seznamOtazek.append({
+                'id': otazka.id,
+                'jmeno': otazka.jmeno,
+                'zadani': zadani["html"],
+                'odpovedi': seznamOdpovedi
+            })
+
+            random.shuffle(seznamOtazek)
+
+        jsTest = {
+            'id': test.id,
+            'jmeno': test.jmeno,
+            'od': test.zobrazenoOd.strftime(formatCasu),
+            'do': test.zobrazenoDo.strftime(formatCasu),
+            'limit': test.limit,
+            'pokusu': test.pokusu,
+            'skryty': test.skryty,
+            'autor': test.ucitel.login,
+            'otazky': seznamOtazek
+        }
+
+        return json({"test": jsTest})        
+
+    def uprav(J):
+        test = DbTest
+        idTestu = J['id']
+        test = DbTest[idTestu]
+
+        test.jmeno = J['jmeno']
+        test.ucitel = get(u for u in DbUcitel if u.login == session['ucitel'])
+        test.zobrazenoOd = dt.strptime(J['od'], formatCasu)
+        test.zobrazenoDo = dt.strptime(J['do'], formatCasu)
+        test.limit = J["limit"]
+        test.pokusu = int(J["pokusu"])
+        test.skryty = J["skryty"] 
+
+        #smaz puvodni otazky z testu
+        select(o for o in DbOtazkaTestu if o.test.id is idTestu).delete()
+        
+        for idOtazky in J['otazky']:
+            DbOtazkaTestu(
+                poradi = 0, 
+                test = get(u for u in DbTest if u.jmeno == J['jmeno']),
+                otazka = get(o for o in DbOtazka if o.id == idOtazky)
+            )
+
+        return 'Upraven test: ' + J['jmeno']
+
+
+    def pridat(J):
+        DbTest(
+            jmeno = J['jmeno'],
+            ucitel = get(u for u in DbUcitel if u.login == session['ucitel']),
+            zobrazenoOd = dt.strptime(J['od'], formatCasu),
+            zobrazenoDo = dt.strptime(J['do'], formatCasu),
+            limit = J["limit"],
+            pokusu = int(J["pokusu"]),
+            skryty = J["skryty"]
+        )
+
+        for idOtazky in J['otazky']:
+            DbOtazkaTestu(
+                poradi = 0, 
+                test = get(u for u in DbTest if u.jmeno == J['jmeno']),
+                otazka = get(o for o in DbOtazka if o.id == idOtazky)
+            )
+
+        return 'Vytvořen test: ' + J['jmeno']
+            
+
+
+    ###################################################################
+
+    def testy():
+        if request.method == 'GET':
+            pritomnost = dt.strptime(
+                time.strftime(formatCasu), formatCasu)
+            testy = select((u.id, u.jmeno, u.zobrazenoOd, u.zobrazenoDo)
+                        for u in DbTest if (pritomnost >= u.zobrazenoOd and
+                                            pritomnost <= u.zobrazenoDo))
+            return render_template('student.html', testy=testy)
+
+    def vysledky():
+        if request.method == 'GET':
+            testy_uzivatele = select((u.test.jmeno, u.casUkonceni, u.id) for u in DbVysledekTestu
+                                    if u.student.login is session['student'])
+            for test in testy_uzivatele:
+                print (test)
+        return render_template('student_vysledky.html', testyUzivatele=testy_uzivatele)
+
+
+
+
+    def zobrazit1(id):
         if request.method == 'GET':
             global zacatek_testu
             zacatek_testu = (dt.now()).strftime("%d.%m.%Y %H:%M:%S")
@@ -98,71 +214,4 @@ class Testy:
                             vysledekTestu=id_vysledek[0],
                             otazkaTestu=idcko
                          )
-            return redirect(url_for('student_testy'))
-
-
-    def uprav(J):
-        nazev_testu = J['jmeno']
-        datum_od = dt.strptime(J['od'], formatCasu)
-        datum_do = dt.strptime(J['do'], formatCasu)
-        zprava = "Vytvořen"
-        test = DbTest
-        idTestu = J['id']
-        test = DbTest[idTestu]
-
-        test.jmeno = nazev_testu
-        test.ucitel = get(u for u in DbUcitel if u.login == session['ucitel'])
-        test.zobrazenoOd = datum_od
-        test.zobrazenoDo = datum_do
-        
-        #smaz puvodni otazky z testu
-        select(o for o in DbOtazkaTestu if o.test.id is idTestu).delete()
-        
-        for idOtazky in J['otazky']:
-            DbOtazkaTestu(
-                poradi = 0, 
-                test = get(u for u in DbTest if u.jmeno == nazev_testu),
-                otazka = get(o for o in DbOtazka if o.id == idOtazky)
-            )
-
-        return 'Upraven test: ' + nazev_testu
-
-
-    def pridat(J):
-        nazev_testu = J['jmeno']
-        datum_od = dt.strptime(J['od'], formatCasu)
-        datum_do = dt.strptime(J['do'], formatCasu)
-
-        DbTest(
-            jmeno = nazev_testu,
-            ucitel = get(u for u in DbUcitel if u.login == session['ucitel']),
-            zobrazenoOd = datum_od,
-            zobrazenoDo = datum_do
-        )
-
-        for idOtazky in J['otazky']:
-            DbOtazkaTestu(
-                poradi = 0, 
-                test = get(u for u in DbTest if u.jmeno == nazev_testu),
-                otazka = get(o for o in DbOtazka if o.id == idOtazky)
-            )
-
-        return 'Vytvořen test: ' + nazev_testu
-            
-
-    def testy():
-        if request.method == 'GET':
-            pritomnost = dt.strptime(
-                time.strftime(formatCasu), formatCasu)
-            testy = select((u.id, u.jmeno, u.zobrazenoOd, u.zobrazenoDo)
-                        for u in DbTest if (pritomnost >= u.zobrazenoOd and
-                                            pritomnost <= u.zobrazenoDo))
-            return render_template('student.html', testy=testy)
-
-    def vysledky():
-        if request.method == 'GET':
-            testy_uzivatele = select((u.test.jmeno, u.casUkonceni, u.id) for u in DbVysledekTestu
-                                    if u.student.login is session['student'])
-            for test in testy_uzivatele:
-                print (test)
-        return render_template('student_vysledky.html', testyUzivatele=testy_uzivatele)
+            return redirect(url_for('student_testy'))        
