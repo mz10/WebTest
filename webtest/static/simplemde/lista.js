@@ -2,9 +2,18 @@ var Simplemde;
 
 function editor(el) {
     Simplemde = new SimpleMDE({
+        
         element: document.getElementById(el),
         spellChecker: false,
         autofocus: true,
+        //podpora MathJax v nahledu
+        previewRender: function(plainText) {
+            var preview = document.getElementsByClassName("editor-preview-side")[0];
+            preview.innerHTML = this.parent.markdown(plainText);
+            preview.setAttribute('id','editor-preview')
+            MathJax.Hub.Queue(["Typeset", MathJax.Hub,"editor-preview"]);
+            return preview.innerHTML;
+        },
         toolbar: [
         {
             name: "preview",

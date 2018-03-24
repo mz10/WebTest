@@ -13,37 +13,27 @@ import webtest.spojeni
 
 db = Database("postgres", **webtest.spojeni.DB)
 
-
-class DbStudent(db.Entity):
-    """Každý jeden student, který se může účastnit testů."""
-    _table_ = 'Student'
-    id = PrimaryKey(int, column='idStudent', auto=True)
-    login = Required(str, 20)
-    jmeno = Required(str, 40)
-    hash = Required(str, 196)
-    akce = Set('DbAkce')
-    vysledkyTestu = Set('DbVysledekTestu')
-
-
 class DbAkce(db.Entity):
-    """evidence toho, co student v aplikací dělá:
-* logIn
-* logOut"""
+    """evidence toho, co student v aplikací dělá: logIn, logOut"""
     _table_ = 'Akce'
     id = PrimaryKey(int, column='idAkce', auto=True)
     cas = Required(datetime)
-    student = Required(DbStudent)
     typAkce = Required(str, 10, column='typAkce')
+    student = Required('DbStudent')
 
 
 class DbVysledekTestu(db.Entity):
     _table_ = 'VysledekTestu'
     id = PrimaryKey(int, column='idVTestu', auto=True)
-    student = Required(DbStudent)
-    test = Required('DbTest')
     casZahajeni = Required(datetime, column='casZ')
     casUkonceni = Optional(datetime, column='casU')
-    odpovedi = Set('DbOdpoved')
+    boduVysledek = Optional(float, column='bVysledek')
+    boduMax = Optional(float, column='bMax')
+    hodnoceni = Optional(str)
+    test = Optional('DbTest')
+    otazky = Set('DbVyslednaOtazka')
+    student = Optional('DbStudent')
+    vysledneOdpovedi = Set('DbVyslednaOdpoved')
 
 
 class DbTest(db.Entity):
@@ -51,15 +41,15 @@ class DbTest(db.Entity):
     _table_ = 'Test'
     id = PrimaryKey(int, column='idTest', auto=True)
     jmeno = Required(str, 80)
-    ucitel = Required('DbUcitel')
-    otazkyTestu = Set('DbOtazkaTestu')
-    vysledkyTestu = Set(DbVysledekTestu)
     zobrazenoOd = Optional(datetime, column='ZobOd')
     zobrazenoDo = Optional(datetime, column='ZobDo')
     limit = Optional(str)
     pokusu = Optional(int)
     skryty = Optional(bool)
     hodnoceni = Optional(str)
+    vysledkyTestu = Set(DbVysledekTestu)
+    ucitel = Required('DbUcitel')
+    otazky = Set('DbOtazkaTestu')
 
 
 class DbOtazka(db.Entity):
@@ -68,37 +58,31 @@ class DbOtazka(db.Entity):
 * typ_otazky: Otevřená, Uzavřená,  Ciselna"""
     _table_ = 'Otazka'
     id = PrimaryKey(int, column='idOtazka', auto=True)
-    ucitel = Required('DbUcitel')
-    jmeno = Optional(str, 80)
+    jmeno = Required(str, 80)
     typOtazky = Optional(str, 1, column='typOtazky', sql_type='char')
     obecneZadani = Optional(str, column='oZadani', nullable=True)
-    bodu = Optional(int)
+    bodu = Optional(float, default=1)
+    hodnotit = Optional(int, default=1)
+    ucitel = Required('DbUcitel')
+    odpovedi = Set('DbOdpoved')
     otazkyTestu = Set('DbOtazkaTestu')
-    odpovedi = Set('DbOdpovedi')
 
 
-class DbOdpoved(db.Entity):
+class DbVyslednaOtazka(db.Entity):
     """Vazební tabulka mezi výsledkem testu a otázkami testu. 
 
 Obsahuje znovu (redundantně) zadání a odpověď. Je to proto, že otázku může učitel editovat a není možné hodnotit odpověď na změněnou otázku. Dále se řeší problém, kdy je v otázce náhodné číslo: je nutno uchovat konkretní zadání i očekávaný výsledek """
-    _table_ = 'Odpoved'
-    id = PrimaryKey(int, column='idOdpoved', auto=True)
+    _table_ = 'VyslednaOtazka'
+    id = PrimaryKey(int, column='idVOtazka', auto=True)
+    jmeno = Optional(str)
+    puvodniZadani = Optional(str)
     konkretniZadani = Required(str, column='kZadani')
-    ocekavanaOdpoved = Required(str, 512, column='ocOdpoved')
-    konkretniOdpoved = Required(str, 512, column='kOdpoved')
-    vysledekTestu = Required(DbVysledekTestu, column='vTestu')
-    otazkaTestu = Required('DbOtazkaTestu', column='otTestu')
-
-
-class DbOtazkaTestu(db.Entity):
-    """Vazební tabulka: každý test, lze vytvořit kombinací libovolných otázek.
-"""
-    _table_ = 'OtazkaTestu'
-    id = PrimaryKey(int, column='idOtTestu', auto=True)
-    poradi = Required(int)
-    test = Required(DbTest)
-    otazka = Required(DbOtazka)
-    odpovedi = Set(DbOdpoved)
+    bodu = Optional(float)
+    boduVysledek = Optional(float, column='bVysledek')
+    hodnotit = Optional(int, default=1)
+    vyslednaOdpoved = Set('DbVyslednaOdpoved')
+    vysledekTestu = Optional(DbVysledekTestu, column='vTestu')
+    puvodniOtazka = Optional(int, column='pOtazka')
 
 
 class DbUcitel(db.Entity):
@@ -106,7 +90,8 @@ class DbUcitel(db.Entity):
     _table_ = 'Ucitel'
     id = PrimaryKey(int, column='idUcitel', auto=True)
     login = Required(str, 20)
-    jmeno = Required(str, 40)
+    jmeno = Optional(str, 40)
+    prijmeni = Optional(str)
     hash = Required(str, 196)
     testy = Set(DbTest)
     otazky = Set(DbOtazka)
@@ -127,6 +112,7 @@ class DbTridy(db.Entity):
     poradi = Optional(int)
     nazev = Required(str, 128)
     rokUkonceni = Optional(int, column='rokUkonceni')
+    studenti = Set('DbStudent')
 
 
 class DbZnamky(db.Entity):
@@ -136,13 +122,43 @@ class DbZnamky(db.Entity):
     hodnoceni = Required(str, 128)
 
 
-class DbOdpovedi(db.Entity):
-    _table_ = 'Odpovedi'
+class DbOdpoved(db.Entity):
+    _table_ = 'Odpoved'
     id = PrimaryKey(int, column='idOdpoved', auto=True)
     odpoved = Required(str)
-    typ = Optional(str)
+    typ = Required(str, 1)
     otazka = Required(DbOtazka)
 
 
+class DbStudent(db.Entity):
+    """Každý jeden student, který se může účastnit testů."""
+    _table_ = 'Student'
+    id = PrimaryKey(int, column='idStudent', auto=True)
+    login = Optional(str)
+    jmeno = Optional(str)
+    prijmeni = Optional(str)
+    hash = Optional(str)
+    akce = Set(DbAkce)
+    vysledkyTestu = Set(DbVysledekTestu)
+    trida = Optional(DbTridy)
+
+
+class DbVyslednaOdpoved(db.Entity):
+    _table_ = 'VyslednaOdpoved'
+    id = PrimaryKey(int, column='idVOdpoved', auto=True)
+    ocekavanaOdpoved = Optional(str, column='ocOdpoved')
+    odpoved = Optional(str)
+    typ = Optional(str)
+    vysledekTestu = Optional(DbVysledekTestu, column='vTestu')
+    vyslednaOtazka = Optional(DbVyslednaOtazka, column='vOtazka')
+
+
+class DbOtazkaTestu(db.Entity):
+    _table_ = 'OtazkaTestu'
+    id = PrimaryKey(int, column='idOTestu', auto=True)
+    poradi = Optional(int)
+    test = Required(DbTest)
+    otazka = Required(DbOtazka)
+    
 sql_debug(True)
 db.generate_mapping(create_tables=True)

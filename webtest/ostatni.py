@@ -7,7 +7,36 @@ from webtest.db import *
 
 udaje = "host='localhost' user='postgres' password='a' dbname='webtest'"
 
+from .funkce import (json)
+
 class Ostatni:
+    def registrace(J):
+        odpoved = ""
+        
+        with db_session:
+            if J['typ'] == "student":
+                DbStudent(
+                    login = J['login'],
+                    jmeno = J['jmeno'],
+                    prijmeni = J['prijmeni'],
+                    hash =  J['heslo'],
+                    trida = get(t for t in DbTridy if t.id == J['trida'])
+                )
+
+                odpoved = "Nový student byl přidán"
+
+            elif J['typ'] == "ucitel":
+                DbUcitel(
+                    login = J['login'],
+                    jmeno = J['jmeno'],
+                    prijmeni = J['prijmeni'],
+                    hash =  J['heslo']
+                )
+
+                odpoved = "Nový učitel byl přidán"
+            
+            return json({"odpoved": odpoved})
+
     def novaTabulka():
         db = psycopg2.connect(udaje)
         sql = db.cursor()
@@ -89,24 +118,3 @@ class Ostatni:
             sql.execute('DROP TABLE "' + tabulka + '" CASCADE;')
         elif akce == "vysypat":
             sql.execute('TRUNCATE TABLE "' + tabulka + '" CASCADE;')
-
-    def registrace():   
-        R = request
-        F = R.form
-        
-        if R.method == 'POST':
-            with db_session:
-                if F['ok'] == 'Ucitel':
-                    DbUcitel(
-                        login=  F['login'],
-                        jmeno=  F['jmeno'],
-                        hash=   F['heslo']
-                    )
-                elif F['ok'] == 'Student':
-                    DbStudent(
-                        login=  F['login'],
-                        jmeno=  F['jmeno'],
-                        hash=   F['heslo']
-                    )
-        
-        return render_template('registrace.html')

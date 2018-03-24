@@ -45,12 +45,19 @@ $(document).on("click", "#ttZvolene > .otazka", function(e) {
 });
 
 //kliknout na test
-$(document).on("click", ".test", function(e) {
+$(document).on("click", ".test.ucitel", function(e) {
     if(e.target.localName == "button") return false;
     if(e.target.localName == "input") return false;
     window.location.hash = "TestyUpravit";   
     var idTestu = e.currentTarget.attributes.cislo.value;    
     testyUprava("uprav",idTestu);
+}); 
+
+//kliknout na test student
+$(document).on("click", ".test.student", function(e) {
+    window.location.hash = "TestyVyzkouset";   
+    var idTestu = e.currentTarget.attributes.cislo.value;
+    testyVyzkouset(idTestu);
 }); 
 
 $(document).on("click", "#ttSkrytZadani", function(e) {
@@ -185,42 +192,7 @@ $(document).on("mouseenter", ".inputLista", function(e) {
     $(this).children('.inputTlacitka').css("display","none");
 });
 
-$(document).on("keyup", "#vlozitOtazky input", function(e) {
-    var input = e.currentTarget;
-    var hodnota = input.value;    
-    var inputy = e.currentTarget.parentElement.parentElement.children;
-    var posledni = e.currentTarget.parentElement.parentElement.lastElementChild;
-    var prvni = inputy[0].children[0];
-
-    cl(e.currentTarget);
-
-    //pokud neni input prazdny, oznac jako spatnou
-    if(input.className == "seda" && hodnota.length >= 1)
-        $(input).removeClass().addClass("spatne");
-
-    //pokud neni posledni input prazdny, vloz ho
-    if(posledni.children[0].className != "seda")
-        vlozitOdpoved("seda","");
-
-    //pokud je input prazdny, bude sedy
-    if(hodnota.length == 0)
-        $(input).removeClass().addClass("seda");
-
-    //pokud je input prazdny, smaz posledni input
-    if(hodnota.length == 0 && posledni.children[0].className == "seda") {
-        $(posledni).remove();
-    }
-
-    if(inputy.length > 2) {
-        prvni.className = "dobre";
-        prvni.placeholder = "Správně"
-    }
-
-    else if(inputy.length <= 2) {
-        prvni.className = "otevrena";
-        prvni.placeholder = "Otevřená"
-    }   
-});
+$(document).on("keyup", "#vlozitOtazky input", otazkyVlozit);
 
 //odeslat slovnik
 $(document).on("click", "#slOdeslat", function(e) {
@@ -234,43 +206,9 @@ $(document).on("click", "#upProchazet", function(e) {
 });
 
 //upload - nacti soubor
-$(document).on("change", "#upSoubor", function(e) {
-    var soubor = this.files[0];
-    $("#upSJmeno").text(soubor.name);
-    
-    if(soubor.size > 524288) {
-        $("#upKontrola").text("Soubor je moc velký!");
-        return false;
-    }
+$(document).on("change", "#upSoubor", uploadNahled);
 
-    var reader = new FileReader();       
-    var souborTxt = reader.readAsText(soubor);    
-    
-    //precist obsah souboru
-    reader.onload = function(e2) {
-        var obsah = e2.target.result;
-        $("#upravaJSON").val(e2.target.result);
-
-        try {
-            $.parseJSON(obsah);
-            $("#upKontrola").text("JSON je v pořádku.");
-            $("#upravaJSON").removeClass("skryty");
-            $("#upOdeslat").removeClass("skryty"); 
-        } catch(chyba) {
-            $("#upKontrola").text(chyba);
-            $("#upOdeslat").addClass("skryty"); 
-        }
-    }
-    
-    cl(soubor);
-});
-
-/*
-with ((console && console._commandLineAPI) || {}) {
-    hlaska("!!!");
-}
-*/
-
+$(document).on("click", "#upOdeslat", uploadOdeslat);
 
 //kliknout na odpoved v testu
 $(document).on("click", ".odpoved", function(e) {
@@ -289,18 +227,19 @@ $(document).on("click", ".odpoved", function(e) {
 });
 
 
-//odeslat test
-$(document).on("click", "#odeslatTest", function(e) {
-    var seznamOdpovedi = [];
+//vyhodnotit test - student
+$(document).on("click", "#odeslatTest", testyVyhodnotit);
 
-    $.each($(".odpoved.oznacena"), foreach);  
-    $.each($(".odpovedOt"), foreach);
+//pridat tridu
+$(document).on("click", ".trPridat", tridyPridat);
 
-    function foreach(i,o) {
-        var text = $(o).text() || $(o).val();
-        var idOtazky = o.parentElement.attributes.otazka.value;        
-        seznamOdpovedi.push([idOtazky,text]); 
-    }
-    
-    cl(seznamOdpovedi);
+//odeslat tridu
+$(document).on("click", "#trOdeslat", tridyOdeslat);
+
+//odeslat osobu - student/ucitel
+$(document).on("click", "#osOdeslat", osobaOdeslat);
+
+//registrace
+$(document).on("click", "#registrace", function(e) {
+    osobaPridat("ucitel");
 });

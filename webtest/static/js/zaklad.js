@@ -1,8 +1,11 @@
-function postJSON(json, odeslano) {
+function postJSON(json, odeslano, url) {
+    if(json && typeof json === "object")
+        json = JSON.stringify(json);
+
     $.ajax({
-        url: '/json/post/',
+        url: url || '/json/post/',
         type: 'POST',
-        data: JSON.stringify(json),
+        data: json,
         contentType: 'application/json; charset=utf-8',
         dataType: 'json',
         async: true,
@@ -10,6 +13,52 @@ function postJSON(json, odeslano) {
         error: odeslano
     });
 }
+
+function odpovedJSON(o) {
+    console.log(o); 
+    if(o.status == 400)
+        hlaska(o.responseText);    
+    else if(o.status != 500) {
+        hlaska(o.odpoved || o.chyba,8);
+    }
+    else chybaIframe(o);
+} 
+
+function smazIntervaly(){
+    var id = window.setTimeout(null,0);
+    while (id--){
+        window.clearTimeout(id);
+    }
+}
+
+function smazIntervaly2() {
+    for(var i=0; i<intervaly.length; i++){
+        clearTimeout(intervaly[i]);
+    }
+    intervaly = [];
+}
+
+//funkce na zjisteni prvku - zjednoduseno
+
+//prvek
+function pr(prvek) {
+    return $(stranka).find(prvek);
+}
+
+//prvek -> hodnota
+function ph(prvek) {
+    return $(stranka).find(prvek).val();
+}
+
+//prvek -> text
+function pt(prvek) {
+    return $(stranka).find(prvek).text();
+}
+
+function isInArray(hodnota, pole) {
+    return pole.indexOf(hodnota) > -1;
+}
+
 
 function zmenHash() {
     var hash = nazevStranky();
@@ -30,6 +79,8 @@ function zmenHash() {
     }
     else if(hash=="Testy")
         $.getJSON("/json/testy/", testyZobraz).fail(chybaIframe);
+    else if(hash=="Testy2")
+        $.getJSON("/json/testy/", testyStudentZobraz).fail(chybaIframe);    
     else if(hash=="Nahrat")
         $(stranka).load("/upload/");  
     else if(hash=="TestyVytvorit")
@@ -38,7 +89,12 @@ function zmenHash() {
         otazkyPridat();
     else if(hash=="Slovnik")
         slovnik();
-
+    else if(hash=="Tridy")
+        tridyZobraz();     
+    else if(hash=="Studenti")
+        osobaPridat("student");   
+    else if(hash=="Vysledky")
+        vysledkyZobraz();            
 }
 
 function chybaServeru(ch) {
@@ -105,9 +161,6 @@ function hlaska(text, cas) {
         document.body.removeChild(div);
     }
 
-
-
-
     if(cas>0) {
         casovac = setTimeout(function() {
             if (document.contains(div))
@@ -134,8 +187,6 @@ function hlaskaIframe(html) {
         document.body.removeChild(div);
     }
 }
-
-
 
 function Nahodne(zacatek,konec) {
     return Math.floor((Math.random() * konec) + zacatek);

@@ -14,7 +14,7 @@ from .funkce import (nahodne, json, jsonStahnout, vypocitej, seznam)
 class Odpovedi:
     # najde odpovedi ktere patri do otazky (podle id)
     def __init__(self,oId, promenne = {}):
-        self.odpovedi = select((o.odpoved, o.typ) for o in DbOdpovedi if o.otazka.id == oId) 
+        self.odpovedi = select((o.odpoved, o.typ) for o in DbOdpoved if o.otazka.id == oId) 
         self.promenne = promenne
         self.oId = oId
 
@@ -23,12 +23,22 @@ class Odpovedi:
 
     def vypocitat(self,typ):
         return [vypocitej(i[0],self.promenne) for i in self.odpovedi if i[1] == typ]
+    
+    def vypocitatVsechny(self):
+        vysledek = []
+        for o in self.odpovedi:
+            odpoved = vypocitej(o[0],self.promenne)
+            typ = o[1]
+            vysledek.append([odpoved, typ])
+
+        return vysledek
+
 
     def pridat(self,odpovedi,typOdpovedi):
         for od in odpovedi:
             if od == "": continue
 
-            DbOdpovedi(
+            DbOdpoved(
                 odpoved = od,
                 typ = typOdpovedi,
                 otazka = self.oId
@@ -112,9 +122,15 @@ class Otazka:
             vyraz = m.group(0).split(".")
             slovo = vyraz[0]
             kategorie = vyraz[1]
-            slova = select((s.slovo1, s.slovo2) for s in DbSlovnik if s.typ is kategorie)
+            vsechno = False
+            if kategorie == "vsechno": vsechno = True
 
+            slova = select((s.slovo1, s.slovo2) for s in DbSlovnik if s.kategorie is kategorie or vsechno)
             seznamSlov = seznam(slova)
+
+            if len(seznamSlov) == 0:
+                return "[spatne zadani]"
+
             slovo12 = random.choice(seznamSlov)
 
             promenne["slovo1.spravne"] = slovo12[0]
@@ -127,12 +143,12 @@ class Otazka:
 
             return str(slovo)
 
+        #vybere slovo ze slovniku
+        m = re.compile("\$slovo[1-9]\.([a-ž])+").sub(nahraditSlova,m)
         #nahradi textove promenne v [] nahodnymi cisly
         m = re.compile('\[\$*([a-z][,\-*\d+[.d+]*]*)\]').sub(nahraditPromenne,m)
         #nahradi textove promenne vypocitanym vyrazem
         m = re.compile('\[\$*([a-z])\=(.*?)\]').sub(nahraditPromenne2,m)
-        #vybere slovo ze slovniku
-        m = re.compile("\$slovo[1-9]\.([a-z])+").sub(nahraditSlova,m)
 
         #prevede markdown do HTML
         m = typogrify(markdown(m))
@@ -200,14 +216,27 @@ class Otazka:
             seznamOtazek.append({
                 'id':       otazka.id,
                 'jmeno':    otazka.jmeno,
+                'bodu':     otazka.bodu,
                 'zadani':   otazka.obecneZadani,
                 'spravne':  odpovedi.tridit("D"),  
                 'spatne':   odpovedi.tridit("S"), 
                 'otevrena': odpovedi.tridit("O"),  
             })
 
-        #return jsonStahnout(seznamOtazek,"otazky.txt")
-        return json(seznamOtazek)
+            jsOtazka = {
+                'akce': 'nahrat', 
+                'co': 'otazka',
+                'otazky': seznamOtazek,
+            }
+
+        return jsonStahnout(jsOtazka,"otazky.txt")
+        #return json(jsOtazka)
+
+    def pridatVsechny(J):
+            for otazka in J["otazky"]:
+                Otazka.pridat(otazka)
+
+            return "Otázky byly přidány"
 
     def pridat(J):
         with db_session:
@@ -238,7 +267,7 @@ class Otazka:
             otazka.obecneZadani = J['zadani']
 
             #smazat puvodni odpovedi
-            select(o for o in DbOdpovedi if o.otazka.id is idOtazky).delete()
+            select(o for o in DbOdpoved if o.otazka.id is idOtazky).delete()
 
             odpovedi = Odpovedi(otazka.id)           
             odpovedi.pridat(J["spravne"],"D")

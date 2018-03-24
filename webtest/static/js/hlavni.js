@@ -1,488 +1,4 @@
 
-/*****************OTÁZKY*****************/
-function otazkyZobraz(div, otazky) {
-    var text = "";
-
-    var tlacitka =  
-        '<span class="otTlacitka">\
-            <button class="tlSmazat">Smazat</button>\
-            <button class="tlKostka">Kostka</button>\
-            <button class="tlZobrazOdpovedi">Odpovědi</button>\
-        </span>';
-
-    //onsole.log(otazky);
-
-    $.each(otazky, function(i, o) {
-        text += 
-            '<div class="otazka" cislo="' + o.id + '">\
-                ' + tlacitka + '\
-                <span class="otId">' + o.id + '. </span>\
-                <span class="otNazev">' + o.jmeno + '</span>\
-                <span class="otZadani">' + o.zadaniHTML.replace("\n","<br>") + '</span>\
-                <div class="otOdpovedi"></div>\
-            </div>';
-    });
-
-    if(div == stranka) {
-        text = 
-            '<h1>Otázky</h1>\
-            <span class="otPridat">Přidat | </span>\
-            <span class="otSmazatVsechny">Smazat všechny | </span>\
-            <span class="otUpravitVsechny">Upravit všechny | </span>\
-            ' + text + '\
-            <div class="otPridat">Přidat</div>';
-        
-    }
-
-    $(div).html(text);
-}
-
-function otazkyUprav(idOtazky) {
-    $(stranka).load("/vzory/otazky/", nacteno);
-
-    function nacteno() {
-        $.getJSON("/json/otazky/" + idOtazky, function(otazka) {     
-            $.each(otazka, nactiOtazku);
-        }).fail(chybaIframe);
-    }
-
-    function nactiOtazku(i, o) {
-        $(stranka).find('#otJmeno').val(o.jmeno);
-        Simplemde.value(o.zadani), //soubor lista.js
-        $(stranka).find('#otId').text(o.id);
-        $(stranka).find('#otTyp').val(o.typ);
-        $(stranka).find('#otBodu').val(o.bodu);
-
-        $(o.spravneZadano).each(function(i, o)  {vlozitOdpoved("dobre",o); });
-        $(o.spatneZadano).each(function(i, o)   {vlozitOdpoved("spatne",o); });
-        $(o.otevrenaZadano).each(function(i, o) {vlozitOdpoved("otevrena",o); });        
-
-        vlozitOdpoved("seda","");
-    }
-}   
-
-function vlozitOdpoved(trida, text) {   
-    var div = '<div class="inputLista">\
-                <input class="' + trida + '" type="text" value="' + text + '">\
-                <span class="inputTlacitka">\
-                    <span class="inputSpatna">o</span>\
-                    <span class="inputSpravna">o</span>\
-                    <span class="inputSmazat">x</span>\
-                </span>\
-            </div>';
-    
-    $("#vlozitOtazky").append(div);        
-}
-
-function otazkyUpravVsechny(e) {
-    var otazky = $(".otazka");
-    $.each(otazky, foreach);
-
-    function foreach(i, o) {
-        cl(o);
-        var zadani = o.children[3];
-        var typ = zadani.localName;      
-        
-        var textarea = $('<textarea />', {
-            type: 'text',
-            class: 'txOtazka',
-            html: $(zadani).html()
-        });
- 
-        var span = $('<span />', {
-            class: 'otZadani',
-            html: $(zadani).val()
-        });
-
-        if(typ=="span")
-            $(zadani).replaceWith(textarea);
-        else if(typ=="textarea")
-            $(zadani).replaceWith(span); 
-    }
-}
-
-function otazkyKostka(e) {
-    var otazka = e.currentTarget.parentElement.parentElement;
-    var idOtazky = otazka.attributes.cislo.value;
-    var otOdpoved = $(".otazka[cislo=" + idOtazky + "] .otOdpovedi");
-    var kod = "";
-
-    $.getJSON("/json/otazky/" + idOtazky, gj).fail(chybaIframe);
-
-    function gj(json) {
-        cl(json.otazka);
-        var o = json.otazka;
-        
-        var zadani = o.zadaniHTML;
-        $(".otazka[cislo=" + idOtazky + "] .otZadani").html(zadani);
-
-        $(o.spravne).each(function(i, o) {
-            kod += '<div class="odDobre">' + o + '</div>';
-        });
-
-        $(o.spatne).each(function(i, o) {
-            kod += '<div class="odSpatne">' + o + '</div>';
-        });
-  
-        $(o.otevrena).each(function(i, o) {
-            kod += '<div class="odOtevrena">' + o + '</div>';
-        });
-
-        otOdpoved.html(kod);
-    }
-}
-
-function otazkyZobrazOdpovedi(e) {
-    var otazka = e.currentTarget.parentElement.parentElement;
-    var idOtazky = otazka.attributes.cislo.value;
-    var otOdpoved = $(".otazka[cislo=" + idOtazky + "] .otOdpovedi");
-
-    if(otOdpoved.text() == "") {
-        otazkyKostka(e);
-    }
-
-    otOdpoved.toggle();
-}
-
-function otazkyPridat() {
-    $(stranka).load("/vzory/otazky/",function() {
-        $(stranka).find('h1#upravitOtazku').text("Přidat otázku"); 
-        $(stranka).find('#otSmazat').css("display","none");
-        vlozitOdpoved("otevrena","");
-        vlozitOdpoved("seda","");   
-    });
-}
-
-function otazkySmazat(idOtazky) {
-    dialog('Smazat otázku?', ano, Function);
-
-    var json = {
-        akce:'smazat', 
-        co:'otazka',
-        id: idOtazky
-    };
-
-    function ano() {
-        postJSON(json, odpoved);
-    }
-
-    function odpoved(o) {
-        if(o.status != 500) {
-            hlaska(o.odpoved,8); 
-            //window.location.hash = "Otazky"; 
-            $.getJSON("/json/otazky/", function(json) {
-                otazkyZobraz("#stranka",json.otazky);	
-            });
-        }
-        else chybaIframe(o);
-    }
-}
-
-function otazkyOdeslat() {
-    var idOtazky = $(stranka).find('#otId').text();
-    var ukol = "pridat";      
-
-    var seznamSpatne = [];
-    var seznamDobre = [];  
-    var seznamOtevrena = [];
-
-    $(stranka).find('input.spatne').each(function(i, o) {
-        seznamSpatne[i] = $(o).val();
-    });
-
-    $(stranka).find('input.dobre').each(function(i, o) {
-        seznamDobre[i] = $(o).val();
-    });  
-
-    $(stranka).find('input.otevrena').each(function(i, o) {
-        seznamOtevrena[i] = $(o).val();
-    });  
-
-    if(idOtazky)
-        ukol = "upravit";
-
-    var json = {
-        akce: ukol, 
-        co: 'otazka',
-        id: idOtazky,
-        jmeno: $(stranka).find('#otJmeno').val(),
-        typ: $(stranka).find('#otTyp').val(),
-        bodu: $(stranka).find('#otBodu').val(),
-        zadani: Simplemde.value(), //soubor lista.js
-        spravne: seznamDobre,
-        spatne: seznamSpatne,
-        otevrena: seznamOtevrena
-    };
-
-    cl(json);
-
-    postJSON(json, odpoved);
-
-    function odpoved(o) {
-        if(o.status != 500) {
-            hlaska(o.odpoved,8); 
-            window.location.hash = "Otazky";
-        }
-        else chybaIframe(o);
-    }
-}
-
-/***************TESTY***************/
-function testyOdeslat() {
-    var idTestu = $(stranka).find('#ttId').text();
-    var ukol = "pridat";      
-
-    if(idTestu)
-        ukol = "upravit";
-
-    var json = {
-        akce: ukol, 
-        co: 'test',
-        id: idTestu,
-        jmeno: $(stranka).find('#ttNazev').val(),
-        od: $(stranka).find('#ttOd').val(),
-        do: $(stranka).find('#ttDo').val(),
-        hodnoceni: null,
-        pokusu: $("#ttPokusu").val(),       
-        limit: $("#ttLimit").val(),
-        skryty:  $("#ttSkryt")[0].checked,          
-        otazky: testyVyberOtazky()
-    };
-
-    cl(json);
-
-    postJSON(json, odpoved);
-
-    function odpoved(o) {
-        console.log(o); 
-        if(o.status != 500) {
-            hlaska(o.odpoved,8); 
-            //window.location.hash = "Otazky";
-        }
-        else chybaIframe(o);
-    }
-}
-
-function testyZobraz(json) {
-    var text = "";
-
-    var tlacitka =  
-        '<span class="ttTlacitka">\
-            <button class="tlZobrazit">Zobrazit</button>\
-            <button class="tlSmazat">Smazat</button>\
-            <button class="tlVyzkouset">Vyzkoušet</button>\
-        </span>';
-
-    $.each(json.testy, function(i, t) {
-        text +=     
-            '<div class="test" cislo="' + t.id + '">\
-                ' + tlacitka + '\
-                <span class="ttId">' + t.id + '. </span>\
-                <span class="ttNazev">' + t.jmeno + '</span>\
-                <br>\
-                <span class="ttAutor">' + t.autor + '</span>\
-                <span class="ttOd">' + t.od + '</span>\
-                <span class="ttDo">' + t.do + '</span>\
-            </div>';
-    });
-    
-    text = 
-    '<h1>Testy</h1>\
-    <div class="ttPridat">Přidat</div>\
-    ' + text + '\
-    <div class="ttPridat">Přidat</div>';
-
-    $(stranka).html(text);
-}
-
-function testyVyzkouset(idTestu) {
-    $.getJSON("/json/testy/" + idTestu, zpracujJSON).fail(chybaIframe);
-    text = "";
-
-    function zpracujJSON(json) {
-        var test = json.test;
-
-        text += "<h1>" + test.jmeno + "</h1>";
-        $.each(test.otazky, zpracujOtazky);
-        text += '<button id="odeslatTest">Odeslat</button>';
-        $(stranka).html(text);
-    }
-
-    function zpracujOtazky(i, o) {
-        odpovedi = "";
-        
-        $.each(o.odpovedi, function(y, odpoved){
-
-            if(odpoved == "_OTEVRENA_")
-                odpoved = '<input type="text" class="odpovedOt">';
-            else
-                odpoved = "<li class='odpoved' >" + odpoved + "</li>";
-
-            odpovedi += odpoved;      
-        });  
-        
-        text +=
-            "<h2 cislo='" + o.id + "'>" + o.jmeno + "</h1>\
-            <div class='zadani'>" + o.zadani + "</div>\
-            <ol type='a' class='odpovedi' vyber='1' otazka='" + o.id + "'>" + odpovedi + "</ol>";
-    }
-}
-
-function testyVyzkouset2(idTestu) {
-    $.getJSON("/json/testy/" + idTestu, zpracujJSON).fail(chybaIframe);
-    text = "";
-
-    function zpracujJSON(json) {
-        var test = json.test;
-
-        text += "<h1>" + test.jmeno + "</h1>";
-        $.each(test.otazky, zpracujOtazky);
-        $(stranka).html(text);
-    }
-
-    function zpracujOtazky(i, o) {
-        odpovedi = "";
-        
-        $.each(o.odpovedi, function(y, odpoved){
-            odpovedi += "<li class='odpoved'>" + odpoved + "</li>";        
-        });  
-        
-        text +=
-            "<h2 cislo='" + o.id + "'>" + o.jmeno + "</h1>\
-            <div class='zadani'>" + o.zadani + "</div>\
-            <ol type='a' class='odpovedi'>" + odpovedi + "</ol>";
-    }
-}
-
-function testyUprava(akce,idTestu) {
-    //kód je asynchroní!
-
-    $(stranka).load("/vzory/testy/", nacteno);
-
-    function nacteno() { 
-        nastavZnamky(1);  
-        $.getJSON("/json/testy/", zpracujJSON).fail(chybaIframe);
-    }
-
-    var seznamOtazek = [];
-
-    function zpracujJSON(json) {
-        if(akce == "uprav")
-            $.each(json.testy, foreach);
-        else if(akce == "pridat")
-            pridatTest();
-        
-        nactiOtazky();
-    }
-
-    function pridatTest() {
-        var datum = dnes();
-        var dalsiRok = zaRok();
-        $(stranka).find('h1#upravitTest').text("Přidat test");
-        $(stranka).find('#ttSmazat').hide();
-        $(stranka).find('#ttOd').val(datum);
-        $(stranka).find('#ttDo').val(dalsiRok);        
-    }
-
-    function foreach(i, t) {
-        if(t.id==idTestu) {
-            $(stranka).find('#ttNazev').val(t.jmeno);
-            $(stranka).find('#ttId').text(t.id); 
-            $(stranka).find('#ttOd').val(t.od);
-            $(stranka).find('#ttDo').val(t.do); 
-            $(stranka).find('#ttPokusu').val(t.pokusu); 
-            $(stranka).find('#ttLimit').val(t.limit); 
-            $(stranka).find('#ttLimit').checked = t.skryty;
-            seznamOtazek = t.otazky;
-            return;           
-        }        
-    }
-
-    function nactiOtazky() {
-        $.getJSON("/json/otazky/", function(json) {
-            otazkyZobraz("#ttDostupne",json.otazky);
-            otazkyZobraz("#ttZvolene",json.otazky);	   
-            
-            var dostupne = $("#ttDostupne")[0].childNodes;
-            var zvolene = $("#ttZvolene")[0].childNodes;
-
-            $.each(dostupne, zobrazOtazky); 
-            $.each(zvolene, skryjOtazky); 
-        
-        }).fail(chybaIframe);
-    }
-
-    function zobrazOtazky(i, otazka) {
-        if (jeVSeznamu(otazka.attributes.cislo.value))
-            otazka.style.display = "none";
-    }
-
-    function skryjOtazky(i, otazka) {
-        if (!jeVSeznamu(otazka.attributes.cislo.value))      
-            otazka.style.display = "none";
-    }
-
-    function jeVSeznamu(id) {
-        var vysledek = false;
-        $.each(seznamOtazek, function(i, idO) {
-            if(id==idO) {
-                vysledek = true;
-                return false;
-            }
-        });
-        return vysledek;
-    }
-}
-
-function testySmazat(idTestu) {
-    dialog('Smazat test?', ano, Function);
-
-    var json = {
-        akce:'smazat', 
-        co:'test',
-        id: idTestu
-    };
-
-    function ano() {
-        postJSON(json, odpoved);
-    }
-
-    function odpoved(o) {
-        if(o.status != 500) {
-            hlaska(o.odpoved,5);
-            $.getJSON("/json/testy/", testyZobraz)
-        }
-        else chybaIframe(o);
-    }
-}
-
-function testyVyberOtazky() {
-    var cislaOtazek = [];
-    var vybrane = $("#ttZvolene .otazka:visible");
-    
-    $.each(vybrane, function(i, v) {
-        cislaOtazek[i] = v.attributes.cislo.value*1;
-    });
-    
-    return cislaOtazek;
-}
-
-function testyVymenOtazky() {
-    var dostupne = $("#ttDostupne .otazka.vybrana");
-    var zvolene = $("#ttZvolene .otazka.vybrana");
-
-    $.each(dostupne, function(i, otazka) { skryt(otazka,"#ttZvolene") });
-    $.each(zvolene,  function(i, otazka) { skryt(otazka,"#ttDostupne") });
-
-    function skryt(otazka, div) {
-        $(otazka).removeClass("vybrana");
-        otazka.style.display = "none";
-        idOtazky = otazka.attributes.cislo.value;
-        $(div + " .otazka[cislo=" + idOtazky + "]").show();        
-    }
-
-}
-
 /************DATABÁZE*************/
 function tabulka(tabulka,ukol){       
     var zprava = 'Smazat tabulku ' + tabulka + '?';
@@ -535,10 +51,6 @@ function zobrazitKalendar(umisteni) {
     });
 }
 
-
-
-
-
 /*************slovnik **********/
 
 function slovnik() {
@@ -567,5 +79,232 @@ function slovnikOdeslat() {
             //window.location.hash = "Otazky";
         }
         else chybaIframe(o);
+    }
+}
+
+
+/***************tridy************** */
+
+function tridyPridat() {
+    var pridat = '\
+        <div class="PridatTridu">\
+            <h1>Přidat třídu</h1>\
+            <input type="text" id="trPoradi" placeholder="Pořadí"><br>\
+            <input type="text" id="trNazev" placeholder="Název"><br>\
+            <input type="text" id="trRok" placeholder="Rok ukončení"><br>\
+            <button id="trOdeslat">Odeslat</button>\
+        </div>';
+    
+    $(stranka).html(pridat);
+}
+
+
+function tridyZobraz(json) {
+    var text = "";
+
+    var tlacitka =  
+        '<span class="trTlacitka">\
+            <button class="trZobrazit">Zobrazit</button>\
+            <button class="trSmazat">Smazat</button>\
+            <button class="trVyzkouset">Vyzkoušet</button>\
+        </span>';
+
+        /*
+    $.each(json.testy, function(i, t) {
+        text +=     
+            '<div class="test" cislo="' + t.id + '">\
+                ' + tlacitka + '\
+                <span class="ttId">' + t.id + '. </span>\
+                <span class="ttNazev">' + t.jmeno + '</span>\
+                <br>\
+                <span class="ttAutor">' + t.autor + '</span>\
+                <span class="ttOd">' + t.od + '</span>\
+                <span class="ttDo">' + t.do + '</span>\
+            </div>';
+    });
+    */
+
+    text = 
+    '<h1>Třídy</h1>\
+    <div class="trPridat">Přidat</div>\
+    ' + text + '\
+    <div class="trPridat">Přidat</div>';
+
+    $(stranka).html(text);
+}
+
+
+function tridyOdeslat() {
+    var json = {
+        akce: "pridat", 
+        co: 'trida',
+        poradi: ph('#trPoradi'),
+        nazev: ph('#trNazev'),
+        rok: ph('#trRok'),
+    }; 
+
+    postJSON(json, odpovedJSON);    
+}
+
+
+//pridat studenta nebo ucitele
+function osobaPridat(typ) {
+    var nadpis = "Přidat učitele";
+    var select = "";
+
+    if(typ == "student") {
+        nadpis = "Přidat studenta";
+        var option = "";
+        
+        $.getJSON("/json/tridy/", function(json) {     
+            $.when($.each(json.tridy, nactiTridy)).done(jsonNacten);
+        }).fail(chybaIframe);
+
+    }
+    else pridat("");
+
+    function nactiTridy(i, t) {
+        option += '<option value=' + t.id + '>' + t.poradi + t.nazev + '</option>';
+        cl(t);
+    }
+
+    function jsonNacten() {
+        select = '<select id="osTrida"><option selected disabled>Třída</option>' + option + '</select>';                           
+        pridat(select);
+    }
+
+    function pridat(select) {
+        var pridat = '\
+            <div class="osPridat">\
+                <h1>' + nadpis + '</h1>\
+                <input type="text" id="osLogin" placeholder="Login"><br>\
+                <input type="password" id="osHeslo" placeholder="Heslo"><br>\
+                <input type="text" id="osJmeno" placeholder="Jméno"><br>\
+                <input type="text" id="osPrijmeni" placeholder="Přijmení"><br>'
+                + select + '\
+                <button value="' + typ + '" id="osOdeslat">Odeslat</button>\
+            </div>';
+
+        $(stranka).html(pridat);
+    }
+}
+
+//odeslat osobu - student/ucitel
+function osobaOdeslat() {
+    var json = {
+        akce: "pridat", 
+        co: 'osoba',
+        typ: ph('#osOdeslat'),
+        login: ph('#osLogin'),
+        heslo: ph('#osHeslo'),
+        jmeno: ph('#osJmeno'),
+        prijmeni: ph('#osPrijmeni'),
+        trida: ph('#osTrida'),
+    }; 
+
+    cl(json);
+    postJSON(json, odpovedJSON, "/json/registrace/");
+}
+
+
+function uploadNahled() {
+    var soubor = this.files[0];
+    var jmeno = soubor.name;
+    var pripona = jmeno.substring(jmeno.length - 4);
+
+    $("#upSJmeno").text(jmeno);
+    
+    if(soubor.size > 524288) {
+        $("#upKontrola").text("Soubor je moc velký!");
+        return false;
+    }
+
+    var reader = new FileReader();       
+    var souborTxt = reader.readAsText(soubor);    
+    
+    //precist obsah souboru
+    reader.onload = function(e2) {
+        var obsah = e2.target.result;
+        $("#upravaJSON").val(e2.target.result);
+        $("#upravaJSON").removeClass();
+        $("#upOdeslat").removeClass(); 
+
+        if(pripona == ".csv") {
+            $("#upKontrola").text("CSV soubor");
+            $("#upOdeslat").addClass("csv"); 
+            return
+        }
+
+        try {
+            $.parseJSON(obsah);
+            $("#upKontrola").text("JSON je v pořádku.");
+        } catch(chyba) {
+            $("#upKontrola").text(chyba);
+            $("#upOdeslat").addClass("skryty"); 
+        }
+    }    
+}
+
+function uploadOdeslat(e) {
+    var soubor = ph("#upravaJSON");
+    
+    if(e.target.className == "csv") {
+        soubor = {
+            akce: "nahrat", 
+            co: "csvSlovnik",
+            data: soubor
+        }
+    }
+
+    cl(soubor);
+    postJSON(soubor, odpovedJSON);
+}
+
+
+
+/****************VYSLEDKY******************* */
+
+function vysledkyZobraz() {
+
+    $.getJSON("/vyhodnotit/" + "10", zpracujJSON).fail(chybaIframe);
+    text = "";
+
+    function zpracujJSON(json) {
+        var test = json.test;
+        $.each(test, zpracujOtazky);
+        $(stranka).html(text);
+        MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
+    }
+
+    //!!!!!
+    function zpracujOtazky(i, seznam) {
+        var typ = "odSpatne";
+        if(seznam.hodnoceni >= 1)
+            typ = "odDobre";
+        
+        text += "<h2 class='" + typ + "'>Otázka " + seznam.jmeno + " (" + seznam.bodu + ")</h1>";
+        text += "<h3>" + seznam.zadani + "</h3>";
+
+        $.each(seznam.dobre, function(i, od) {
+            if(seznam.oznaceneDobre && isInArray(od, seznam.oznaceneDobre))
+                text += "<div class='odDobre'>" + od + "</div>";
+            else
+                text += "<div>" + od + "</div>";
+        });
+
+        $.each(seznam.spatne, function(i, od) {
+            if(seznam.oznaceneSpatne && isInArray(od, seznam.oznaceneSpatne))
+                text += "<div class='odSpatne'>" + od + "</div>";
+            else
+                text += "<div>" + od + "</div>";
+        });
+
+        $.each(seznam.otevrena, function(i, od) {
+            if(seznam.oznaceneDobre && isInArray(od, seznam.oznaceneDobre))
+                text += "<div class='odDobre'>" + od + "</div>";
+            else if(seznam.spatne && isInArray(od, seznam.oznaceneSpatne))
+                text += "<div class='odSpravne'>" + od + "</div>";
+        });
+
     }
 }

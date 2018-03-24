@@ -27,31 +27,35 @@
     </p>
 
   {% else %}
+    <div id="stranka">
+      <h1>Přihlaste se</h1>
 
-    <h1>Přihlaste se</h1>
-
-    <p><strong style="color:red;">
-    {% if spatne is defined %}
-      Neplatné přihlašovací údaje. Zaregistrujte se nejdřív.
-    {% endif %}
-    {% if url is defined %}
-      Stránka 
-      <a href="{{request.url_root[:-1]+url}}">{{request.url_root[:-1]+url}}</a>
-      vyžaduje přihlášení.
-    {% endif %}
-    </strong></p>
-
-    <form method="post" action="">
-      <p class="login">
-        uživatelské jméno: <input type="text" name="login" value="ucitel" /> <br />
-        heslo: <input type="password" name="passwd" /> <br />
+      <p><strong style="color:red;">
+      {% if spatne is defined %}
+        Neplatné přihlašovací údaje. Zaregistrujte se nejdřív.
+      {% endif %}
       {% if url is defined %}
-        <input type="hidden" name="url" value="{{url}}" /> 
-      {% endif %}      
-        <input class="submit" type="submit" name="ok" value="Přihlásit se" /><br>
-        <strong><a href="{{url_for('registrace')}}">Zaregistrovat se</a></strong><br>
-        <strong><a href="{{url_for('databaze')}}">Databáze</a></strong><br>
-      </p>
-    </form>
+        Stránka 
+        <a href="{{request.url_root[:-1]+url}}">{{request.url_root[:-1]+url}}</a>
+        vyžaduje přihlášení.
+      {% endif %}
+      </strong></p>
+
+      <form method="post" action="">
+        <span class="login">
+          <input type="text" name="login" placeholder="Jméno" value="ucitel" /> <br />
+          <input type="password" placeholder="Heslo" name="passwd" /> <br />
+        {% if url is defined %}
+          <input type="hidden" name="url" value="{{url}}" /> 
+        {% endif %}      
+          <input class="submit" type="submit" name="ok" value="Přihlásit se">
+        </span>
+      </form>
+      <button id="registrace">Registrace</button><br>
+      <strong><a href="{{url_for('databaze')}}">Databáze</a></strong><br>
+      <span id="obnovJS">obnovit
+
+      </span>
+    </div>
   {% endif %}
 {% endblock main %}

@@ -3,7 +3,7 @@ function menuNahore() {
     var pozice = menu.offset().top;				
 
     $(window).scroll(function() {
-        var fix = ($(this).scrollTop() > pozice) ? true : false;	
+        var fix = $(this).scrollTop() > pozice ? true : false;	
         menu.toggleClass("menu", fix);
         $('body').toggleClass("body-menu", fix);			
     });
@@ -48,4 +48,42 @@ function nazevStranky() {
         hash = window.location.hash.substring(1);
 
     return hash;    
+}
+
+function odpocet(prvek,cas) {
+    var sekunda = 1000;
+    var minuta = sekunda * 60;
+    var hodina = minuta * 60;
+    cas = cas*60000;
+    
+    if(intOdpocet) clearInterval(intOdpocet);
+
+    var intOdpocet = setInterval(tik, sekunda);
+
+    function tik() {
+        //var ted = new Date() + limit;
+        
+        cas-=sekunda;
+        
+        if (cas < sekunda) {
+            $(prvek).text("Konec testu!!!");
+            return;
+        }
+        
+        var zbyva = {
+            hodin: Math.floor((cas / hodina) ),
+            minut: Math.floor((cas % hodina) / minuta),
+            sekund: Math.floor((cas % minuta) / sekunda)
+        }
+        
+        if(zbyva.hodin < 10) zbyva.hodin = "0" + zbyva.hodin;
+        if(zbyva.minut < 10) zbyva.minut = "0" + zbyva.minut;
+        if(zbyva.sekund < 10) zbyva.sekund = "0" + zbyva.sekund;
+        
+        if(zbyva.hodin < 1)
+            $(prvek).text(zbyva.minut + ":" + zbyva.sekund);
+        else
+            $(prvek).text(zbyva.hodin + ":" + zbyva.minut + ":" + zbyva.sekund);
+        
+    }
 }

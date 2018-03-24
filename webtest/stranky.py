@@ -73,7 +73,7 @@ def prihlasitJSON(klic):
 @app.route('/')
 def index():
     if 'student' in session:
-        return redirect(url_for('student_testy'))
+        return render_template('student.html')
     elif 'ucitel' in session:
         return render_template('ucitel.html')
     else:
@@ -167,7 +167,8 @@ def student_vysledek(): return Student.vysledky()
 @app.route('/upload/', methods=['GET', 'POST'])
 @prihlasit('ucitel')
 @db_session
-def upload():return upload1()
+def upload(): 
+    return render_template('upload.html')
 
 
 @app.errorhandler(404)
@@ -181,6 +182,10 @@ def otazky1(): return render_template('upravit_otazku1.html')
 
 
 ################JSON#################
+@app.route('/json/slovnik/', methods=['GET', 'POST'])
+#@prihlasitJSON('ucitel')
+@db_session
+def sl(): return Slovnik.stahnout()
 
 @app.route('/json/testy/', methods=['GET', 'POST'])
 #@prihlasitJSON('ucitel')
@@ -192,6 +197,14 @@ def testy(): return Testy.zobraz()
 @db_session
 def testy2(id): return Testy.zobrazTest(id)
 
+@app.route('/json/student/testy/<id>', methods=['GET', 'POST'])
+#@prihlasitJSON('ucitel')
+@db_session
+def testy3(id): return Student.vyplnitTest(id)
+
+
+
+
 @app.route('/json/otazky/', methods=['GET', 'POST'])
 #@prihlasitJSON('ucitel')
 @db_session
@@ -201,6 +214,16 @@ def otazky(): return Otazka.zobrazOtazky()
 #@prihlasitJSON('ucitel')
 @db_session
 def otazkyE(): return Otazka.export()
+
+@app.route('/json/registrace/', methods=['GET', 'POST'])
+#@prihlasitJSON('ucitel')
+@db_session
+def reg(): return Ostatni.registrace(request.json)
+
+@app.route('/json/tridy/', methods=['GET', 'POST'])
+#@prihlasitJSON('ucitel')
+@db_session
+def tr(): return Trida.zobraz()
 
 @app.route('/json/otazky/<id>', methods=['GET'])
 #@prihlasitJSON('ucitel')
@@ -219,10 +242,37 @@ def akce(typAkce,vec):
     return json(js)
 
 
+@app.route('/json/post/student/', methods=['POST'])
+@prihlasitJSON('student')
+@db_session
+def postS():
+    J = request.json
+    akce = J["akce"]
+    co = J["co"]
+    odpoved = "zadna akce"
+
+    if(co == "test"):
+        if akce == "vyhodnotit":
+            odpoved = Student.vyhodnotitTest(J)
+
+    js = {
+        "odpoved":odpoved,
+        "stav":"ok",
+    }           
+
+    return json(js)
+
+
+@app.route('/vyhodnotit/<id>', methods=['GET'])
+@db_session
+def ttt(id):
+    return Student.hodnotit(id)
+    #return Student.zobrazVysledekTestu(5)
+
 @app.route('/json/post/', methods=['POST'])
 @prihlasitJSON('ucitel')
 @db_session
-def akceP(): 
+def postU(): 
     J = request.json
     akce = J["akce"]
     co = J["co"]
@@ -237,6 +287,9 @@ def akceP():
             odpoved = Otazka.pridat(J)
         elif akce == "upravit":
             odpoved = Otazka.upravit(J)
+        elif akce == "nahrat":
+            odpoved = Otazka.pridatVsechny(J)
+                        
     if(co == "test"):
         if akce == "smazat":
             idTestu = J["id"]
@@ -257,6 +310,18 @@ def akceP():
         if akce == "pridat":
             Slovnik.pridat(J)
             odpoved = "Slovo bylo přidáno."
+    elif(co == "trida"):
+        if akce == "pridat":
+            odpoved = Trida.pridat(J)
+    elif(co == "osoba"):
+        if akce == "pridat":
+            odpoved = Ostatni.registrace(J)
+    elif(co == "csvSlovnik"):
+        if akce == "nahrat":
+            odpoved = Slovnik.nahrat(J)
+
+
+
 
     js = {
         "odpoved":odpoved,

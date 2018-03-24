@@ -5,6 +5,7 @@
   <meta charset="utf-8">
   <link rel="stylesheet" href="/static/styles.css">
   <link rel="shortcut icon" href="/static/favico.svg" />
+  <script type="text/javascript" async src="http://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_CHTML"></script>
   <script src="/static/js/jquery-3.2.1.min.js"></script>
   <script src="/static/ssrefresh.js"></script> 
   <script src="/static/simplemde/simplemde.min.js" defer></script>
@@ -12,17 +13,6 @@
   <script src="/static/js/nacti.js"></script>
   <link rel="stylesheet" href="/static/simplemde/simplemde.min.css" media="none" onload="if(media!=='all')media='all'">
 
-
-  {% macro mathjaxheader() %}
-    <script type="text/x-mathjax-config">
-        MathJax.Hub.Config({tex2jax: {inlineMath: [['\$','\$'], ['\\\\(','\\\\)']]}});
-        MathJax.Hub.Config({ TeX: { extensions: ["autobold.js"] }});
-        MathJax.Hub.Config({ TeX: { equationNumbers: {autoNumber: "all"} } });
-    </script>
-    <script type="text/javascript"
-      src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
-    </script>
-  {% endmacro %}
   {% macro jqueryheader() %}
     <script src="{{ url_for('static', filename='oujeee.js') }}"></script>
   {% endmacro %}

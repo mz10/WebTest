@@ -613,11 +613,11 @@ li.odpoved {
   cursor: pointer; 
 }
 
-input.dobre {
+.dobre, input.dobre {
   border: green solid 2px; 
 }
 
-input.spatne {
+.spatne, input.spatne {
   border: red solid 2px; 
 }
 

@@ -89,8 +89,8 @@ class Prihlaseni:
         if request.method == 'GET':
             with db_session:
                 if 'student' in session:
-                    student = get(s for s in DbStudent
-                                if s.login == session['student'])
+                    student = get(s for s in DbStudent if s.login == session['student'])
+                    Zaznamy.pridat("prihlaseni",session['student'])
                     return render_template('login.html', jmeno=student.jmeno)
                 elif 'ucitel' in session:
                     ucitel = get(u for u in DbUcitel
@@ -108,6 +108,8 @@ class Prihlaseni:
                 ucitel_hash = get(u.hash for u in DbUcitel if u.login == login)
             if student_hash and pswd_check(heslo, student_hash):
                 session['student'] = login
+                with db_session:
+                    Zaznamy.pridat("prihlaseni",session['student'])
                 if 'url' in request.form:
                     return redirect(request.form['url'])
                 else:
@@ -168,3 +170,61 @@ class Slovnik:
         )
         
         return
+
+    def nahrat(J):
+        text = J["data"].split("\n")
+        for radek in text:
+            bunka = radek.split(";")       
+            if len(bunka) < 4: continue
+            
+            DbSlovnik(
+                slovo1 = bunka[0],
+                slovo2 = bunka[1],
+                kategorie = bunka[2],         
+                jazyk = bunka[3]
+            )            
+        return "CSV soubor byl úspěšně nahrán"
+
+
+    def stahnout():
+        slovnik = select((s.slovo1, s.slovo2, s.kategorie, s.jazyk) for s in DbSlovnik).order_by(3)
+        csv = '\ufeff'
+
+        for sloupec in slovnik:
+            csv += sloupec[0] + ";" + sloupec[1] + ";" + sloupec[2] + ";" + sloupec[3] + "\r\n"
+
+        r = Response(response=csv,status=200,mimetype="text/plain")
+        r.headers["Content-Disposition"] = 'attachment; filename="slovnik.csv"'
+        return r
+
+class Trida:
+    def pridat(J):
+        DbTridy(
+            poradi = int(J["poradi"]),
+            nazev = J["nazev"],
+            rokUkonceni = J["rok"]
+        )
+
+        return "Třída byla přidána"
+
+    def zobraz():
+        seznamTrid = []
+        tridy = select(t for t in DbTridy).order_by(1)
+
+        for trida in tridy:
+            seznamTrid.append({
+                'id':           trida.id,
+                'poradi':       trida.poradi,
+                'nazev':        trida.nazev,
+                'rokUkonceni':  trida.rokUkonceni
+            })
+
+        return json({"tridy": seznamTrid})
+
+class Zaznamy:
+    def pridat(typ,student):
+        DbAkce(
+            cas = dt.now().strftime("%d.%m.%Y %H:%M:%S"),
+            typAkce = typ,
+            student = get(s.id for s in DbStudent if s.login == student)
+        )

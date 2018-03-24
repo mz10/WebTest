@@ -1,5 +1,7 @@
 spustJS("dalsiFunkce"); 
-spustJS("hlavni");  
+spustJS("hlavni"); 
+spustJS("otazky"); 
+spustJS("testy"); 
 spustJS("zaklad");    
 spustJS("hodnoceni"); 
 spustJS("kalendar");
@@ -7,11 +9,17 @@ spustJS("kalendar");
 window.onload = function() {
     spustJS("udalosti"); 
     zmenHash();
+    menuNahore();
+    MathJax.Hub.Config({
+        tex2jax: {inlineMath: [["$","$"],["\\(","\\)"]]}
+    });
 
     document.getElementById("obnovJS").onclick = function() {
-        $(document).off(); //odstrani udalosti
+        $(document).off(); //odstrani puvodni udalosti
         obnovJS("dalsiFunkce"); 
-        obnovJS("hlavni");  
+        obnovJS("hlavni"); 
+        obnovJS("otazky"); 
+        obnovJS("testy");          
         obnovJS("zaklad");    
         obnovJS("hodnoceni"); 
         obnovJS("kalendar");
@@ -20,6 +28,7 @@ window.onload = function() {
 }
 
 var stranka = "#stranka";
+var intervaly = [];
 var intervalDb;
 
 function spustJS(jsSoubor) {
