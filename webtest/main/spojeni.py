@@ -1,6 +1,6 @@
 ﻿#Přihlašovací údaje k databázi
 
-DB = {
+pripojit = {
     "host": "localhost",
     "user": "postgres",
     "database": "webtest",

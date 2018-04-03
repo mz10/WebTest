@@ -3,11 +3,12 @@ from werkzeug.routing import BaseConverter
 from pony.orm import (sql_debug, get, select, db_session)
 import psycopg2
 from datetime import datetime as dt
-from webtest.db import *
+from .db import *
 
 udaje = "host='localhost' user='postgres' password='a' dbname='webtest'"
 
 from .funkce import (json)
+from .tridy import Trida
 
 class Ostatni:
     def registrace(J):

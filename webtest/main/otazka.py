@@ -4,7 +4,7 @@ from typogrify.filters import typogrify
 from markdown import markdown
 from pony.orm import (sql_debug, get, select, db_session)
 from datetime import datetime as dt
-from webtest.db import *
+from .db import *
 import re
 import random
 import sympy
@@ -14,7 +14,8 @@ from .funkce import (nahodne, json, jsonStahnout, vypocitej, seznam)
 class Odpovedi:
     # najde odpovedi ktere patri do otazky (podle id)
     def __init__(self,oId, promenne = {}):
-        self.odpovedi = select((o.odpoved, o.typ) for o in DbOdpoved if o.otazka.id == oId) 
+        # v dotazu jsou i opakujici se odpovedi - without_distinct
+        self.odpovedi = select((o.odpoved, o.typ) for o in DbOdpoved if o.otazka.id == oId).without_distinct()
         self.promenne = promenne
         self.oId = oId
 
@@ -121,34 +122,48 @@ class Otazka:
         def nahraditSlova(m):
             vyraz = m.group(0).split(".")
             slovo = vyraz[0]
-            kategorie = vyraz[1]
-            vsechno = False
-            if kategorie == "vsechno": vsechno = True
+            jazyk = vyraz[1]
+            kategorie = vyraz[2]
+            vsechno = True if kategorie == "vsechno" else False
 
-            slova = select((s.slovo1, s.slovo2) for s in DbSlovnik if s.kategorie is kategorie or vsechno)
+            slova = select((s.slovo1, s.slovo2) 
+                for s in DbSlovnik if (s.kategorie is kategorie or vsechno) and s.jazyk is jazyk)
             seznamSlov = seznam(slova)
+
+            random.shuffle(seznamSlov)
 
             if len(seznamSlov) == 0:
                 return "[spatne zadani]"
 
-            slovo12 = random.choice(seznamSlov)
+            spravne1 = seznamSlov[0][0]
+            spravne2 = seznamSlov[0][1]
 
-            promenne["slovo1.spravne"] = slovo12[0]
-            promenne["slovo2.spravne"] = slovo12[1]
+            promenne["slovo1.spravne"] = spravne1
+            promenne["slovo2.spravne"] = spravne2
+
+            #odebere spravne slova ze seznamu a zustanou jen spatne
+            seznamSlov.pop(0)
+            
+            promenne["slovo1.spatne"] = []
+            promenne["slovo2.spatne"] = []      
+
+            for sl in seznamSlov:
+                promenne["slovo1.spatne"].append(sl[0])
+                promenne["slovo2.spatne"].append(sl[1])
 
             if slovo == "$slovo1":
-                return slovo12[0]
+                return spravne1
             elif slovo == "$slovo2":
-                return slovo12[1]
+                return spravne2
 
             return str(slovo)
 
-        #vybere slovo ze slovniku
-        m = re.compile("\$slovo[1-9]\.([a-ž])+").sub(nahraditSlova,m)
         #nahradi textove promenne v [] nahodnymi cisly
         m = re.compile('\[\$*([a-z][,\-*\d+[.d+]*]*)\]').sub(nahraditPromenne,m)
         #nahradi textove promenne vypocitanym vyrazem
         m = re.compile('\[\$*([a-z])\=(.*?)\]').sub(nahraditPromenne2,m)
+        #vybere slovo ze slovniku
+        m = re.compile("\$slovo[1-9]\.\w+.\w+?$", re.UNICODE).sub(nahraditSlova,m)
 
         #prevede markdown do HTML
         m = typogrify(markdown(m))
@@ -167,7 +182,7 @@ class Otazka:
         otazka = DbOtazka[id]
         zadani = Otazka.vytvorZadani(otazka.obecneZadani)
         odpovedi = Odpovedi(otazka.id, zadani["promenne"])
-
+        
         jsOtazka = {
             'id':             otazka.id,
             'jmeno':          otazka.jmeno,

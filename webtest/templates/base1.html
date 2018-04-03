@@ -17,29 +17,40 @@
 </head>
 
 <body><div id="body">
+
   <header role="banner">
   {% block header %}
-    <span id="prihlaseno">
+
+    <p class="inout">
       {% if 'student' in session %}
-        student: <a id="odhlasit">ucitel</a><br>
-        Přihlášených: <span id="prihlasenych">0</span></span>                            
+      student: <a href="/login/">{{session.student}}</a>, 
+                                  <a href="/logout/">odhlásit</a>
       {% elif 'ucitel' in session %}
-        učitel: <a id="odhlasit">ucitel</a><br>
-        Přihlášených: <span id="prihlasenych">0</span></span>   
+      učitel: <a href="/login/">{{session.ucitel}}</a>,
+                                  <a href="/logout/">odhlásit</a>
       {% endif %}
-    </span>
-    <a href="/"><img class="logo" src="/static/logo.svg">>WebTest</a>
-    <span class="logo2">
-      <span class="bar0"></span>
-      <span class="bar1"></span>
-      <span class="bar2"></span>
-      <span class="bar3"></span>
-      <span class="bar4"></span>
-      <span class="bar5"></span>
-      <span class="bar6"></span>
-    </span>
+      <br>
+      Přihlášených: <span id="prihlasenych">0</span>
+    </p>
+
+    <h1>
+      <a href="/">
+        <img class="logo "src="/static/logo.svg">
+        WebTest</a>
+      <span class="logo2">
+        <span class="bar0"></span>
+        <span class="bar1"></span>
+        <span class="bar2"></span>
+        <span class="bar3"></span>
+        <span class="bar4"></span>
+        <span class="bar5"></span>
+        <span class="bar6"></span>
+      </span>
+    </h1>
+
     <nav role="navigation">
     {% block menu %}
+
 
     {% endblock menu %}
     </nav>
@@ -52,8 +63,6 @@
 
 {% endblock main %}
 
-<div id="log"></div>
-<div id="uzivatele"></div>
 
 {% block footer %}
   <footer>

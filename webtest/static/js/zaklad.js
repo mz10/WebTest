@@ -11,8 +11,48 @@ function postJSON(json, odeslano, url) {
         async: true,
         success: odeslano,
         error: odeslano
-    });
+    }).fail(chybaIframe);
 }
+
+//odesle websocket a pocka na odpoved
+//zobrazi traceback pokud je chyba na serveru
+function wsJSON(json, odpoved) {
+    cl("JSON k odeslání:");
+    cl(json);
+    
+    if(json && typeof json === "object")
+        json = JSON.stringify(json);
+    
+    ws.emit('odeslatJSON', json, function(o) {
+        var prijato = "";
+        
+        try {
+            prijato = JSON.parse(o);  
+        }
+        catch(e) {
+            prijato = "chyba: " + o;
+        }
+
+        if(prijato.odpoved)
+            odpoved(prijato);
+
+        var text = "<h3>Chyba na serveru:</h3>";
+
+        if(prijato.traceback) {
+            $.each(prijato.traceback, zobrazTraceback);  
+            hlaska(text,50);
+        }
+
+        function zobrazTraceback(i, t) {
+            text += t + "<br>";
+        }
+
+        cl("Odpověď ze serveru:");
+        cl(prijato);
+    });
+
+}
+
 
 function odpovedJSON(o) {
     console.log(o); 
@@ -66,6 +106,9 @@ function zmenHash() {
     
     //if(!nacti) return;
 
+    $("#log").hide();
+    $("#uzivatele").hide();
+
     if(hash=="DB") {
         $(stranka).load("/tabulky/");
         intervalDb = setInterval(function() {
@@ -88,13 +131,22 @@ function zmenHash() {
     else if(hash=="OtazkyPridat")
         otazkyPridat();
     else if(hash=="Slovnik")
-        slovnik();
+        slovnikZobraz();
     else if(hash=="Tridy")
         tridyZobraz();     
     else if(hash=="Studenti")
-        osobaPridat("student");   
+        //osobaPridat("student");
+        studentZobraz()  
     else if(hash=="Vysledky")
-        vysledkyZobraz();            
+        vysledkyZobraz();    
+    else if(hash=="Zaznamy") {
+        $(stranka).html("");
+        $("#log").show();  
+    }
+    else if(hash=="Prihlaseni") {
+        $(stranka).html("");
+        $("#uzivatele").show();
+    }                 
 }
 
 function chybaServeru(ch) {
@@ -108,8 +160,12 @@ function chybaServeru(ch) {
 }
 
 function chybaIframe(ch) {
-    hlaskaIframe(ch.responseText);
-    //cl(chyba);
+    if(ch.responseText == "neprihlasen") {
+        zobrazitPrihlaseni();
+        hlaska("Nejsi příhlášen, přihlas se.",3);
+    }
+    else 
+        hlaskaIframe(ch.responseText);
 }
 
 function dialog(zprava, ano, ne) {    

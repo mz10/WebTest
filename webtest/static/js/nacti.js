@@ -6,15 +6,20 @@ spustJS("zaklad");
 spustJS("hodnoceni"); 
 spustJS("kalendar");
 
+//web sockety
+ws = null;
+
 window.onload = function() {
     spustJS("udalosti"); 
     zmenHash();
     menuNahore();
+
     MathJax.Hub.Config({
-        tex2jax: {inlineMath: [["$","$"],["\\(","\\)"]]}
+        tex2jax: {inlineMath: [["$","$"],["\\(","\\)"]]},
+        displayAlign: "left"
     });
 
-    document.getElementById("obnovJS").onclick = function() {
+    document.getElementsByClassName("logo2")[0].onclick = function() {
         $(document).off(); //odstrani puvodni udalosti
         obnovJS("dalsiFunkce"); 
         obnovJS("hlavni"); 
@@ -58,4 +63,8 @@ function odebratJS(jsSoubor){
         && js[i].getAttribute('src').indexOf(jsSoubor + ".js") != -1)
             js[i].parentNode.removeChild(js[i]); 
     }
+}
+
+function websocket() {
+    ws = io.connect(location.protocol + '//' + document.domain + ':' + location.port + "/ws");    
 }

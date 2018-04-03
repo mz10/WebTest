@@ -1,11 +1,16 @@
-#!/usr/bin/env python3
-# Soubor:  __init__.py
-# Úloha:  Flask -- aplikace
-############################################################################
 from flask import Flask
+from flask_socketio import SocketIO, emit, join_room, leave_room, close_room, rooms, disconnect
 import os
 
-app = Flask(__name__)
-app.secret_key = os.urandom(24)
+socketio = SocketIO()
 
-from . import stranky
+def createApp(debug=False):
+    app = Flask(__name__)
+    app.debug = debug
+    app.config['SECRET_KEY'] = os.urandom(24)
+
+    from .main import main as m
+    app.register_blueprint(m)
+    socketio.init_app(app)
+    return app
+

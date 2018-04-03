@@ -1,8 +1,14 @@
 var Simplemde;
 
 function editor(el) {
-    Simplemde = new SimpleMDE({
-        
+    function vlozTabulku(editor) {
+        var cm = editor.codemirror;
+        var vybranyText = cm.getSelection();
+        var tabulka = "| | | |\n|-|-|-|\n| | | |\n| | | |";
+        cm.replaceSelection(tabulka);
+    }
+
+    Simplemde = new SimpleMDE({  
         element: document.getElementById(el),
         spellChecker: false,
         autofocus: true,
@@ -92,7 +98,7 @@ function editor(el) {
         },
         {
             name: "table",
-            action: SimpleMDE.drawTable,
+            action: vlozTabulku,
             className: "fa fa-table",
             title: "Tabulka"
         },

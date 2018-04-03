@@ -4,7 +4,7 @@ from typogrify.filters import typogrify
 from markdown import markdown
 from pony.orm import (sql_debug, get, select, db_session)
 from datetime import datetime as dt
-from webtest.db import *
+from .db import *
 import json as _json
 import random
 

@@ -87,3 +87,48 @@ function odpocet(prvek,cas) {
         
     }
 }
+
+
+function tabulkaRadek(pocet,sloupce) {
+    var vysledek = "";
+    $.each(sloupce, function(i, sloupec) {
+        //1. a posledni bunka se neda upravovat
+        if(i == 0 || i >= pocet)
+            vysledek += "<td>" + sloupec + "</td>";
+        else
+            vysledek += "<td><input type'text' class='tabInput' value='" + sloupec + "'></td>";
+    });
+    return "<tr>" + vysledek + "</tr>";
+}
+
+function tabulkaHlavicka(sloupce) {
+    var vysledek = "";
+    $.each(sloupce, function(i, sloupec) {
+        vysledek += "<th>" + sloupec + "</th>";
+    });
+    return "<tr>" + vysledek + "</tr>";
+}
+
+
+function zobrazitPrihlaseni() {
+    var text = '\
+        <h1>Přihlaste se</h1>\
+        <span class="login">\
+        <input placeholder="Jméno" id="login" value="ucitel" type="text"><br>\
+        <input placeholder="Heslo" id="heslo" type="password"><br> \
+        <button id="prihlasit">Přihlásit se</button>\
+        <button id="registrace">Registrace</button>\
+        </span><br>\
+        <strong><a href="/databaze/">Databáze</a></strong><br>\
+        <span id="obnovJS">obnovit</span>';
+    
+    //vymazat vsechny odpocty
+    smazIntervaly();
+    
+    //odstrani hash
+    window.location.hash = "";
+
+    $("#prihlaseno").html("");
+    $("nav").html("");
+    $(stranka).html(text);
+}

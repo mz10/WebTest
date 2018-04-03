@@ -173,12 +173,12 @@ body .vysledek_True{
   margin-right: 34.375%;
   line-height: 150%; }
 
-.inout {
+#prihlaseno {
   float: right;
   text-align: right; }
-  .inout a {
+  #prihlaseno a {
     text-decoration: overline; }
-  .inout a:hover {
+  #prihlaseno a:hover {
     text-decoration: underline; }
 
 .pridat_otazku td {
@@ -668,4 +668,13 @@ input.seda {
 
 #obnovJS:hover {
   //background: yellow;
+}
+
+.tabDb input {
+	width: 30px;
+}
+
+
+#uzivatele, #log {
+  display: none;
 }

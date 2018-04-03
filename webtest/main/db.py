@@ -9,9 +9,9 @@
 ############################################################################
 from datetime import datetime
 from pony.orm import (Database, PrimaryKey, Required, Optional, Set, sql_debug)
-import webtest.spojeni
+from .spojeni import pripojit
 
-db = Database("postgres", **webtest.spojeni.DB)
+db = Database("postgres", **pripojit)
 
 class DbAkce(db.Entity):
     """evidence toho, co student v aplikací dělá: logIn, logOut"""

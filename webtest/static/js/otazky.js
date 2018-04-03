@@ -4,6 +4,7 @@
     var tlacitka =  
         '<span class="otTlacitka">\
             <button class="tlSmazat">Smazat</button>\
+            <button class="tlZadani">Zadání</button>\
             <button class="tlKostka">Kostka</button>\
             <button class="tlZobrazOdpovedi">Odpovědi</button>\
         </span>';
@@ -128,6 +129,7 @@ function otazkyKostka(e) {
         });
 
         otOdpoved.html(kod);
+        MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
     }
 }
 
@@ -193,9 +195,10 @@ function otazkyOdeslat() {
         akce: ukol, 
         co: 'otazka',
         id: idOtazky,
-        jmeno: $(stranka).find('#otJmeno').val(),
-        typ: $(stranka).find('#otTyp').val(),
-        bodu: $(stranka).find('#otBodu').val(),
+        jmeno: ph('#otJmeno'),
+        typ: ph('#otTyp'),
+        bodu: ph('#otBodu'),
+        vyhodnotit: ph('#otVyhodnotit'),
         zadani: Simplemde.value(), //soubor lista.js
         spravne: seznamDobre,
         spatne: seznamSpatne,
@@ -215,7 +218,7 @@ function otazkyOdeslat() {
     }
 }
 
-function otazkyVlozit() {
+function otazkyVlozit(e) {
     var input = e.currentTarget;
     var hodnota = input.value;    
     var inputy = e.currentTarget.parentElement.parentElement.children;

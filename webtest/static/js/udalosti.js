@@ -122,10 +122,15 @@ $(document).on("click", ".otTlacitka .tlZadani", function(e) {
     $.getJSON("/json/otazky/" + idOtazky, function(json) {         
         var zadani = json.otazka.zadani.replace(/\n/g,"<br>")
         if(zadaniJakoHTML)
-            zadani = json.otazka.zadaniHTML;
+            zadani = json.otazka.zadaniHTML;    
+        else
+            zadani = "<p>" + zadani + "</p>";
             
         zadaniJakoHTML = !zadaniJakoHTML;
         $(".otazka[cislo=" + idOtazky + "] .otZadani").html(zadani);
+        
+        if(!zadaniJakoHTML)
+            MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
     });
 });
 
@@ -239,7 +244,108 @@ $(document).on("click", "#trOdeslat", tridyOdeslat);
 //odeslat osobu - student/ucitel
 $(document).on("click", "#osOdeslat", osobaOdeslat);
 
+//prihlaseni
+$(document).on("click", "#prihlasit", prihlasit);
+
+$(document).on("click", "#odhlasit", odhlasit);
+
 //registrace
 $(document).on("click", "#registrace", function(e) {
     osobaPridat("ucitel");
 });
+
+
+$(document).on("click", ".logo2", function(e) {
+
+    var json = {
+        akce:'test', 
+        co:'nic'
+    };
+
+
+    /*
+    wsJSON(json, function(odpoved) {
+        hlaska("ws: " + odpoved);
+    });
+    */
+    ws.emit('neco', false);
+});
+
+$(window).on("unload", function() {
+    ws && ws.emit('odpojit', false);
+});
+$(window).on("beforeunload", function() {
+    ws && ws.emit('odpojit', false);
+});
+
+$(document).on("click", ".radekAkce", tabulkaZmenitZaznam);
+
+//vkladani textu do tabulky
+$(document).on("mouseenter", ".tabDb tr", function(e) {
+    //tabulkaUpravit(this);
+}).on("mouseleave", ".tabDb tr", function(e) {
+    //tabulkaUpravit(this,true);
+});
+
+//zmena hodnoty v tabulce
+$(document).on("keyup", ".tabInput", function(e) {
+    var tlacitko = e.currentTarget.parentElement
+        .parentElement.lastChild.firstChild;
+    $(tlacitko).text("Změnit");
+});
+
+//zmena hodnoty v tabulce - u selectu
+$(document).on("change", ".tbTridy", function(e) {
+    var tlacitko = e.currentTarget.parentElement
+        .parentElement.lastChild.firstChild;
+   
+    $(tlacitko).text("Změnit");
+});
+
+
+$(window).on("visibilitychange", function(e) {
+    if(document.hidden) {
+        ws && ws.emit("info","s");
+    }
+    else
+        ws && ws.emit("info","z");
+});
+
+$(window).on('blur', function(){
+    //$("html").hide();
+    ws && ws.emit("info","b");
+ });
+ 
+ $(window).on('focus', function(){
+    //$("html").show();
+    ws && ws.emit("info","f");
+ });
+
+function wsUdalosti() {
+    websocket();
+
+    ws.on('connect', function() {
+        ws.emit("prihlasit",false);
+        
+        ws.on('odpoved', function(o) {
+            hlaska(o);
+        });
+    
+        ws.on('disconnect', function() {
+            //ws.off('odpoved');
+        }); 
+        
+        ws.on('pocet', function(o) {
+            $("#prihlasenych").text(o);
+        });
+        
+        ws.on('log', function(json) {
+            pridatZaznam(json);
+        }); 
+        
+        ws.on('uzivatele', function(json) {
+            zobrazPrihlasene(json);
+        }); 
+
+    });
+}

@@ -4,13 +4,13 @@ from typogrify.filters import typogrify
 from markdown import markdown
 from pony.orm import (sql_debug, get, select, db_session)
 from datetime import datetime as dt
-from webtest.db import *
+from .db import *
 import time
 import os
 import functools
 
 from .testy import Testy
-from .funkce import Zaznamy
+from .funkce import (Zaznamy, naDesetinne)
 from .otazka import *
 
 from collections import defaultdict
@@ -18,12 +18,42 @@ from collections import defaultdict
 formatCasu = "%d.%m.%Y %H:%M"
 
 class Student:
+    def seznamStudentu():
+        studenti = select(s for s in DbStudent)
+        seznam = []
+
+        for student in studenti:
+            seznam.append(Student.zobrazStudenta(student))
+            
+        return json({"studenti": seznam})
+
+    def zobrazStudenta(student):
+        trida = None
+        idTridy = None
+
+        if student.trida:
+            tridy = get(t for t in DbTridy if t.id is student.trida.id)         
+            trida = str(tridy.poradi) + tridy.nazev
+            idTridy = tridy.id
+
+        studentInfo = {
+            "id": student.id,
+            "login": student.login,
+            "jmeno": student.jmeno,
+            "prijmeni": student.prijmeni,
+            "trida": {
+                "id": idTridy,
+                "nazev": trida,
+            },
+        }
+            
+        return studentInfo
+
     def vyplnitTest(id): 
         Zaznamy.pridat("vyplneni",session['student'])
         zacatek = dt.now().strftime("%d.%m.%Y %H:%M:%S")
 
         limit = select(t.limit for t in DbTest if t.id == id)
-
 
         # vytvori se 3 tabulky:
         # vysledekTestu, vyslednaOtazka a vyslednaOdpoved
@@ -118,8 +148,7 @@ class Student:
                 vOdpoved = DbVyslednaOdpoved[idOtOdpovedi]                
                 vOdpoved.odpoved = text   
         
-        return "Test byl odeslán" 
-                                 
+        return "Test byl odeslán"                  
 
     def hodnotit1(id):
         vysledek = ""
@@ -220,13 +249,27 @@ class Student:
 
                 vysledek[oId][oznacene].append(odpoved)
 
-            # otevrena odpoved - spatne/spravne
-            if odpoved and ocOdpoved != odpoved and typ == "otevrena":
-                vysledek[oId]["oznaceneSpatne"] = odpoved
-                vysledek[oId]["hodnoceni"] = 0  
-            elif odpoved and ocOdpoved == odpoved and typ == "otevrena":
-                vysledek[oId]["oznaceneDobre"] = odpoved
-                vysledek[oId]["hodnoceni"] = 1 
+            if typ == "otevrena":
+                #je ocekavana odpoved desetinne cislo?:
+                # zaokrouhli na 2 DM, nahradi carku za tecku a porovna
+                if not re.match("^\d+?[\.\,]\d+?$", ocOdpoved) is None:
+                    ocCislo = naDesetinne(ocOdpoved,2)
+                    stCislo = naDesetinne(odpoved,2)
+                    vysledek[oId]["ciselna"] = True
+                    
+                    if ocCislo == stCislo:
+                        vysledek[oId]["oznaceneSpravne"] = odpoved
+                        vysledek[oId]["hodnoceni"] = 1 
+                    else:
+                        vysledek[oId]["oznaceneSpatne"] = odpoved
+                        vysledek[oId]["hodnoceni"] = 0   
+                # otevrena odpoved - spatne/spravne
+                elif odpoved and ocOdpoved != odpoved:
+                    vysledek[oId]["oznaceneSpatne"] = odpoved
+                    vysledek[oId]["hodnoceni"] = 0  
+                elif odpoved and ocOdpoved == odpoved:
+                    vysledek[oId]["oznaceneDobre"] = odpoved
+                    vysledek[oId]["hodnoceni"] = 1 
 
         return json({"test": vysledek})
 
@@ -256,9 +299,7 @@ class Student:
             'otazky': seznamOtazek,
         }
 
-        return json({"test": jsTest})  
-
-
+        return json({"test": jsTest})
 
     def testy():
         if request.method == 'GET':
@@ -276,3 +317,39 @@ class Student:
             for test in testy_uzivatele:
                 print (test)
         return render_template('student_vysledky.html', testyUzivatele=testy_uzivatele)
+
+    def zmenObsah(J):
+        if J["tabulka"] != "Student":
+            return "Nemáš oprávnění měnit obsah této tabulky!!!"
+        
+        if J["id"] == "":
+            DbStudent(
+                login = J["bunky"][0],
+                jmeno =  J["bunky"][1],
+                prijmeni = J["bunky"][2],
+                trida = int(J["bunky"][3])
+            )
+
+            return "Byl vložen nový student."
+
+        id = int(J["id"])
+
+        dbId = get(o.id for o in DbStudent if o.id is id)
+
+        if not dbId:
+            return "Toto id neexistuje!"
+
+        student = DbStudent[id]
+
+        if J["akce"] == "smazat":
+            student.delete()
+            return "Student byl smazán"
+
+        elif J["akce"] == "zmenit":
+            student.login = J["bunky"][0]
+            student.jmeno = J["bunky"][1]
+            student.prijmeni = J["bunky"][2]
+            if J["bunky"][3] != "null":
+                student.trida = int(J["bunky"][3])
+
+            return "Student byl změněn."
