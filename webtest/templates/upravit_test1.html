@@ -6,9 +6,9 @@
     <br>
     <h4>Platnost:</h4>
     <input type="text" id="ttOd" placeholder='od'>
-    <img src="/static/kalendar.png" input="ttOd" class="kalendar">
+    <img src="./static/kalendar.png" input="ttOd" class="kalendar">
     <input type="text" id="ttDo" placeholder='do'>
-    <img src="/static/kalendar.png" input="ttDo" class="kalendar">    
+    <img src="./static/kalendar.png" input="ttDo" class="kalendar">    
 
     <h4>Hodnocení:</h4>
     <select id="hodnoceniTyp">
@@ -36,19 +36,33 @@
         <span class="znamka" id="ctverka">0</span>
         <span class="znamka" id="petka">0</span>
     </span>
+
+    <h4>Třídy:</h4>  
+    <div class="inputLista">
+        <select class="ttTridy">
+            <option value="0">Všechny třídy</option>	
+        </select>
+        <span class="inputTlacitka">
+            <span class="inputPridat">+</span>
+            <span class="inputSmazat">x</span>
+        </span>
+    </div>
     <br><br>
-    <input type="checkbox" id="ttSkryt">Skrýt test<br><br>
-    <input type="text" id="ttPokusu" placeholder="Počet pokusů"><br>
-    <input type="text" id="ttLimit" placeholder="Čas na test (min)"><br>
+    <input type="checkbox" id="ttSkryt">Skrýt test<br>
+    <input type="checkbox" id="ttVyber">Náhodný výběr<br><br>
+    
+    <input type="text" id="ttPokusu" placeholder="Počet pokusů">
+    <input type="text" id="ttLimit" placeholder="Čas na test (min)">
+    <input type="text" id="ttOmezeni" placeholder="Omezit počet otázek"><br>
     <br>    
     <button id="ttOdeslat">Odeslat</button>
     <button id="ttVybrat">Vybrat otázky</button>    
     <button id="ttSmazat">Smazat</button>
     <button id="ttSkrytZadani">Zobrazit zadání</button>
 
-    <h4>Otázky:</h4>    
+    <h4>Otázky:</h4> 
+    <h6>Zvolené:</h3>
+    <div id="ttZvolene"></div>       
     <h6>Dostupné:</h3>
     <div id="ttDostupne"></div>
-    <h6>Zvolené:</h3>
-    <div id="ttZvolene"></div>
 </div>

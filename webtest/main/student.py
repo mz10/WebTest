@@ -1,6 +1,5 @@
 from flask import (Flask, render_template, Markup, request, redirect, session, flash, Markup, url_for, Response)
 from werkzeug.routing import BaseConverter
-from typogrify.filters import typogrify
 from markdown import markdown
 from pony.orm import (sql_debug, get, select, db_session)
 from datetime import datetime as dt
@@ -10,7 +9,7 @@ import os
 import functools
 
 from .testy import Testy
-from .funkce import (Zaznamy, naDesetinne)
+from .funkce import (Zaznamy, naDesetinne, delka, datum, ted)
 from .otazka import *
 
 from collections import defaultdict
@@ -51,20 +50,19 @@ class Student:
 
     def vyplnitTest(id): 
         Zaznamy.pridat("vyplneni",session['student'])
-        zacatek = dt.now().strftime("%d.%m.%Y %H:%M:%S")
-
-        limit = select(t.limit for t in DbTest if t.id == id)
-
+        
         # vytvori se 3 tabulky:
         # vysledekTestu, vyslednaOtazka a vyslednaOdpoved
-        # v tabulce vyslednaOdpoved budou jen spravne a otevrene odpovedi
-        # az student vyplni test, do teto tabulky se odeslou jeho odpovedi (typ vyplneno - "V")
-        # podle id se porovna kolik odeslanych odpovedi je spravne
+        # az student vyplni test, do sloupce 'odpoved' se odeslou jeho odpovedi
+
+        test = get(u for u in DbTest if u.id is id)
 
         vTestu = DbVysledekTestu(
             student = get(s.id for s in DbStudent if s.login == session['student']),
-            test = get(u.id for u in DbTest if u.id is id),
-            casZahajeni = zacatek,
+            test = test.id,
+            jmeno = test.jmeno,
+            limit = test.limit,
+            casZahajeni = ted(),
         )
 
         cislaOtazek = select(o.otazka for o in DbOtazkaTestu if o.test.id is id)
@@ -84,7 +82,8 @@ class Student:
                 konkretniZadani = zadani["html"],
                 vysledekTestu = vTestu.id,
                 puvodniOtazka = idOtazky,
-                bodu = otazka.bodu
+                bodu = otazka.bodu,
+                hodnotit = otazka.hodnotit
             )
 
             for (odpoved, typ) in odpovedi.vypocitatVsechny():
@@ -117,13 +116,13 @@ class Student:
         test = {
             'id': vTestu.id,
             'do': "limit",
-            'limit': seznam(limit)[0],
+            'limit': seznam(test.limit)[0],
             'otazky': seznamOtazek
         }
 
         return json({"test": test})
 
-    def vyhodnotitTest(J): 
+    def odeslatTest(J): 
         Zaznamy.pridat("vyplneno",session['student'])      
         
         idTestu = int(J["idTestu"])
@@ -150,66 +149,29 @@ class Student:
         
         return "Test byl odeslán"                  
 
-    def hodnotit1(id):
-        vysledek = ""
-
-        zadaneOdpovedi = select((o.odpoved, o.typ, o.vyslednaOtazka.id) 
-            for o in DbVyslednaOdpoved if o.vysledekTestu.id is id and o.typ != "V").order_by(3)
-
-        vyplneneOdpovedi = select((o.odpoved, o.typ, o.vyslednaOtazka.id) 
-            for o in DbVyslednaOdpoved if o.vysledekTestu.id is id and o.typ == "V").order_by(3)
-
-        for o in zadaneOdpovedi:
-            vysledek += str(o) + "\n"
-
-        vysledek += "\n\n"
-
-        for o in vyplneneOdpovedi:
-            vysledek += str(o) + "\n"
-
-        vysledky = []
-
-        # vyhleda cisla spravnych odpovedi
-        for zo in zadaneOdpovedi:
-            odpoved = zo[0]
-            idOdpovedi = zo[2]
-
-            for vo in vyplneneOdpovedi:
-                if odpoved == vo[0]:
-                   vysledky.append(idOdpovedi)
-                   break
-                
-                if idOdpovedi < vo[2]: 
-                    #vysledky.append(["spatne", idOdpovedi]) 
-                    break
-                    
-        pocetOtazek = select(u for u in DbVyslednaOtazka).count()
-        pocetSpravnych = len(vysledky)
-
-        procent = pocetSpravnych/pocetOtazek*100
-
-        vTestu = DbVysledekTestu[id]
-        vTestu.procent = procent
-
-        return vysledek + "\n\n\n"  + "\n\n\n" + str(pocetOtazek) + "\n\n\n" + str(procent)
-
-
-    def hodnotit(id):
+    def vysledekTestu(id):
         # datovy typ ktery podporuje vlozeni seznamu
         vysledek = defaultdict(dict)
 
         vsechnyOdpovedi = select((o.ocekavanaOdpoved, o.odpoved, o.typ, o.vyslednaOtazka.id) 
             for o in DbVyslednaOdpoved if o.vysledekTestu.id is id).order_by(3)
 
+        typDobre = "zadaniDobre"
+        typSpatne = "zadaniSpatne"
+        typOtevrena = "zadaniOtevrena" 
+
+        oznaceneDobre = "oznaceneDobre"
+        oznaceneSpatne = "oznaceneSpatne"
+        oznaceneOtevrena = "oznaceneOtevrena"
+
         # projdou se vsechny odpovedi
         for o in vsechnyOdpovedi:
             oId = o[3]
             typ = o[2]
 
-            if typ == "D": typ = "dobre"
-            elif typ == "S": typ = "spatne"
-            elif typ == "O": typ = "otevrena"
-                 
+            if typ == "D": typ = typDobre
+            elif typ == "S": typ = typSpatne
+            elif typ == "O": typ = typOtevrena 
 
             ocOdpoved = o[0]
             odpoved = o[1]
@@ -217,61 +179,132 @@ class Student:
             if not oId in vysledek:
               vysledek[oId] = {}  
 
-            if not typ in vysledek[oId]:
-                vysledek[oId][typ] = []
+            def pridatTyp(tp):
+                if not tp in vysledek[oId]:
+                    vysledek[oId][tp] = []
+            
+            pridatTyp(typDobre)
+            pridatTyp(typSpatne)
+            pridatTyp(typOtevrena)
+            
+            pridatTyp(oznaceneDobre)
+            pridatTyp(oznaceneSpatne)
+            pridatTyp(oznaceneOtevrena)
             
             vysledek[oId][typ].append(ocOdpoved)
             
-            # zobrazi info o otazce
-            otazka = get(o for o in DbVyslednaOtazka if o.id == oId)
-            vysledek[oId]["jmeno"] = otazka.jmeno
-            vysledek[oId]["zadani"] = otazka.konkretniZadani
-            vysledek[oId]["bodu"] = otazka.bodu          
+            #a=5/0
 
+            # prida info o otazce
+            otazka = get(o for o in DbVyslednaOtazka if o.id == oId)
+            vysledek[oId].update({
+                "jmeno": otazka.jmeno,
+                "zadani": otazka.konkretniZadani,
+                "bodu": otazka.bodu,
+                "hodnotit": otazka.hodnotit,
+                "hodnoceni": 0 
+            })
 
             # priradi, ktere odpovedi jsou spravne a spatne
-            if odpoved and ocOdpoved == odpoved and typ != "otevrena":
-                if not "hodnoceni" in vysledek[oId]:
-                    vysledek[oId]["hodnoceni"] = 0               
-                                
-                oznacene = "oznaceneSpatne"
+            if odpoved and ocOdpoved == odpoved and typ != typOtevrena:                       
+                oznacene = oznaceneSpatne
                 
-                # pokud je otazka dobre, hodnoceni je 1
-                # pokud je vic spatnych nez dobrych, hodnoceni je zaporne
-                if typ == "dobre": 
-                    oznacene = "oznaceneDobre"
-                    vysledek[oId]["hodnoceni"] += 1                 
-                else:
-                    vysledek[oId]["hodnoceni"] -= 1 
-
-                if not oznacene in vysledek[oId]:
-                    vysledek[oId][oznacene] = []
+                if typ == typDobre: 
+                    oznacene = oznaceneDobre         
 
                 vysledek[oId][oznacene].append(odpoved)
 
-            if typ == "otevrena":
-                #je ocekavana odpoved desetinne cislo?:
+            if typ == typOtevrena:
+                #cislena odpoved - desetinne cislo?:
                 # zaokrouhli na 2 DM, nahradi carku za tecku a porovna
+                vysledek[oId]["ciselna"] = False
+
                 if not re.match("^\d+?[\.\,]\d+?$", ocOdpoved) is None:
                     ocCislo = naDesetinne(ocOdpoved,2)
                     stCislo = naDesetinne(odpoved,2)
-                    vysledek[oId]["ciselna"] = True
-                    
-                    if ocCislo == stCislo:
-                        vysledek[oId]["oznaceneSpravne"] = odpoved
-                        vysledek[oId]["hodnoceni"] = 1 
-                    else:
-                        vysledek[oId]["oznaceneSpatne"] = odpoved
-                        vysledek[oId]["hodnoceni"] = 0   
-                # otevrena odpoved - spatne/spravne
-                elif odpoved and ocOdpoved != odpoved:
-                    vysledek[oId]["oznaceneSpatne"] = odpoved
-                    vysledek[oId]["hodnoceni"] = 0  
-                elif odpoved and ocOdpoved == odpoved:
-                    vysledek[oId]["oznaceneDobre"] = odpoved
-                    vysledek[oId]["hodnoceni"] = 1 
+                    vysledek[oId]["ciselna"] = True                   
 
-        return json({"test": vysledek})
+                    if ocCislo == stCislo:
+                        vysledek[oId][oznaceneDobre] = odpoved
+                        vysledek[oId]["hodnoceni"] = otazka.bodu
+                    else:
+                        vysledek[oId][oznaceneSpatne] = odpoved
+                
+                # obycejna odpoved - spatne/spravne
+                elif odpoved and ocOdpoved != odpoved:
+                    vysledek[oId][oznaceneSpatne] = odpoved
+                elif odpoved and ocOdpoved == odpoved:
+                    vysledek[oId][oznaceneDobre] = odpoved
+                    vysledek[oId]["hodnoceni"] = otazka.bodu
+
+        #prideli pocet bodu k otazkam
+        for i, o in vysledek.items():
+            if len(o[typOtevrena]) > 0:
+                continue     
+            if len(o[typDobre]) == 0 and len(o[oznaceneDobre]) == 0:
+                continue
+            if len(o[typDobre]) == 0: 
+                continue
+            # pokud je v zadani 1 spravna odpoved:
+            elif len(o[typDobre]) == 1:
+                if len(o[oznaceneDobre]) == 0:
+                    continue       
+                o["hodnoceni"] = o["bodu"]
+                continue
+
+            # pokud je v zadani nekolik spravnych odpovedi:
+            spravnych = len(o[typDobre])
+            oznacenych = len(o[oznaceneDobre])
+            hodnotit = o["hodnotit"]
+
+            # pokud neni oznacena spravna odpoved:
+            if oznacenych == 0: continue
+
+            # pokud otazka obsahuje spatnou odpoved = 0 bodu:
+            if len(o[oznaceneSpatne]) > 0: continue
+
+            # podminky pridelovani bodu:
+            # pokud jsou jen nektere oznaceny:   
+            if hodnotit == 1:
+                o["hodnoceni"] = o["bodu"] 
+            # pokud jsou vsechny oznaceny:
+            elif hodnotit == 2 and spravnych == oznacenych:
+                o["hodnoceni"] = o["bodu"]
+                a=5/0
+            # castecne spravne - body se deli  
+            elif hodnotit == 3:
+                if spravnych != 0:
+                    o["hodnoceni"] = o["bodu"]*oznacenych/spravnych
+
+        # zpocita pocet bodu, prida odpovedi a prida vysledek na konec JSON
+        boduMax = 0
+        boduTest = 0
+
+        for i, o in vysledek.items():
+            boduMax += o["bodu"]
+            boduTest += o ["hodnoceni"]
+        
+        # zapise udeje do DB (pokud jeste nejsou v DB)
+        vTestu = DbVysledekTestu[id]
+        
+        if not vTestu.boduVysledek:
+            vTestu.boduVysledek = boduTest
+        if not vTestu.boduMax:
+            vTestu.boduMax = boduMax
+
+
+        jsTest = {
+            "id": vTestu.id,
+            "student": vTestu.student.login,
+            "od": datum(vTestu.casZahajeni),
+            "do": datum(vTestu.casUkonceni),
+            "boduMax": boduMax,
+            "boduTest": boduTest,
+            "procent": 100*boduTest/boduMax,          
+            "otazky": vysledek,
+        }
+
+        return json({"test": jsTest})
 
     def zobrazVysledekTestu(id):
         test = DbVysledekTestu[id]
@@ -293,8 +326,8 @@ class Student:
             'id': test.id,
             'od': test.casZahajeni.strftime(formatCasu),
             'do': test.casUkonceni.strftime(formatCasu),
-            'procent': str(test.procent),
-            'bodu': str(test.bodu),
+            'boduVysledek': str(test.boduVysledek),
+            'boduMax': str(test.boduMax),
             'student': test.student.login,
             'otazky': seznamOtazek,
         }

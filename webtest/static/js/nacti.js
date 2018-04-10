@@ -2,6 +2,7 @@ spustJS("dalsiFunkce");
 spustJS("hlavni"); 
 spustJS("otazky"); 
 spustJS("testy"); 
+spustJS("vysledky");
 spustJS("zaklad");    
 spustJS("hodnoceni"); 
 spustJS("kalendar");
@@ -10,9 +11,14 @@ spustJS("kalendar");
 ws = null;
 
 window.onload = function() {
-    spustJS("udalosti"); 
+    //hlaska("stranka nactena");
+    spustJS("udalosti");
     zmenHash();
     menuNahore();
+    
+    //navaze WS spojeni pokud je uz uzivatel prihlasen pres http
+    if ($("#odhlasit").length > 0)
+        wsUdalosti();
 
     MathJax.Hub.Config({
         tex2jax: {inlineMath: [["$","$"],["\\(","\\)"]]},
@@ -20,11 +26,13 @@ window.onload = function() {
     });
 
     document.getElementsByClassName("logo2")[0].onclick = function() {
+        console.log("Obnovit JS");
         $(document).off(); //odstrani puvodni udalosti
         obnovJS("dalsiFunkce"); 
         obnovJS("hlavni"); 
         obnovJS("otazky"); 
-        obnovJS("testy");          
+        obnovJS("testy");  
+        obnovJS("vysledky");        
         obnovJS("zaklad");    
         obnovJS("hodnoceni"); 
         obnovJS("kalendar");
@@ -40,7 +48,7 @@ function spustJS(jsSoubor) {
     var cas = new Date().getTime();
     var js = document.createElement("script");
     js.type = "text/javascript";
-    js.src = "/static/js/" + jsSoubor + ".js?" + cas;
+    js.src = "./static/js/" + jsSoubor + ".js?" + cas;
     js.setAttribute("defer", "defer");
     document.head.appendChild(js);
 }
@@ -50,7 +58,7 @@ function obnovJS(jsSoubor) {
     var js = document.createElement("script");
     odebratJS(jsSoubor);
     js.type = "text/javascript";
-    js.src = "/static/js/" + jsSoubor + ".js?" + cas;
+    js.src = "./static/js/" + jsSoubor + ".js?" + cas;
     js.setAttribute("defer", "defer");
     document.head.appendChild(js);
 }

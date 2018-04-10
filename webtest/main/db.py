@@ -13,6 +13,10 @@ from .spojeni import pripojit
 
 db = Database("postgres", **pripojit)
 
+
+
+
+
 class DbAkce(db.Entity):
     """evidence toho, co student v aplikací dělá: logIn, logOut"""
     _table_ = 'Akce'
@@ -25,8 +29,11 @@ class DbAkce(db.Entity):
 class DbVysledekTestu(db.Entity):
     _table_ = 'VysledekTestu'
     id = PrimaryKey(int, column='idVTestu', auto=True)
+    jmeno = Optional(str)
     casZahajeni = Required(datetime, column='casZ')
     casUkonceni = Optional(datetime, column='casU')
+    limit = Optional(str)
+    pokus = Optional(int)
     boduVysledek = Optional(float, column='bVysledek')
     boduMax = Optional(float, column='bMax')
     hodnoceni = Optional(str)
@@ -45,11 +52,14 @@ class DbTest(db.Entity):
     zobrazenoDo = Optional(datetime, column='ZobDo')
     limit = Optional(str)
     pokusu = Optional(int)
-    skryty = Optional(bool)
+    maxOtazek = Optional(int, column='mOtazek')
+    nahodny = Optional(bool, default=False)
+    skryty = Optional(bool, default=False)
     hodnoceni = Optional(str)
     vysledkyTestu = Set(DbVysledekTestu)
     ucitel = Required('DbUcitel')
     otazky = Set('DbOtazkaTestu')
+    tridy = Set('DbTridyTestu')
 
 
 class DbOtazka(db.Entity):
@@ -92,7 +102,7 @@ class DbUcitel(db.Entity):
     login = Required(str, 20)
     jmeno = Optional(str, 40)
     prijmeni = Optional(str)
-    hash = Required(str, 196)
+    hash = Required(str, 196, default="123")
     testy = Set(DbTest)
     otazky = Set(DbOtazka)
 
@@ -113,6 +123,7 @@ class DbTridy(db.Entity):
     nazev = Required(str, 128)
     rokUkonceni = Optional(int, column='rokUkonceni')
     studenti = Set('DbStudent')
+    tridyTestu = Set('DbTridyTestu')
 
 
 class DbZnamky(db.Entity):
@@ -137,7 +148,7 @@ class DbStudent(db.Entity):
     login = Optional(str)
     jmeno = Optional(str)
     prijmeni = Optional(str)
-    hash = Optional(str)
+    hash = Optional(str, default="123")
     akce = Set(DbAkce)
     vysledkyTestu = Set(DbVysledekTestu)
     trida = Optional(DbTridy)
@@ -157,8 +168,17 @@ class DbOtazkaTestu(db.Entity):
     _table_ = 'OtazkaTestu'
     id = PrimaryKey(int, column='idOTestu', auto=True)
     poradi = Optional(int)
+    pocet = Optional(int)
     test = Required(DbTest)
     otazka = Required(DbOtazka)
+
+
+class DbTridyTestu(db.Entity):
+    _table_ = 'TridyTestu'
+    id = PrimaryKey(int, column='idTrTestu', auto=True)
+    test = Optional(DbTest)
+    trida = Optional(DbTridy)
+
     
 sql_debug(True)
 db.generate_mapping(create_tables=True)

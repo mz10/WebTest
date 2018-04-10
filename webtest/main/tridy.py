@@ -1,6 +1,5 @@
 ﻿from flask import (Flask, render_template, Markup, request, redirect, session, flash, Markup, url_for, Response)
 from werkzeug.routing import BaseConverter
-from typogrify.filters import typogrify
 from pony.orm import (sql_debug, get, select, db_session)
 from datetime import datetime as dt
 from .db import *

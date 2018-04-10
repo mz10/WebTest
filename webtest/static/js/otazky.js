@@ -38,20 +38,21 @@
 }
 
 function otazkyUprav(idOtazky) {
-    $(stranka).load("/vzory/otazky/", nacteno);
+    $(stranka).load("./vzory/otazky/", nacteno);
 
     function nacteno() {
-        $.getJSON("/json/otazky/" + idOtazky, function(otazka) {     
+        $.getJSON("./json/otazky/" + idOtazky, function(otazka) {     
             $.each(otazka, nactiOtazku);
         }).fail(chybaIframe);
     }
 
     function nactiOtazku(i, o) {
-        $(stranka).find('#otJmeno').val(o.jmeno);
+        pr('#otJmeno').val(o.jmeno);
         Simplemde.value(o.zadani), //soubor lista.js
-        $(stranka).find('#otId').text(o.id);
-        $(stranka).find('#otTyp').val(o.typ);
-        $(stranka).find('#otBodu').val(o.bodu);
+        pr('#otId').text(o.id);
+        pr('#otTyp').val(o.typ);
+        pr('#otBodu').val(o.bodu);
+        pr('#otVyhodnotit').val(o.hodnotit);
 
         $(o.spravneZadano).each(function(i, o)  {vlozitOdpoved("dobre",o); });
         $(o.spatneZadano).each(function(i, o)   {vlozitOdpoved("spatne",o); });
@@ -107,7 +108,7 @@ function otazkyKostka(e) {
     var otOdpoved = $(".otazka[cislo=" + idOtazky + "] .otOdpovedi");
     var kod = "";
 
-    $.getJSON("/json/otazky/" + idOtazky, gj).fail(chybaIframe);
+    $.getJSON("./json/otazky/" + idOtazky, gj).fail(chybaIframe);
 
     function gj(json) {
         cl(json.otazka);
@@ -146,9 +147,9 @@ function otazkyZobrazOdpovedi(e) {
 }
 
 function otazkyPridat() {
-    $(stranka).load("/vzory/otazky/",function() {
-        $(stranka).find('h1#upravitOtazku').text("Přidat otázku"); 
-        $(stranka).find('#otSmazat').css("display","none");
+    $(stranka).load("./vzory/otazky/",function() {
+        pr('h1#upravitOtazku').text("Přidat otázku"); 
+        pr('#otSmazat').css("display","none");
         vlozitOdpoved("otevrena","");
         vlozitOdpoved("seda","");   
     });
@@ -169,22 +170,22 @@ function otazkySmazat(idOtazky) {
 }
 
 function otazkyOdeslat() {
-    var idOtazky = $(stranka).find('#otId').text();
+    var idOtazky = pr('#otId').text();
     var ukol = "pridat";      
 
     var seznamSpatne = [];
     var seznamDobre = [];  
     var seznamOtevrena = [];
 
-    $(stranka).find('input.spatne').each(function(i, o) {
+    pr('input.spatne').each(function(i, o) {
         seznamSpatne[i] = $(o).val();
     });
 
-    $(stranka).find('input.dobre').each(function(i, o) {
+    pr('input.dobre').each(function(i, o) {
         seznamDobre[i] = $(o).val();
     });  
 
-    $(stranka).find('input.otevrena').each(function(i, o) {
+    pr('input.otevrena').each(function(i, o) {
         seznamOtevrena[i] = $(o).val();
     });  
 
@@ -198,7 +199,7 @@ function otazkyOdeslat() {
         jmeno: ph('#otJmeno'),
         typ: ph('#otTyp'),
         bodu: ph('#otBodu'),
-        vyhodnotit: ph('#otVyhodnotit'),
+        hodnotit: ph('#otVyhodnotit')*1,
         zadani: Simplemde.value(), //soubor lista.js
         spravne: seznamDobre,
         spatne: seznamSpatne,
@@ -212,7 +213,7 @@ function otazkyOdeslat() {
     function odpoved(o) {
         if(o.status != 500) {
             hlaska(o.odpoved,8); 
-            window.location.hash = "Otazky";
+            prejit("Otazky");
         }
         else chybaIframe(o);
     }

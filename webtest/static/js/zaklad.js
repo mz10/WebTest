@@ -1,4 +1,7 @@
 function postJSON(json, odeslano, url) {
+    cl("Odeslaný JSON:");
+    cl(json);
+    
     if(json && typeof json === "object")
         json = JSON.stringify(json);
 
@@ -54,8 +57,10 @@ function wsJSON(json, odpoved) {
 }
 
 
-function odpovedJSON(o) {
-    console.log(o); 
+function odpovedJSON(o) { 
+    cl("Přijatá odpověď:");
+    cl(o);
+    
     if(o.status == 400)
         hlaska(o.responseText);    
     else if(o.status != 500) {
@@ -97,56 +102,6 @@ function pt(prvek) {
 
 function isInArray(hodnota, pole) {
     return pole.indexOf(hodnota) > -1;
-}
-
-
-function zmenHash() {
-    var hash = nazevStranky();
-    if(intervalDb) clearInterval(intervalDb);
-    
-    //if(!nacti) return;
-
-    $("#log").hide();
-    $("#uzivatele").hide();
-
-    if(hash=="DB") {
-        $(stranka).load("/tabulky/");
-        intervalDb = setInterval(function() {
-            $(stranka).load("/tabulky/");
-        }, 3000);
-    }
-    else if(hash=="Otazky"){
-        $.getJSON("/json/otazky/", function(json) {
-            otazkyZobraz("#stranka",json.otazky);	
-        }).fail(chybaIframe);
-    }
-    else if(hash=="Testy")
-        $.getJSON("/json/testy/", testyZobraz).fail(chybaIframe);
-    else if(hash=="Testy2")
-        $.getJSON("/json/testy/", testyStudentZobraz).fail(chybaIframe);    
-    else if(hash=="Nahrat")
-        $(stranka).load("/upload/");  
-    else if(hash=="TestyVytvorit")
-        testyUprava("pridat");
-    else if(hash=="OtazkyPridat")
-        otazkyPridat();
-    else if(hash=="Slovnik")
-        slovnikZobraz();
-    else if(hash=="Tridy")
-        tridyZobraz();     
-    else if(hash=="Studenti")
-        //osobaPridat("student");
-        studentZobraz()  
-    else if(hash=="Vysledky")
-        vysledkyZobraz();    
-    else if(hash=="Zaznamy") {
-        $(stranka).html("");
-        $("#log").show();  
-    }
-    else if(hash=="Prihlaseni") {
-        $(stranka).html("");
-        $("#uzivatele").show();
-    }                 
 }
 
 function chybaServeru(ch) {
@@ -248,7 +203,11 @@ function Nahodne(zacatek,konec) {
     return Math.floor((Math.random() * konec) + zacatek);
 }
 
-window.onhashchange = zmenHash;
+Number.prototype.zaokrouhlit = function(mista){
+    mista = Math.pow(10, mista); 
+    return Math.round(this * mista)/mista;
+}
+
 window.addEventListener("error", zobrazitChybu, true);
 
 function zobrazitChybu(e) {

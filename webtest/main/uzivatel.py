@@ -1,6 +1,5 @@
 from flask import (Flask, render_template, Markup, request, redirect, session, flash, Markup, url_for, Response)
 from werkzeug.routing import BaseConverter
-from typogrify.filters import typogrify
 from markdown import markdown
 from pony.orm import (sql_debug, get, select, db_session)
 from datetime import datetime as dt
@@ -34,15 +33,17 @@ class Uzivatel:
         html = None
         info = None
 
-        studentHash = get(s.hash for s in DbStudent if s.login == login)
-        ucitelHash = get(u.hash for u in DbUcitel if u.login == login)
+        student = get(s for s in DbStudent if s.login == login)
+        ucitel = get(u for u in DbUcitel if u.login == login)
 
-        if studentHash and pswd_check(heslo, studentHash):
+        if student and student.hash and pswd_check(heslo, student.hash):
+            Uzivatel.odpojLogin(student.login, student.prijmeni)
             prihlasen = "student"
             session['student'] = login
             Zaznamy.pridat("prihlaseni", login)
             html = render_template('studentMenu.html')
-        elif ucitelHash and pswd_check(heslo, ucitelHash):
+        elif ucitel and ucitel.hash and pswd_check(heslo, ucitel.hash):
+            Uzivatel.odpojLogin(ucitel.login, ucitel.prijmeni)
             prihlasen = "učitel"
             session['ucitel'] = login
             html = render_template('ucitelMenu.html')
@@ -117,32 +118,26 @@ class Uzivatel:
             Uzivatel.poslatZaznam("prihlasen")
 
         Uzivatel.zobrazPrihlasene()
-
-        pocet = len(ucitele) + len(studenti)
-        #posle vsem zpravu o poctu prihlasenych uzivatelu
-        ws.emit('pocet', str(pocet), namespace=nm, broadcast=True)
+        Uzivatel.pocetPrihlasenych()
 
     # ukonci spojeni WS a smaze ze seznamu prihlasenych
     def smazatSpojeni(z):
         sid = request.sid
 
         for p in ucitele:
-            if sid in p.values(): 
+            if sid in p["sid"]:
                 ucitele.remove(p)
 
         for p in studenti:
-            if sid in p.values():
+            if sid in p["sid"]:
                 Uzivatel.poslatZaznam("odhlasen") 
                 studenti.remove(p)
         
-        pocet = len(ucitele) + len(studenti)
-        
         Uzivatel.zobrazPrihlasene()
-        ws.emit('pocet', str(pocet), namespace=nm, broadcast=True)
+        Uzivatel.pocetPrihlasenych()
 
         disconnect()
         
-
     def poslatZaznam(z):
         if 'ucitel' in session: return
         
@@ -170,3 +165,57 @@ class Uzivatel:
         
         for u in ucitele:
             ws.emit("uzivatele",wsJSON(prihlaseni),namespace=nm,room=u["sid"])
+
+    def odpojUzivatele(sid,osoba="neznamy"):
+        odstraneno = False    
+        sidUcitele = None
+        
+        if hasattr(request, 'sid'):
+            sidUcitele = request.sid
+
+        # najde jmeno ucitele ktery to odpojil
+        for p in ucitele:
+            if sidUcitele and sidUcitele in p["sid"]:
+                osoba = p["jmeno"]
+                break
+        
+        for p in ucitele:          
+            if sid in p["sid"]: 
+                ucitele.remove(p)
+                odstraneno = True
+
+        for p in studenti:
+            if sid in p["sid"]:
+                studenti.remove(p)
+                odstraneno = True
+
+        if not odstraneno: return
+
+        #odpojit uzivatele
+        ws.emit("uzivatelOdpojen",osoba,namespace=nm,room=sid)       
+        
+        #poslat tabulku prihlasenych
+        Uzivatel.zobrazPrihlasene()
+
+        Uzivatel.pocetPrihlasenych()
+
+        # funkce by mela prijimat 2 parametry
+        # s "nm" vypise chybu, ale vysledek je spravny,
+        # bez "nm" by odpojila aktualniho uzivatele
+        try: disconnect(sid,nm)
+        except: False
+
+    #posle vsem zpravu o poctu prihlasenych uzivatelu
+    def pocetPrihlasenych():
+        pocet = len(ucitele) + len(studenti)
+        ws.emit('pocet', str(pocet), namespace=nm, broadcast=True)
+
+    # odpoji uzivatele se stejnym loginem
+    def odpojLogin(login,osoba):
+        for p in studenti:
+            if login in p["login"]:
+                Uzivatel.odpojUzivatele(p["sid"],osoba)
+        
+        for p in ucitele:
+            if login in p["login"]:
+                Uzivatel.odpojUzivatele(p["sid"],osoba)

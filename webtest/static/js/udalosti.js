@@ -29,7 +29,7 @@ $(document).on("click", "#ttVybrat", testyVymenOtazky);
 $(document).on("click", stranka + " > .otazka", function(e) {
     if(e.target.localName == "button") return false;
     if(e.target.localName == "textarea") return false;
-    window.location.hash = "OtazkyUpravit";
+    prejit("OtazkyUpravit");
     var idOtazky = e.currentTarget.attributes.cislo.value;
     otazkyUprav(idOtazky);
 });
@@ -48,14 +48,14 @@ $(document).on("click", "#ttZvolene > .otazka", function(e) {
 $(document).on("click", ".test.ucitel", function(e) {
     if(e.target.localName == "button") return false;
     if(e.target.localName == "input") return false;
-    window.location.hash = "TestyUpravit";   
+    prejit("TestyUpravit");
     var idTestu = e.currentTarget.attributes.cislo.value;    
     testyUprava("uprav",idTestu);
 }); 
 
 //kliknout na test student
 $(document).on("click", ".test.student", function(e) {
-    window.location.hash = "TestyVyzkouset";   
+    prejit("TestyVyzkouset");
     var idTestu = e.currentTarget.attributes.cislo.value;
     testyVyzkouset(idTestu);
 }); 
@@ -63,7 +63,6 @@ $(document).on("click", ".test.student", function(e) {
 $(document).on("click", "#ttSkrytZadani", function(e) {
     $(".otZadani").toggle();
 }); 
-
 
 //zobrazit tlacitka po najeti mysi - u otazek
 $(document).on("mouseenter", stranka + " > .otazka", function(e) {
@@ -119,7 +118,7 @@ var zadaniJakoHTML = false;
 $(document).on("click", ".otTlacitka .tlZadani", function(e) {
     var idOtazky =  e.target.parentElement.parentElement.attributes.cislo.value;
 
-    $.getJSON("/json/otazky/" + idOtazky, function(json) {         
+    $.getJSON("./json/otazky/" + idOtazky, function(json) {         
         var zadani = json.otazka.zadani.replace(/\n/g,"<br>")
         if(zadaniJakoHTML)
             zadani = json.otazka.zadaniHTML;    
@@ -143,13 +142,13 @@ $(document).on("click", "#ttPokusu", function(e) {
 
 //přidat nový test
 $(document).on("click", ".ttPridat", function(e) {
-    window.location.hash = "TestyVytvorit"; 
+    prejit("TestyVytvorit"); 
     //testyUprava("pridat");
 });
 
 //přidat novou otázku
 $(document).on("click", ".otPridat", function(e) {
-    window.location.hash = "OtazkyPridat"; 
+    prejit("OtazkyPridat"); 
     //otazkyPridat();
 });
 
@@ -159,7 +158,7 @@ $(document).on("click", ".otUpravitVsechny", function(e) {
 
 //vyzkouset test
 $(document).on("click", ".ttTlacitka .tlVyzkouset", function(e) {
-    window.location.hash = "TestyVyzkouset";   
+    prejit("TestyVyzkouset");   
     var idTestu = e.target.parentElement.parentElement.attributes.cislo.value;
     testyVyzkouset(idTestu);
 });
@@ -182,12 +181,16 @@ $(document).on("click", ".inputTlacitka", function(e) {
     var trida = e.target.className;
     var input = e.currentTarget.previousElementSibling;
 
+    cl(input.parentElement);
+
     if(trida == "inputSpravna")
         $(input).attr('class','dobre');
     else if (trida == "inputSpatna")
         $(input).attr('class','spatne');
     else if (trida == "inputSmazat")
         $(input.parentElement).remove();
+    else if (trida == "inputPridat")
+        $(input.parentElement).clone().insertAfter(input.parentElement);
 });
 
 //zobrazit tlacitka po najeti mysi - u inputu
@@ -251,31 +254,7 @@ $(document).on("click", "#odhlasit", odhlasit);
 
 //registrace
 $(document).on("click", "#registrace", function(e) {
-    osobaPridat("ucitel");
-});
-
-
-$(document).on("click", ".logo2", function(e) {
-
-    var json = {
-        akce:'test', 
-        co:'nic'
-    };
-
-
-    /*
-    wsJSON(json, function(odpoved) {
-        hlaska("ws: " + odpoved);
-    });
-    */
-    ws.emit('neco', false);
-});
-
-$(window).on("unload", function() {
-    ws && ws.emit('odpojit', false);
-});
-$(window).on("beforeunload", function() {
-    ws && ws.emit('odpojit', false);
+    prejit("Registrace");
 });
 
 $(document).on("click", ".radekAkce", tabulkaZmenitZaznam);
@@ -321,31 +300,29 @@ $(window).on('blur', function(){
     ws && ws.emit("info","f");
  });
 
-function wsUdalosti() {
-    websocket();
+$(window).on("unload", function() {
+    ws && ws.emit('odhlasit', false);
+});
+$(window).on("beforeunload", function() {
+    ws && ws.emit('odhlasit', false);
+});
 
-    ws.on('connect', function() {
-        ws.emit("prihlasit",false);
-        
-        ws.on('odpoved', function(o) {
-            hlaska(o);
-        });
-    
-        ws.on('disconnect', function() {
-            //ws.off('odpoved');
-        }); 
-        
-        ws.on('pocet', function(o) {
-            $("#prihlasenych").text(o);
-        });
-        
-        ws.on('log', function(json) {
-            pridatZaznam(json);
-        }); 
-        
-        ws.on('uzivatele', function(json) {
-            zobrazPrihlasene(json);
-        }); 
+//odpojit uzivatele pres websocket
+$(document).on("click", ".uzivatelOdpojit", function(e) {
+    var sid = this.parentElement.parentElement.children[0].textContent;
+    $(this).text(". . .");
+    ws && ws.emit('odpojUzivatele', sid);
+});
 
-    });
-}
+//kliknout na vysledek testu
+$(document).on("click", ".vysledek", function(e) {
+    var idTestu = this.attributes.cislo.value;
+    prejit("VysledkyTabulka/"+ idTestu*1);
+}); 
+
+
+//zobrazit vysledek testu
+$(document).on("click", ".vsZobrazit", function(e) {
+    var idVysledku = this.parentElement.parentElement.children[0].textContent;
+    prejit("VysledkyZobrazit/" + idVysledku*1);
+}); 

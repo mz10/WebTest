@@ -471,7 +471,7 @@ table {
 
   
 
-.otazka, .test {
+.otazka, .test, .vysledek {
 	padding: 5px;
 	border: 2px solid orange;
 	background:orange;
@@ -661,10 +661,9 @@ input.seda {
   background: orange;
 }
 
-#obnovJS {
+#obnovJS, #odhlasit, .otPridat, .logo2, .ttPridat {
   cursor: pointer;
 }
-
 
 #obnovJS:hover {
   //background: yellow;
@@ -677,4 +676,18 @@ input.seda {
 
 #uzivatele, #log {
   display: none;
+}
+
+.odSpatne.oznaceno, .odDobre.oznaceno {
+  color: white;
+  display: table;
+  padding-right: 5px;
+}
+
+.odSpatne.oznaceno {
+  background: red;
+}
+
+.odDobre.oznaceno {
+  background: green;
 }

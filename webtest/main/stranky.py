@@ -1,7 +1,6 @@
 from flask import *
 from flask_socketio import SocketIO, emit, join_room, leave_room, close_room, rooms, disconnect
 from werkzeug.routing import BaseConverter
-from typogrify.filters import typogrify
 from markdown import markdown
 from pony.orm import (sql_debug, get, select, db_session)
 from datetime import datetime
@@ -17,8 +16,9 @@ from .student import *
 from .testy import *
 from .otazka import *
 from .tridy import *
-from .prihlaseni import Uzivatel
+from .uzivatel import Uzivatel
 from .slovnik import Slovnik
+from .vysledky import Vysledky
 
 import time
 import os
@@ -205,6 +205,21 @@ def st(): return Student.seznamStudentu()
 @db_session
 def otazka_zobrazit(id): return Otazka.zobraz(id)
 
+@main.route('/json/vysledky/', methods=['GET'])
+#@prihlasitJSON('ucitel')
+@db_session
+def vz(): return Vysledky.vsechnyVysledky()
+
+@main.route('/json/vysledky/seznam/', methods=['GET'])
+#@prihlasitJSON('ucitel')
+@db_session
+def vs(): return Vysledky.seznamVysledku()
+
+@main.route('/json/vysledky/<id>/', methods=['GET'])
+#@prihlasitJSON('ucitel')
+@db_session
+def vt(id): return Vysledky.test(id)
+
 @main.route('/json/post/student/', methods=['POST'])
 @prihlasitJSON('student')
 @db_session
@@ -216,7 +231,8 @@ def postS():
 
     if(co == "test"):
         if akce == "vyhodnotit":
-            odpoved = Student.vyhodnotitTest(J)
+            Student.odeslatTest(J)
+            return Student.vysledekTestu(J["idTestu"])
 
     js = {
         "odpoved":odpoved,
@@ -226,11 +242,10 @@ def postS():
     return json(js)
 
 
-@main.route('/vyhodnotit/<id>', methods=['GET'])
+@main.route('/student/vyhodnotit/<id>', methods=['GET'])
 @db_session
 def ttt(id):
-    return Student.hodnotit(id)
-    #return Student.zobrazVysledekTestu(5)
+    return Student.vysledekTestu(id)
 
 @main.route('/json/post/', methods=['POST'])
 @prihlasitJSON('ucitel')
@@ -380,8 +395,10 @@ def wsp(z):
 def wsp(z): 
     Uzivatel.smazatSpojeni(z)
 
-
-
 @ws.on('info', namespace=nm)
 def info(z): 
     Uzivatel.poslatZaznam(z)
+
+@ws.on('odpojUzivatele', namespace=nm)
+def odU(sid): 
+    Uzivatel.odpojUzivatele(sid)

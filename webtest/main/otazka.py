@@ -1,6 +1,5 @@
 from flask import (Flask, render_template, Markup, request, redirect, session, flash, Markup, url_for, Response)
 from werkzeug.routing import BaseConverter
-from typogrify.filters import typogrify
 from markdown import markdown
 from pony.orm import (sql_debug, get, select, db_session)
 from datetime import datetime as dt
@@ -166,7 +165,7 @@ class Otazka:
         m = re.compile("\$slovo[1-9]\.\w+.\w+?$", re.UNICODE).sub(nahraditSlova,m)
 
         #prevede markdown do HTML
-        m = typogrify(markdown(m))
+        m = markdown(m)
         #nahradi \n novym radkem <br>
         m = m.replace("\n","<br>")
 
@@ -188,6 +187,7 @@ class Otazka:
             'jmeno':          otazka.jmeno,
             'bodu':           otazka.bodu,
             'zadani':         otazka.obecneZadani,
+            'hodnotit':       otazka.hodnotit,
             'zadaniHTML':     zadani["html"],
             'spravneZadano':  odpovedi.tridit("D"),
             'spatneZadano':   odpovedi.tridit("S"),
@@ -207,16 +207,17 @@ class Otazka:
         seznamOtazek = []
         otazky = select(o for o in DbOtazka).order_by(1)
 
-        for ot in otazky:
-            zadani = Otazka.vytvorZadani(ot.obecneZadani)
+        for otazka in otazky:
+            zadani = Otazka.vytvorZadani(otazka.obecneZadani)
 
             seznamOtazek.append({
-                'id':           ot.id,
-                'jmeno':        ot.jmeno,
-                'bodu':         ot.bodu,
-                'zadani':       ot.obecneZadani,
+                'id':           otazka.id,
+                'jmeno':        otazka.jmeno,
+                'bodu':         otazka.bodu,
+                'hodnotit':     otazka.hodnotit,
+                'zadani':       otazka.obecneZadani,               
                 'zadaniHTML':   zadani["html"],
-                'autor':        ot.ucitel.jmeno,
+                'autor':        otazka.ucitel.jmeno,
             })
 
         return json({"otazky": seznamOtazek})
@@ -232,6 +233,7 @@ class Otazka:
                 'id':       otazka.id,
                 'jmeno':    otazka.jmeno,
                 'bodu':     otazka.bodu,
+                'hodnotit': otazka.hodnotit,
                 'zadani':   otazka.obecneZadani,
                 'spravne':  odpovedi.tridit("D"),  
                 'spatne':   odpovedi.tridit("S"), 
@@ -254,42 +256,42 @@ class Otazka:
             return "Otázky byly přidány"
 
     def pridat(J):
-        with db_session:
-            nahodneJmeno = "_" + str(nahodne(1000,10000))
+        nahodneJmeno = "_" + str(nahodne(1000,10000))
 
-            # vytvorit prazdnou otazku, id je nezname!
-            # pro prirazeni odpovedi je potreba znat id
-            DbOtazka(
-                ucitel = get(u for u in DbUcitel if u.login == session['ucitel']),
-                jmeno = nahodneJmeno
-            )           
-            
-            # zjistit id teto otazky
-            idOtazky = get(u.id for u in DbOtazka if u.jmeno == nahodneJmeno)
-            
-            # vyplnit
-            Otazka.upravit(J,idOtazky)
+        # vytvorit prazdnou otazku, id je nezname!
+        # pro prirazeni odpovedi je potreba znat id
+        DbOtazka(
+            ucitel = get(u for u in DbUcitel if u.login == session['ucitel']),
+            jmeno = nahodneJmeno
+        )           
+        
+        # zjistit id teto otazky
+        idOtazky = get(u.id for u in DbOtazka if u.jmeno == nahodneJmeno)
+        
+        # vyplnit
+        Otazka.upravit(J,idOtazky)
 
-            return "Uzavřená otázka byla přidána. " + str(idOtazky)
+        return "Uzavřená otázka byla přidána. " + str(idOtazky)
 
     def upravit(J,id=0):        
-            idOtazky = id or int(J['id'])
-            otazka = DbOtazka[idOtazky]                 
-            otazka.ucitel = get(u for u in DbUcitel if u.login == session['ucitel'])
-            
-            otazka.jmeno = J['jmeno']
-            otazka.bodu = J['bodu']
-            otazka.obecneZadani = J['zadani']
+        idOtazky = id or int(J['id'])
+        otazka = DbOtazka[idOtazky]                 
+        otazka.ucitel = get(u for u in DbUcitel if u.login == session['ucitel'])
+        
+        otazka.jmeno = J['jmeno']
+        otazka.bodu = J['bodu']
+        otazka.obecneZadani = J['zadani']
+        otazka.hodnotit = J['hodnotit']
 
-            #smazat puvodni odpovedi
-            select(o for o in DbOdpoved if o.otazka.id is idOtazky).delete()
+        #smazat puvodni odpovedi
+        select(o for o in DbOdpoved if o.otazka.id is idOtazky).delete()
 
-            odpovedi = Odpovedi(otazka.id)           
-            odpovedi.pridat(J["spravne"],"D")
-            odpovedi.pridat(J["spatne"],"S")
-            odpovedi.pridat(J["otevrena"],"O")
+        odpovedi = Odpovedi(otazka.id)           
+        odpovedi.pridat(J["spravne"],"D")
+        odpovedi.pridat(J["spatne"],"S")
+        odpovedi.pridat(J["otevrena"],"O")
 
-            return "Uzavřená otázka byla upravena. " + str(idOtazky)
+        return "Uzavřená otázka byla upravena. " + str(idOtazky)
 
 
     #############################################

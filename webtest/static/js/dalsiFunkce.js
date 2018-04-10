@@ -1,3 +1,69 @@
+window.onhashchange = zmenHash;
+
+function zmenHash() {
+    var adresa = nazevStranky();
+    var hash = adresa.hash;
+    var promenna = adresa.promenna;
+    document.title = "WT: " + hash;
+
+    if(intervalDb) clearInterval(intervalDb);    
+    //if(!nacti) return;
+
+    $("#log").hide();
+    $("#uzivatele").hide();
+
+    if(hash=="DB") {
+        $(stranka).load("./tabulky/");
+        intervalDb = setInterval(function() {
+            $(stranka).load("./tabulky/");
+        }, 3000);
+    }
+    else if(hash=="Otazky"){
+        $.getJSON("./json/otazky/", function(json) {
+            otazkyZobraz("#stranka",json.otazky);	
+        }).fail(chybaIframe);
+    }
+    else if(hash=="Testy")
+        $.getJSON("./json/testy/", testyZobraz).fail(chybaIframe);
+    else if(hash=="Testy2")
+        $.getJSON("./json/testy/", testyStudentZobraz).fail(chybaIframe);    
+    else if(hash=="Nahrat")
+        $(stranka).load("./upload/");  
+    else if(hash=="TestyVytvorit")
+        testyUprava("pridat");
+    else if(hash=="OtazkyPridat")
+        otazkyPridat();
+    else if(hash=="Slovnik")
+        slovnikZobraz();
+    else if(hash=="Tridy")
+        tridyZobraz();     
+    else if(hash=="Studenti")
+        //osobaPridat("student");
+        studentZobraz()  
+    else if(hash=="Vysledky")
+        vysledkyZobrazSeznam();   
+    else if(hash=="Registrace")
+        osobaPridat("ucitel");         
+    else if(hash=="Zaznamy") {
+        $(stranka).html("");
+        $("#log").show();  
+    }
+    else if(hash=="VysledkyTabulka")
+        vysledkyTabulka(promenna);
+    else if(hash=="Hodnoceni")
+        vysledkyTabulka("");
+    else if(hash=="VysledkyZobrazit")
+        vysledkyZobraz(promenna);       
+    else if(hash=="Prihlaseni") {
+        $(stranka).html("");
+        $("#uzivatele").show();
+    }
+}
+
+function prejit(adresa) {
+    window.location.hash = "!" + adresa;
+}
+
 function menuNahore() {
     var menu = $('nav');
     var pozice = menu.offset().top;				
@@ -43,11 +109,17 @@ function zaRok() {
 }
 
 function nazevStranky() {
-    var hash = "index";
-    if(window.location.hash)
-        hash = window.location.hash.substring(1);
+    var nazev = {};
+    nazev.hash = "index";
+    nazev.promenna = null;
 
-    return hash;    
+    if(window.location.hash) {
+        var adresa = window.location.hash.substring(1).replace("!","").split("/");
+        nazev.hash = adresa[0];
+        nazev.promenna = adresa[1];
+    }
+
+    return nazev;    
 }
 
 function odpocet(prvek,cas) {
@@ -119,7 +191,7 @@ function zobrazitPrihlaseni() {
         <button id="prihlasit">Přihlásit se</button>\
         <button id="registrace">Registrace</button>\
         </span><br>\
-        <strong><a href="/databaze/">Databáze</a></strong><br>\
+        <strong><a href="./databaze/">Databáze</a></strong><br>\
         <span id="obnovJS">obnovit</span>';
     
     //vymazat vsechny odpocty
@@ -130,5 +202,42 @@ function zobrazitPrihlaseni() {
 
     $("#prihlaseno").html("");
     $("nav").html("");
+    $("#log").html("");
+    $("#uzivatele").html("");
     $(stranka).html(text);
+}
+
+
+function wsUdalosti() {
+    websocket();
+
+    ws.on('connect', function() {
+        ws.emit("prihlasit",false);
+        
+        ws.on('odpoved', function(o) {
+            hlaska(o);
+        });
+    
+        ws.on('disconnect', function() {
+
+        }); 
+        
+        ws.on('pocet', function(o) {
+            $("#prihlasenych").text(o);
+        });
+        
+        ws.on('log', function(json) {
+            pridatZaznam(json);
+        }); 
+        
+        ws.on('uzivatele', function(json) {
+            zobrazPrihlasene(json);
+        }); 
+
+        ws.on('uzivatelOdpojen', function(jmeno) {
+            odhlasit();
+            hlaska("Uživatel '" + jmeno + "' tě odpojil!",7);
+        }); 
+
+    });
 }

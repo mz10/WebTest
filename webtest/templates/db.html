@@ -48,16 +48,16 @@
         $(function() {
             /*
             $("#ajaxTest").click(function(e) {
-                $.getJSON("/test/", function(json) {
+                $.getJSON("./test/", function(json) {
                     console.log(hodnota);	
                 }); 
             });	
         */
         
-            $("#tabulky").load("/tabulky/");
+            $("#tabulky").load("./tabulky/");
 
             setInterval(function(){
-                $("#tabulky").load("/tabulky/");
+                $("#tabulky").load("./tabulky/");
             }, 3000);    
         
         });

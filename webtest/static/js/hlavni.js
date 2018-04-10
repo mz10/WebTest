@@ -55,7 +55,7 @@ function slovnikZobraz() {
 }
 
 function slovnikZobrazTabulku(nacteno) {
-    $.getJSON("/json/slovnik/", zpracujJSON).fail(chybaIframe);
+    $.getJSON("./json/slovnik/", zpracujJSON).fail(chybaIframe);
     
     var tabulka = tabulkaHlavicka(["id", "Slovo 1", "Slovo 2", "Kategorie","Jazyk",""]);
     
@@ -74,7 +74,7 @@ function slovnikZobrazTabulku(nacteno) {
 
 
 function slovnik() {
-    $(stranka).load("/static/slovnik.html");
+    $(stranka).load("./static/slovnik.html");
 } 
 
 
@@ -130,7 +130,7 @@ function tridyOdeslat() {
 
 
 function tridyZobrazTabulku(nacteno) {
-    $.getJSON("/json/tridy/", zpracujJSON).fail(chybaIframe);
+    $.getJSON("./json/tridy/", zpracujJSON).fail(chybaIframe);
     
     var tabulka = tabulkaHlavicka(["id", "Pořadí", "Název", "Rok",""]);
     
@@ -158,7 +158,7 @@ function osobaPridat(typ) {
         nadpis = "Přidat studenta";
         var option = "";
         
-        $.getJSON("/json/tridy/", function(json) {     
+        $.getJSON("./json/tridy/", function(json) {     
             $.when($.each(json.tridy, nactiTridy)).done(jsonNacten);
         }).fail(chybaIframe);
 
@@ -205,12 +205,12 @@ function osobaOdeslat() {
     }; 
 
     cl(json);
-    postJSON(json, odpovedJSON, "/json/registrace/");
+    postJSON(json, odpovedJSON, "./json/registrace/");
 }
 
 
 function studentZobrazTabulku(nacteno) {
-    $.getJSON("/json/studenti/", zpracujJSON).fail(chybaIframe);
+    $.getJSON("./json/studenti/", zpracujJSON).fail(chybaIframe);
     
     var tabulka = tabulkaHlavicka(["id", "Login", "Jméno", "Příjmení","Třída",""]);
     
@@ -241,7 +241,7 @@ function studentZobraz() {
     });
     var option = "";
 
-    $.getJSON("/json/tridy/", function(json) {     
+    $.getJSON("./json/tridy/", function(json) {     
         $.each(json.tridy, nactiTridy);
         $(stranka).find(".tbTridy").append(option);
     }).fail(chybaIframe);
@@ -304,54 +304,6 @@ function uploadOdeslat(e) {
     postJSON(soubor, odpovedJSON);
 }
 
-
-
-/****************VYSLEDKY******************* */
-
-function vysledkyZobraz() {
-
-    $.getJSON("/vyhodnotit/" + "10", zpracujJSON).fail(chybaIframe);
-    text = "";
-
-    function zpracujJSON(json) {
-        var test = json.test;
-        $.each(test, zpracujOtazky);
-        $(stranka).html(text);
-        MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
-    }
-
-    //!!!!!
-    function zpracujOtazky(i, seznam) {
-        var typ = "odSpatne";
-        if(seznam.hodnoceni >= 1)
-            typ = "odDobre";
-        
-        text += "<h2 class='" + typ + "'>Otázka " + seznam.jmeno + " (" + seznam.bodu + ")</h1>";
-        text += "<h3>" + seznam.zadani + "</h3>";
-
-        $.each(seznam.dobre, function(i, od) {
-            if(seznam.oznaceneDobre && isInArray(od, seznam.oznaceneDobre))
-                text += "<div class='odDobre'>" + od + "</div>";
-            else
-                text += "<div>" + od + "</div>";
-        });
-
-        $.each(seznam.spatne, function(i, od) {
-            if(seznam.oznaceneSpatne && isInArray(od, seznam.oznaceneSpatne))
-                text += "<div class='odSpatne'>" + od + "</div>";
-            else
-                text += "<div>" + od + "</div>";
-        });
-
-        $.each(seznam.otevrena, function(i, od) {
-            if(seznam.oznaceneDobre && isInArray(od, seznam.oznaceneDobre))
-                text += "<div class='odDobre'>" + od + "</div>";
-            else if(seznam.spatne && isInArray(od, seznam.oznaceneSpatne))
-                text += "<div class='odSpravne'>" + od + "</div>";
-        });
-
-    }
-}
 
 /** */
 
@@ -426,7 +378,7 @@ function prihlasit(e) {
     };
 
     console.log(json);
-    postJSON(json, odpoved, "/prihlasit/");
+    postJSON(json, odpoved, "./prihlasit/");
 
     function odpoved(o) {
         if(o.html)
@@ -446,8 +398,8 @@ function prihlasit(e) {
 
 }
 
-function odhlasit(e) {
-    $.getJSON("/odhlasit/", odpoved).fail(chybaIframe);
+function odhlasit() {
+    $.getJSON("./odhlasit/", odpoved).fail(chybaIframe);
 
     function odpoved(o) {
         if(o.odpoved == "odhlaseno"){
@@ -499,6 +451,8 @@ function zobrazPrihlasene(json) {
     json = JSON.parse(json); 
 
     var radky = "";
+    var odpojit = "<button class='uzivatelOdpojit'>Odpojit</button>"
+
 
     $.each(json, function(i, p) {
         radky += 
@@ -509,9 +463,9 @@ function zobrazPrihlasene(json) {
                 <td>' + p.typ + '</td>\
                 <td>' + p.trida + '</td>\
                 <td>' + p.casPrihlaseni + '</td>\
+                <td>' + odpojit + '</td>\
             </tr>';
     });
-
 
     var tabulka = 
         '<table class="tbPrihlaseni"><tr>\
@@ -521,6 +475,7 @@ function zobrazPrihlasene(json) {
             <th>Typ</th>\
             <th>Třída</th>\
             <th>Přihlášen</th>\
+            <th></th>\
         </tr>' + radky + '</table>';
 
     $("#uzivatele").html(tabulka);

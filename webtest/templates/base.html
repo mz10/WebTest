@@ -3,16 +3,16 @@
 <head>
   <title>WebTest{% block title %}{% endblock %}</title>
   <meta charset="utf-8">
-  <link rel="stylesheet" href="/static/styles.css">
-  <link rel="shortcut icon" href="/static/favico.svg" />
+  <link rel="stylesheet" href="./static/styles.css">
+  <link rel="shortcut icon" href="./static/favico.svg" />
   <script type="text/javascript" async src="http://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_CHTML"></script>
-  <script src="/static/js/jquery-3.2.1.min.js"></script>
-  <script src="/static/ssrefresh.js"></script> 
-  <script src="/static/js/socketio.min.js"></script>
-  <script src="/static/simplemde/simplemde.min.js" defer></script>
-  <script src="/static/simplemde/lista.js" defer></script>
-  <script src="/static/js/nacti.js"></script>
-  <link rel="stylesheet" href="/static/simplemde/simplemde.min.css" media="none" onload="if(media!=='all')media='all'">
+  <script src="./static/js/jquery-3.2.1.min.js"></script>
+  <script src="./static/ssrefresh.js"></script> 
+  <script src="./static/js/socketio.min.js"></script>
+  <script src="./static/simplemde/simplemde.min.js" defer></script>
+  <script src="./static/simplemde/lista.js" defer></script>
+  <script src="./static/js/nacti.js"></script>
+  <link rel="stylesheet" href="./static/simplemde/simplemde.min.css" media="none" onload="if(media!=='all')media='all'">
 
 </head>
 
@@ -22,13 +22,14 @@
     <span id="prihlaseno">
       {% if 'student' in session %}
         student: <a id="odhlasit">ucitel</a><br>
-        Přihlášených: <span id="prihlasenych">0</span></span>                            
+        Přihlášených: <span id="prihlasenych">0</span>
+    </span>                            
       {% elif 'ucitel' in session %}
         učitel: <a id="odhlasit">ucitel</a><br>
-        Přihlášených: <span id="prihlasenych">0</span></span>   
+        Přihlášených: <span id="prihlasenych">0</span>  
       {% endif %}
     </span>
-    <a href="/"><img class="logo" src="/static/logo.svg">>WebTest</a>
+    <a href="./"><img class="logo" src="./static/logo.svg">WebTest</a>
     <span class="logo2">
       <span class="bar0"></span>
       <span class="bar1"></span>

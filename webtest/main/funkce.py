@@ -1,6 +1,5 @@
 from flask import (Flask, render_template, Markup, request, redirect, session, flash, Markup, url_for, Response)
 from werkzeug.routing import BaseConverter
-from typogrify.filters import typogrify
 from markdown import markdown
 from pony.orm import (sql_debug, get, select, db_session)
 from datetime import datetime as dt
@@ -16,6 +15,7 @@ import sys
 import re
 import json as _json
 import sympy
+import math
 
 from decimal import Decimal
 from sympy import init_printing, Symbol
@@ -114,6 +114,15 @@ def vypocitej(text,promenne):
             vyraz = str(sympy.simplify(vyraz))
             #nahradi mocninu v pythonu, aby se zobrazila spravne v MathJax
             vyraz = vyraz.replace("**", "^")
+
+            #pokusi se zaokrouhlit vyraz na max 4 mista
+            try:    
+                vyraz = float(vyraz)
+                vyraz = ('%.14f' % round(vyraz,4)).rstrip('0').rstrip('.')
+            except: True
+            
+            return vyraz
+
         except NameError:
             return vyraz
         except Exception as e:
@@ -131,6 +140,15 @@ def vypocitej(text,promenne):
     #regularni vyraz - funkce nahore
     text = re.compile("\[(.*?)\]").sub(nahraditVyrazy,text)
     return str(text)
+
+def datum(d):
+    if d:
+        return d.strftime(formatCasu)
+    return None
+
+def delka(p):
+    if p: return len(p)
+    return 0
 
 def json(js):
     return Response(response=_json.dumps(js),status=200,mimetype="application/json")

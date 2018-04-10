@@ -1,36 +1,33 @@
 ﻿function testyOdeslat() {
-    var idTestu = $(stranka).find('#ttId').text();
+    var tridy = [];
+
+    $.each(pr(".ttTridy"), function(i, t) {
+        tridy.push($(t).val()*1);
+    });     
+    
+    var idTestu = pt('#ttId');
     var ukol = "pridat";      
 
-    if(idTestu)
-        ukol = "upravit";
+    if(idTestu) ukol = "upravit";
 
     var json = {
-        akce: ukol, 
-        co: 'test',
-        id: idTestu,
-        jmeno: $(stranka).find('#ttNazev').val(),
-        od: $(stranka).find('#ttOd').val(),
-        do: $(stranka).find('#ttDo').val(),
-        hodnoceni: null,
-        pokusu: $("#ttPokusu").val(),       
-        limit: $("#ttLimit").val(),
-        skryty:  $("#ttSkryt")[0].checked,          
-        otazky: testyVyberOtazky()
+        akce:       ukol, 
+        co:         'test',
+        id:         idTestu,
+        jmeno:      ph('#ttNazev'),
+        od:         ph('#ttOd'),
+        do:         ph('#ttDo'),
+        hodnoceni:  null,
+        pokusu:     ph("#ttPokusu"),       
+        limit:      ph("#ttLimit"),
+        skryty:     $("#ttSkryt")[0].checked,  
+        nahodny:    $("#ttVyber")[0].checked, 
+        omezit:     ph("#ttOmezeni"),
+        otazky:     testyVyberOtazky(),
+        tridy:      tridy
     };
 
-    cl(json);
-
-    postJSON(json, odpoved);
-
-    function odpoved(o) {
-        console.log(o); 
-        if(o.status != 500) {
-            hlaska(o.odpoved,8); 
-            //window.location.hash = "Otazky";
-        }
-        else chybaIframe(o);
-    }
+    postJSON(json, odpovedJSON);
 }
 
 function testyZobraz(json) {
@@ -85,7 +82,7 @@ function testyStudentZobraz(json) {
 }
 
 function testyVyzkouset(idTestu) {
-    $.getJSON("/json/student/testy/" + idTestu, zpracujJSON).fail(chybaIframe);
+    $.getJSON("./json/student/testy/" + idTestu, zpracujJSON).fail(chybaIframe);
     text = "";
     //vymazat vsechny odpocty
     smazIntervaly();
@@ -125,18 +122,24 @@ function testyVyzkouset(idTestu) {
 function testyUprava(akce,idTestu) {
     //kód je asynchroní!
 
-    $(stranka).load("/vzory/testy/", nacteno);
+    $(stranka).load("./vzory/testy/", nacteno);
 
     function nacteno() { 
         nastavZnamky(1);  
-        $.getJSON("/json/testy/", zpracujJSON).fail(chybaIframe);
+        $.getJSON("./json/testy/", zpracujJSON).fail(chybaIframe);
+        
+        $.getJSON("./json/tridy/", function(json) {     
+            $.each(json.tridy, nactiTridy);
+            $(".ttTridy").append(option);
+        }).fail(chybaIframe);
     }
 
     var seznamOtazek = [];
+    var seznamTridy = [];
 
     function zpracujJSON(json) {
         if(akce == "uprav")
-            $.each(json.testy, foreach);
+            $.each(json.testy, zpracujTest);
         else if(akce == "pridat")
             pridatTest();
         
@@ -146,28 +149,32 @@ function testyUprava(akce,idTestu) {
     function pridatTest() {
         var datum = dnes();
         var dalsiRok = zaRok();
-        $(stranka).find('h1#upravitTest').text("Přidat test");
-        $(stranka).find('#ttSmazat').hide();
-        $(stranka).find('#ttOd').val(datum);
-        $(stranka).find('#ttDo').val(dalsiRok);        
+        pr('h1#upravitTest').text("Přidat test");
+        pr('#ttSmazat').hide();
+        pr('#ttOd').val(datum);
+        pr('#ttDo').val(dalsiRok); 
+
     }
 
-    function foreach(i, t) {
+    function zpracujTest(i, t) {
         if(t.id==idTestu) {
-            $(stranka).find('#ttNazev').val(t.jmeno);
-            $(stranka).find('#ttId').text(t.id); 
-            $(stranka).find('#ttOd').val(t.od);
-            $(stranka).find('#ttDo').val(t.do); 
-            $(stranka).find('#ttPokusu').val(t.pokusu); 
-            $(stranka).find('#ttLimit').val(t.limit); 
-            $(stranka).find('#ttLimit').checked = t.skryty;
+            pr('#ttNazev').val(t.jmeno);
+            pr('#ttId').text(t.id); 
+            pr('#ttOd').val(t.od);
+            pr('#ttDo').val(t.do); 
+            pr('#ttPokusu').val(t.pokusu); 
+            pr('#ttLimit').val(t.limit); 
+            pr('#ttOmezeni').val(t.omezit);            
+            pr('#ttSkryt')[0].checked = t.skryty;
+            pr('#ttVyber')[0].checked = t.nahodny;
             seznamOtazek = t.otazky;
+            $.each(t.tridy, zobrazTridy);
             return;           
         }        
     }
 
     function nactiOtazky() {
-        $.getJSON("/json/otazky/", function(json) {
+        $.getJSON("./json/otazky/", function(json) {
             otazkyZobraz("#ttDostupne",json.otazky);
             otazkyZobraz("#ttZvolene",json.otazky);	   
             
@@ -190,6 +197,7 @@ function testyUprava(akce,idTestu) {
             otazka.style.display = "none";
     }
 
+
     function jeVSeznamu(id) {
         var vysledek = false;
         $.each(seznamOtazek, function(i, idO) {
@@ -199,6 +207,24 @@ function testyUprava(akce,idTestu) {
             }
         });
         return vysledek;
+    }
+    
+    
+    var option = "";
+    
+    function nactiTridy(i, t) {
+        option += '<option value=' + t.id + '>' + t.poradi + t.nazev + '</option>';
+    }
+
+    function zobrazTridy(i,t) {
+        var prvek = $(".inputLista:first").clone().insertAfter(".inputLista:first");      
+        var zaklad = '<option value="0">Všechny třídy</option>';
+        var option = '<option value=' + t.id + '>' + t.jmeno + '</option>';
+
+        var select = $(prvek[0].children[0]);
+        select.html(zaklad + option);
+        select.val(t.id);
+        if(i == 0) $(".inputLista:first").remove();
     }
 }
 
@@ -218,7 +244,7 @@ function testySmazat(idTestu) {
     function odpoved(o) {
         if(o.status != 500) {
             hlaska(o.odpoved,5);
-            $.getJSON("/json/testy/", testyZobraz)
+            $.getJSON("./json/testy/", testyZobraz)
         }
         else chybaIframe(o);
     }
@@ -257,6 +283,7 @@ function testyVyhodnotit(e) {
 
     $.each($(".odpoved.oznacena"), foreach);  
     $.each($(".odpovedOt"), foreach);
+    var idTestu = ph("#odeslatTest");
 
     function foreach(i,o) {
         var text = $(o).text() || $(o).val();
@@ -267,11 +294,13 @@ function testyVyhodnotit(e) {
     var json = {
         akce:'vyhodnotit', 
         co:'test',
-        idTestu: ph("#odeslatTest"),
+        idTestu: idTestu,
         odpovedi: seznamOdpovedi
     };
 
-    postJSON(json, odpovedJSON, "/json/post/student/");
+    postJSON(json, odpoved, "./json/post/student/");
 
-    cl(json);
+    function odpoved(o) {
+        vysledkyZobraz(idTestu);
+    }
 }
