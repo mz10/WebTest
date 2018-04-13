@@ -33,37 +33,37 @@ def pswd_check(pswd, encript):
 
 formatCasu = "%d.%m.%Y %H:%M"
 
-def prihlasit(klic):
+def prihlasit(klic1, klic2=""):
     #Dekoruje funkce, které vyžadují přihlášení
     #@prihlasit(klic)
     #klic: je klic ve slovniku session, který se kontroluje.
     
-    def decorator(function):
+    def decorator(function): 
         @functools.wraps(function)
         def wrapper(*args, **kwargs):
-            if klic in session:
+            if klic1 in session or klic2 in session:
                 return function(*args, **kwargs)
             else:
                 return redirect(url_for('login', url=request.path))
         return wrapper
     return decorator
 
-def prihlasitJSON(klic):
+def prihlasitJSON(klic1, klic2=""):
     def decorator(function):
         @functools.wraps(function)
         def wrapper(*args, **kwargs):
-            if klic in session:
+            if klic1 in session or klic2 in session:
                 return function(*args, **kwargs)
             else:
                 return "neprihlasen"
         return wrapper
     return decorator
 
-def prihlasitJSON2(klic):
+def prihlasitJSON2(klic1, klic2=""):
     def decorator(function):
         @functools.wraps(function)
         def wrapper(*args, **kwargs):
-            if klic in session:
+            if klic1 in session or klic2 in session:
                 return function(*args, **kwargs)
             else:
                 return wsJSON({"chyba":"neprihlasen"})

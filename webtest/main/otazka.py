@@ -178,6 +178,11 @@ class Otazka:
 
     def zobraz(id):
         #try:
+        oId = get(o.id for o in DbOtazka if o.id is id)
+
+        if not oId:
+            return "Tato otázka neexistuje!"
+
         otazka = DbOtazka[id]
         zadani = Otazka.vytvorZadani(otazka.obecneZadani)
         odpovedi = Odpovedi(otazka.id, zadani["promenne"])
@@ -273,8 +278,13 @@ class Otazka:
 
         return "Uzavřená otázka byla přidána. " + str(idOtazky)
 
-    def upravit(J,id=0):        
+    def upravit(J,id=0):    
         idOtazky = id or int(J['id'])
+        oId = get(o.id for o in DbOtazka if o.id is idOtazky)
+
+        if not oId:
+            return "Tato otázka neexistuje!"
+
         otazka = DbOtazka[idOtazky]                 
         otazka.ucitel = get(u for u in DbUcitel if u.login == session['ucitel'])
         

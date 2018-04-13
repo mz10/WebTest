@@ -123,9 +123,14 @@ class Student:
         return json({"test": test})
 
     def odeslatTest(J): 
+        idTestu = int(J["idTestu"])
+        vId = get(v.id for v in DbVysledekTestu if v.id is idTestu)
+
+        if not vId:
+            return "Tento výsledek testu neexistuje!"
+
         Zaznamy.pridat("vyplneno",session['student'])      
         
-        idTestu = int(J["idTestu"])
         vTestu = DbVysledekTestu[idTestu]
         vTestu.casUkonceni = dt.now().strftime(formatCasu)
 
@@ -150,8 +155,19 @@ class Student:
         return "Test byl odeslán"                  
 
     def vysledekTestu(id):
-        # datovy typ ktery podporuje vlozeni seznamu
-        vysledek = defaultdict(dict)
+        vId = get(v.id for v in DbVysledekTestu if v.id is id)
+
+        if not vId:
+            return "Tento výsledek testu neexistuje!"        
+
+        vTestu = DbVysledekTestu[id]
+
+        # zjisti, jestli ma student si tento vysledek pravo zobrazit
+        if "student" in session:
+            sId = get(s.id for s in DbStudent if s.login == session['student'])   
+ 
+            if sId != vTestu.student.id:
+                return "Nemáš právo zobrazit tento výsledek!"
 
         vsechnyOdpovedi = select((o.ocekavanaOdpoved, o.odpoved, o.typ, o.vyslednaOtazka.id) 
             for o in DbVyslednaOdpoved if o.vysledekTestu.id is id).order_by(3)
@@ -163,6 +179,9 @@ class Student:
         oznaceneDobre = "oznaceneDobre"
         oznaceneSpatne = "oznaceneSpatne"
         oznaceneOtevrena = "oznaceneOtevrena"
+
+        # datovy typ ktery podporuje vlozeni seznamu
+        vysledek = defaultdict(dict)
 
         # projdou se vsechny odpovedi
         for o in vsechnyOdpovedi:
@@ -285,7 +304,6 @@ class Student:
             boduTest += o ["hodnoceni"]
         
         # zapise udeje do DB (pokud jeste nejsou v DB)
-        vTestu = DbVysledekTestu[id]
         
         if not vTestu.boduVysledek:
             vTestu.boduVysledek = boduTest
@@ -307,6 +325,11 @@ class Student:
         return json({"test": jsTest})
 
     def zobrazVysledekTestu(id):
+        vId = get(v.id for v in DbVysledekTestu if v.id is id)
+
+        if not vId:
+            return "Tento výsledek testu neexistuje!"
+
         test = DbVysledekTestu[id]
         otazky = select(o for o in DbVyslednaOtazka if o.vysledekTestu.id is test.id)
         seznamOtazek = []

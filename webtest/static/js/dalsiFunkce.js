@@ -26,7 +26,7 @@ function zmenHash() {
     else if(hash=="Testy")
         $.getJSON("./json/testy/", testyZobraz).fail(chybaIframe);
     else if(hash=="Testy2")
-        $.getJSON("./json/testy/", testyStudentZobraz).fail(chybaIframe);    
+        $.getJSON("./json/student/testy/", testyStudentZobraz).fail(chybaIframe);    
     else if(hash=="Nahrat")
         $(stranka).load("./upload/");  
     else if(hash=="TestyVytvorit")

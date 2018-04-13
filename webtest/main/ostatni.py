@@ -31,7 +31,8 @@ class Ostatni:
                     login = J['login'],
                     jmeno = J['jmeno'],
                     prijmeni = J['prijmeni'],
-                    hash =  J['heslo']
+                    hash =  J['heslo'],
+                    admin = J['admin']
                 )
 
                 odpoved = "Nový učitel byl přidán"

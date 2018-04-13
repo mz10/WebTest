@@ -182,7 +182,8 @@ function osobaPridat(typ) {
                 <input type="text" id="osLogin" placeholder="Login"><br>\
                 <input type="password" id="osHeslo" placeholder="Heslo"><br>\
                 <input type="text" id="osJmeno" placeholder="Jméno"><br>\
-                <input type="text" id="osPrijmeni" placeholder="Přijmení"><br>'
+                <input type="text" id="osPrijmeni" placeholder="Přijmení"><br>\
+                <input type="checkbox" id="osAdmin"> Admin<br>'
                 + select + '\
                 <button value="' + typ + '" id="osOdeslat">Odeslat</button>\
             </div>';
@@ -201,6 +202,7 @@ function osobaOdeslat() {
         heslo: ph('#osHeslo'),
         jmeno: ph('#osJmeno'),
         prijmeni: ph('#osPrijmeni'),
+        admin: pr('#osAdmin')[0].checked,
         trida: ph('#osTrida'),
     }; 
 
@@ -346,11 +348,19 @@ function tabulkaZmenitZaznam(e) {
 
     //ziska seznam bunek v tabulce (krome 1. a posledni)
     var seznamBunek = [];
+    var pocet = 0;
     for(i=1;i<radek.childElementCount-1;i++) {
-        seznamBunek.push(radek.children[i].firstChild.value);
+        var bunka = radek.children[i].firstChild.value;
+        if(bunka != "") {
+            seznamBunek.push(bunka);
+            pocet++;
+        }
     }
-    cl(radek);
-
+    
+    if(pocet == 0) {
+        hlaska("Všechny sloupce musí být vyplněny!",3);
+        return;
+    }
 
     var json = {
         akce: akce,

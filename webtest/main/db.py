@@ -103,6 +103,7 @@ class DbUcitel(db.Entity):
     jmeno = Optional(str, 40)
     prijmeni = Optional(str)
     hash = Required(str, 196, default="123")
+    admin = Optional(bool, default=False)
     testy = Set(DbTest)
     otazky = Set(DbOtazka)
 

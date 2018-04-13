@@ -10,6 +10,18 @@
 
     if(idTestu) ukol = "upravit";
 
+    if (ph('#ttNazev') == "") {
+        hlaska("Test musí mít jméno!",3); 
+        return;
+    }
+
+    var seznamOtazek = testyVyberOtazky();
+
+    if(seznamOtazek.length == 0) {
+        hlaska("V testu musí být aspoň 1 otázka!",3); 
+        return;
+    }
+    
     var json = {
         akce:       ukol, 
         co:         'test',
@@ -18,12 +30,12 @@
         od:         ph('#ttOd'),
         do:         ph('#ttDo'),
         hodnoceni:  null,
-        pokusu:     ph("#ttPokusu"),       
-        limit:      ph("#ttLimit"),
+        pokusu:     ph("#ttPokusu") || 1,       
+        limit:      ph("#ttLimit") || "5",
         skryty:     $("#ttSkryt")[0].checked,  
         nahodny:    $("#ttVyber")[0].checked, 
-        omezit:     ph("#ttOmezeni"),
-        otazky:     testyVyberOtazky(),
+        omezit:     ph("#ttOmezeni") || 0,
+        otazky:     seznamOtazek,
         tridy:      tridy
     };
 

@@ -9,11 +9,11 @@
 
     <ul>
     {% if "student" in session %}  
-      <li>Jsi přihlášen jako <strong>student: {{jmeno}} -- {{session.student}}
-                                                                </strong>.</li>
+      <li>Jsi přihlášen jako <strong>student: {{jmeno}} -- {{session.student}}</strong>.</li>
     {% elif "ucitel" in session %}  
-      <li>Jsi přihlášen jako <strong>učitel: {{jmeno}} -- {{session.ucitel}}
-                                                                </strong>.</li>
+      <li>Jsi přihlášen jako <strong>učitel: {{jmeno}} -- {{session.ucitel}}</strong>.</li>
+    {% elif "admin" in session %}  
+      <li>Jsi přihlášen jako <strong>admin: {{jmeno}} -- {{session.admin}}</strong>.</li>
     {% endif %}  
       <li>Přihlášení je platné do zavření prohlížeče.</li> 
       <li>Pokud se rozhodneš tento web opustit prosím 

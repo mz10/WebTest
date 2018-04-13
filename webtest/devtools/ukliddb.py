@@ -1,5 +1,3 @@
-# vymaze vsechny tabulky z databaze
-
 import psycopg2
 
 udaje = {

@@ -45,7 +45,12 @@ class Uzivatel:
         elif ucitel and ucitel.hash and pswd_check(heslo, ucitel.hash):
             Uzivatel.odpojLogin(ucitel.login, ucitel.prijmeni)
             prihlasen = "učitel"
-            session['ucitel'] = login
+            if ucitel.admin:
+                session['admin'] = login 
+                prihlasen = "admin"   
+            else:
+                session['ucitel'] = login
+                prihlasen = "učitel"
             html = render_template('ucitelMenu.html')
         else:  # špatně
             info = "Špatné jméno nebo heslo"
@@ -68,6 +73,9 @@ class Uzivatel:
         elif 'ucitel' in session:
             ucitel = get(u for u in DbUcitel if u.login == session['ucitel'])
             return render_template('login.html', jmeno=ucitel.jmeno)
+        elif 'admin' in session:
+            ucitel = get(u for u in DbUcitel if u.login == session['admin'])
+            return render_template('login.html', jmeno=ucitel.jmeno)
         else:
             return render_template('login.html')
 
@@ -76,6 +84,8 @@ class Uzivatel:
             session.pop('student', None)
         elif 'ucitel' in session:
             session.pop('ucitel', None)
+        elif 'admin' in session:
+            session.pop('admin', None)            
         return json({"odpoved": "odhlaseno"})
 
     def zaznamenat(z):
@@ -97,10 +107,14 @@ class Uzivatel:
                 trida = str(tridy.poradi) + tridy.nazev
         
         elif 'ucitel' in session:
-            ucitel = get(u for u in DbUcitel if u.login == session['ucitel'])
+            ucitel = get(u for u in DbUcitel if u.login == session['ucitel'])  
+            typ = "ucitel"   
             jmeno = ucitel.prijmeni
             login = ucitel.login
-            typ = "ucitel"
+        elif 'admin' in session:
+            typ = "admin"
+            jmeno = ucitel.prijmeni
+            login = ucitel.login
 
         prihlaseniInfo = {
             "sid": sid,
@@ -111,7 +125,7 @@ class Uzivatel:
             "casPrihlaseni": ted()
         }
 
-        if 'ucitel' in session:
+        if 'ucitel' in session or 'admin' in session:
             ucitele.append(prihlaseniInfo)
         else:
             studenti.append(prihlaseniInfo)

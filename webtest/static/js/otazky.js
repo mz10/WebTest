@@ -186,8 +186,22 @@ function otazkyOdeslat() {
     });  
 
     pr('input.otevrena').each(function(i, o) {
-        seznamOtevrena[i] = $(o).val();
-    });  
+        var hodnota = $(o).val();
+        if(hodnota != "")
+            seznamOtevrena[i] = $(o).val();
+    }); 
+    
+    var pocet = seznamSpatne.length + seznamDobre.length + seznamOtevrena.length;
+
+    if(pocet == 0) {
+        hlaska("Aspoň 1 odpověď musí být zadána.",3);
+        return;
+    }
+
+    if (ph('#otJmeno') == "") {
+        hlaska("Otázka musí mít jméno!",3);
+        return;  
+    }
 
     if(idOtazky)
         ukol = "upravit";
@@ -198,8 +212,8 @@ function otazkyOdeslat() {
         id: idOtazky,
         jmeno: ph('#otJmeno'),
         typ: ph('#otTyp'),
-        bodu: ph('#otBodu'),
-        hodnotit: ph('#otVyhodnotit')*1,
+        bodu: ph('#otBodu') || 0,
+        hodnotit: ph('#otVyhodnotit')*1 || 1,
         zadani: Simplemde.value(), //soubor lista.js
         spravne: seznamDobre,
         spatne: seznamSpatne,

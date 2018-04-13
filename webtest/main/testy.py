@@ -15,30 +15,59 @@ formatCasu = "%d.%m.%Y %H:%M"
 class Testy:
     def zobraz():
         seznam = []
-        testy = select(o for o in DbTest)
+        testy = None
 
-        for t in testy:
+        if "admin" in session:
+            testy = select(o for o in DbTest)
+        elif "ucitel" in session:
+            testy = select(o for o in DbTest if o.ucitel.login == session["ucitel"])
+        else:
+            return "!!!"
+
+        for test in testy:
             seznamOtazek = []
 
-            for o in select(o for o in DbOtazkaTestu if o.test.id is t.id):
+            for o in select(o for o in DbOtazkaTestu if o.test.id is test.id):
                 seznamOtazek.append(o.otazka.id)
 
-            seznam.append({
-                'id':       t.id,
-                'jmeno':    t.jmeno,
-                'od':       t.zobrazenoOd.strftime(formatCasu),
-                'do':       t.zobrazenoDo.strftime(formatCasu),
-                'autor':    t.ucitel.login,
-                'limit':    t.limit,
-                'pokusu':   t.pokusu,
-                'skryty':   t.skryty,
-                'nahodny':  t.nahodny,
-                'omezit':   t.maxOtazek,
-                'otazky':   seznamOtazek,
-                'tridy':    Testy.seznamTrid(t.id)
-            })
+            seznam.append(
+                Testy.testInfo(test,seznamOtazek)
+            )
 
         return json({"testy": seznam})
+
+    def zobrazStudent():
+        seznam = []
+        testy = None
+
+        # info o studentovi
+        student = get(s for s in DbStudent if s.login == session["student"])
+        testy = select(o for o in DbTest)
+
+        for test in testy:
+            if test.skryty: continue
+
+            # overi jestli je test prirazen k studentove tride
+            tridy = select(t.trida for t in DbTridyTestu if t.test.id is test.id)
+            pokracovat = 0
+            for trida in tridy:
+                if student.trida and trida and trida.id != student.trida.id:
+                    pokracovat +=1
+            
+            if pokracovat > 0:
+                continue
+
+            seznamOtazek = []
+
+            for o in select(o for o in DbOtazkaTestu if o.test.id is test.id):
+                seznamOtazek.append(o.otazka.id)
+
+            seznam.append(
+                Testy.testInfo(test,seznamOtazek)
+            )
+
+        return json({"testy": seznam})
+
 
     def zobrazTest(id):
         test = DbTest[id]
@@ -67,7 +96,11 @@ class Testy:
 
             random.shuffle(seznamOtazek)
 
-        jsTest = {
+        jsTest = Testy.testInfo(test,seznamOtazek)
+        return json({"test": jsTest})        
+
+    def testInfo(test,otazky):
+        return {
             'id':       test.id,
             'jmeno':    test.jmeno,
             'od':       test.zobrazenoOd.strftime(formatCasu),
@@ -78,11 +111,9 @@ class Testy:
             'nahodny':  test.nahodny,
             'omezit':   test.maxOtazek,
             'autor':    test.ucitel.login,
-            'otazky':   seznamOtazek,
+            'otazky':   otazky,
             'tridy':    Testy.seznamTrid(test.id)
         }
-
-        return json({"test": jsTest})        
 
     def pridat(J):
         nahodneJmeno = "_" + str(nahodne(1000,10000))
