@@ -1,5 +1,5 @@
 import psycopg2
-
+ 
 udaje = {
     "host": "localhost",
     "user": "postgres",

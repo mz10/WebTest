@@ -186,7 +186,6 @@ def otazky(): return Otazka.zobrazOtazky()
 def otazkyE(): return Otazka.export()
 
 @main.route('/json/registrace/', methods=['GET', 'POST'])
-@prihlasit('ucitel','admin')
 @db_session
 def reg(): return Ostatni.registrace(request.json)
 

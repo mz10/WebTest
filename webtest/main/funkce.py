@@ -44,7 +44,7 @@ def prihlasit(klic1, klic2=""):
             if klic1 in session or klic2 in session:
                 return function(*args, **kwargs)
             else:
-                return redirect(url_for('login', url=request.path))
+                return redirect(url_for('login'))
         return wrapper
     return decorator
 

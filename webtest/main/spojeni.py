@@ -1,4 +1,4 @@
-﻿#Přihlašovací údaje k databázi
+﻿#Přihlašovací údaje k databázi 
 
 pripojit = {
     "host": "localhost",
