@@ -208,8 +208,7 @@ function testyUprava(akce,idTestu) {
         if (!jeVSeznamu(otazka.attributes.cislo.value))      
             otazka.style.display = "none";
     }
-
-
+    
     function jeVSeznamu(id) {
         var vysledek = false;
         $.each(seznamOtazek, function(i, idO) {

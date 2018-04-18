@@ -45,31 +45,11 @@ function zobrazitKalendar(umisteni) {
 }
 
 /*************slovnik **********/
-
-
 function slovnikZobraz() {
     slovnikZobrazTabulku(function(tabulka) {
         var nadpis = "<h1>Slovník</h1>";
         $(stranka).html(nadpis + tabulka);
     });
-}
-
-function slovnikZobrazTabulku(nacteno) {
-    $.getJSON("./json/slovnik/", zpracujJSON).fail(chybaIframe);
-    
-    var tabulka = tabulkaHlavicka(["id", "Slovo 1", "Slovo 2", "Kategorie","Jazyk",""]);
-    
-    function tlacitko(text) { return "<button class='radekAkce'>" + text + "</button>"; }
-    
-    function zpracujJSON(json) {
-        $.each(json.slovnik, zobrazTabulku);
-        tabulka += tabulkaRadek(5,["", "", "", "", "", tlacitko("Přidat")]);
-        nacteno("<table class='tabDb' nazev='Slovnik'>" + tabulka + "</table>");
-    }
-
-    function zobrazTabulku(i,t) {
-        tabulka += tabulkaRadek(5,[t.id, t.slovo1, t.slovo2, t.kategorie, t.jazyk, tlacitko("Smazat")]);
-    }
 }
 
 
@@ -94,163 +74,11 @@ function slovnikOdeslat() {
 
 /***************tridy************** */
 
-function tridyPridat() {
-    var pridat = '\
-        <div class="PridatTridu">\
-            <h1>Přidat třídu</h1>\
-            <input type="text" id="trPoradi" placeholder="Pořadí"><br>\
-            <input type="text" id="trNazev" placeholder="Název"><br>\
-            <input type="text" id="trRok" placeholder="Rok ukončení"><br>\
-            <button id="trOdeslat">Odeslat</button>\
-        </div>';
-    
-    $(stranka).html(pridat);
-}
-
-
-function tridyZobraz(json) {
+function tridyZobraz() {
     tridyZobrazTabulku(function(tabulka) {
         var nadpis = "<h1>Třídy</h1>";
         $(stranka).html(nadpis + tabulka);
     });
-}
-
-
-function tridyOdeslat() {
-    var json = {
-        akce: "pridat", 
-        co: 'trida',
-        poradi: ph('#trPoradi'),
-        nazev: ph('#trNazev'),
-        rok: ph('#trRok'),
-    }; 
-
-    $.getJSON(json, odpovedJSON);
-}
-
-
-function tridyZobrazTabulku(nacteno) {
-    $.getJSON("./json/tridy/", zpracujJSON).fail(chybaIframe);
-    
-    var tabulka = tabulkaHlavicka(["id", "Pořadí", "Název", "Rok",""]);
-    
-    function tlacitko(text) { return "<button class='radekAkce'>" + text + "</button>"; }
-    
-    function zpracujJSON(json) {
-        $.each(json.tridy, zobrazTabulku);
-        tabulka += tabulkaRadek(4,["", "", "", "", tlacitko("Přidat")]);
-        nacteno("<table class='tabDb' nazev='Tridy'>" + tabulka + "</table>");
-    }
-
-    function zobrazTabulku(i,t) {
-        tabulka += tabulkaRadek(4,[t.id, t.poradi, t.nazev, t.rokUkonceni, tlacitko("Smazat")]);
-    }
-}
-
-/*******************************************/
-
-//pridat studenta nebo ucitele
-function osobaPridat(typ) {
-    var nadpis = "Přidat učitele";
-    var select = "";
-
-    if(typ == "student") {
-        nadpis = "Přidat studenta";
-        var option = "";
-        
-        $.getJSON("./json/tridy/", function(json) {     
-            $.when($.each(json.tridy, nactiTridy)).done(jsonNacten);
-        }).fail(chybaIframe);
-
-    }
-    else pridat("");
-
-    function nactiTridy(i, t) {
-        option += '<option value=' + t.id + '>' + t.poradi + t.nazev + '</option>';
-        cl(t);
-    }
-
-    function jsonNacten() {
-        select = '<select id="osTrida"><option selected disabled>Třída</option>' + option + '</select>';                           
-        pridat(select);
-    }
-
-    function pridat(select) {
-        var pridat = '\
-            <div class="osPridat">\
-                <h1>' + nadpis + '</h1>\
-                <input type="text" id="osLogin" placeholder="Login"><br>\
-                <input type="password" id="osHeslo" placeholder="Heslo"><br>\
-                <input type="text" id="osJmeno" placeholder="Jméno"><br>\
-                <input type="text" id="osPrijmeni" placeholder="Přijmení"><br>\
-                <input type="checkbox" id="osAdmin"> Admin<br>'
-                + select + '\
-                <button value="' + typ + '" id="osOdeslat">Odeslat</button>\
-            </div>';
-
-        $(stranka).html(pridat);
-    }
-}
-
-//odeslat osobu - student/ucitel
-function osobaOdeslat() {
-    var json = {
-        akce: "pridat", 
-        co: 'osoba',
-        typ: ph('#osOdeslat'),
-        login: ph('#osLogin'),
-        heslo: ph('#osHeslo'),
-        jmeno: ph('#osJmeno'),
-        prijmeni: ph('#osPrijmeni'),
-        admin: pr('#osAdmin')[0].checked,
-        trida: ph('#osTrida'),
-    }; 
-
-    cl(json);
-    postJSON(json, odpovedJSON, "./json/registrace/");
-}
-
-
-function studentZobrazTabulku(nacteno) {
-    $.getJSON("./json/studenti/", zpracujJSON).fail(chybaIframe);
-    
-    var tabulka = tabulkaHlavicka(["id", "Login", "Jméno", "Příjmení","Třída",""]);
-    
-    function tlacitko(text) { 
-        return "<button class='radekAkce'>" + text + "</button>"; 
-    }
-    
-    function zpracujJSON(json) {
-        $.each(json.studenti, zobrazTabulku);
-        var select = '<select class="tbTridy"></select>';
-        tabulka += tabulkaRadek(4,["", "", "", "", select, tlacitko("Přidat")]);
-        nacteno("<table class='tabDb' nazev='Student'>" + tabulka + "</table>");
-    }
-
-    function zobrazTabulku(i,t) {
-        var select = 
-            '<select class="tbTridy" hodnota="' + t.trida.id + '">\
-                <option selected value="' + t.trida.id + '">' + t.trida.nazev + '</option>\
-            </select>';
-        tabulka += tabulkaRadek(4,[t.id, t.login, t.jmeno, t.prijmeni, select, tlacitko("Smazat")]);
-    }
-}
-
-function studentZobraz() {
-    studentZobrazTabulku(function(tabulka) {
-        var nadpis = "<h1>Studenti</h1>";
-        $(stranka).html(nadpis + tabulka);
-    });
-    var option = "";
-
-    $.getJSON("./json/tridy/", function(json) {     
-        $.each(json.tridy, nactiTridy);
-        $(stranka).find(".tbTridy").append(option);
-    }).fail(chybaIframe);
-    
-    function nactiTridy(i, t) {
-        option += '<option value=' + t.id + '>' + t.poradi + t.nazev + '</option>';
-    }
 }
 
 function uploadNahled() {
@@ -306,103 +134,34 @@ function uploadOdeslat(e) {
     postJSON(soubor, odpovedJSON);
 }
 
-
-/** */
-
-function tabulkaUpravit(radek,zpet) {
-    for(var i=1;i<=3;i++) {
-        var bunka = radek.children[i];
-        var typ = bunka.localName;      
-
-        cl(bunka.firstChild.localName);
-
-        if(zpet && bunka.firstChild.localName == "input") {
-            var td = $('<td />', {
-                html: $(bunka.firstChild).val()
-            });
-
-            $(bunka).replaceWith(td);
-        }
-        else if (bunka.localName == "td") {
-            var input = $('<input />', {
-                type: 'text',
-                value: $(bunka).text()
-            });
-
-            $(bunka).html(input);
-        }
-           
-    }
-}
-
-function tabulkaZmenitZaznam(e) {
-    var radek = e.target.parentElement.parentElement;  
-    var tabNazev = radek.parentElement.parentElement.attributes.nazev.value;
-
-    var tlacitko = this;
-    var text = $(tlacitko).text();
-    var akce = 'smazat';
-
-    if(text == "Změnit")
-        akce = 'zmenit';
-
-    //ziska seznam bunek v tabulce (krome 1. a posledni)
-    var seznamBunek = [];
-    var pocet = 0;
-    for(i=1;i<radek.childElementCount-1;i++) {
-        var bunka = radek.children[i].firstChild.value;
-        if(bunka != "") {
-            seznamBunek.push(bunka);
-            pocet++;
-        }
-    }
-    
-    if(pocet == 0) {
-        hlaska("Všechny sloupce musí být vyplněny!",3);
-        return;
-    }
-
-    var json = {
-        akce: akce,
-        co:'radek',
-        tabulka: tabNazev,
-        id: $(radek.firstChild).text(), 
-        bunky: seznamBunek
-    }
-
-    cl(json);
-    postJSON(json, odpovedJSON);
-    if(tabNazev == "Tridy")
-        tridyZobraz();
-    else if (tabNazev == "Student")
-        studentZobraz();
-    else if (tabNazev == "Slovnik")
-        slovnikZobraz();    
-}
-
-
 function prihlasit(e) {
     var json = {
-        login: ph("#login"),
-        heslo: ph("#heslo"),
+        login: $("#login").val(),
+        heslo: $("#heslo").val(),
     };
 
     console.log(json);
     postJSON(json, odpoved, "./prihlasit/");
 
     function odpoved(o) {
-        if(o.html)
+        if(o.prihlasen != "nikdo")
             prihlaseno(o);
         if (o.info)
-            hlaska(o.info,7);
+            hlaska(o.info,3);
     }
 
     function prihlaseno(o) {
         wsUdalosti();
-        $("nav").html(o.html);
-        text = o.prihlasen + ': <a id="odhlasit">' + o.uzivatel + '</a><br>';
+        $("#prihlaseni").hide();
+        text = `<span id="typUzivatele">${o.prihlasen}</span>: <a id="odhlasit">${o.uzivatel}</a><br>`;
         text += 'Přihlášených: <span id="prihlasenych">0</span>';
         $("#prihlaseno").html(text);
+        if(o.prihlasen == "učitel")
+            $("#menuUcitel").show();
+        if(o.prihlasen == "admin")
+            $("#menuUcitel").show();
+        else if(o.prihlasen == "student")
+            $("#menuStudent").show();
         $(stranka).html("");
     }
 
@@ -420,6 +179,23 @@ function odhlasit() {
         else
             hlaska("Chyba při odhášení!",4);
     }
+}
+
+function zobrazitPrihlaseni() {
+    $("#prihlaseni").show();
+    //vymazat vsechny odpocty
+    smazIntervaly();
+    
+    //odstrani hash
+    window.location.hash = "";
+
+    $("#menuUcitel").hide();
+    $("#menuStudent").hide();
+
+    $("#prihlaseno").html("");
+    $("#log").html("");
+    $("#uzivatele").html("");
+    $(stranka).html("");
 }
 
 

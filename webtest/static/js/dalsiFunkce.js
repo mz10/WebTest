@@ -12,53 +12,63 @@ function zmenHash() {
     $("#log").hide();
     $("#uzivatele").hide();
 
-    if(hash=="DB") {
-        $(stranka).load("./tabulky/");
-        intervalDb = setInterval(function() {
+    switch (hash) {  
+        case "TestyVytvorit":    testyUprava("pridat");        break;
+        case "OtazkyPridat":     otazkyPridat();               break;
+        case "Slovnik":          slovnikZobraz();              break;
+        case "Tridy":            tridyZobraz();                break;     
+        case "Studenti":         studentZobraz();              break;
+        case "Ucitele":          uciteleZobrazTabulku();       break;
+        case "Vysledky":         vysledkyZobrazSeznam();       break;   
+        case "Registrace":       osobaPridat("ucitel");        break;       
+        case "VysledkyTabulka":  vysledkyTabulka(promenna);    break;
+        case "Hodnoceni":        vysledkyTabulka("");          break;
+        case "VysledkyZobrazit": vysledkyZobraz(promenna);     break;   
+        case "Nahrat":
+            $(stranka).load("./vzory/upload/"); 
+            break;           
+        case "Testy":
+            $.getJSON("./json/testy/", testyZobraz).fail(chybaIframe);
+            break;
+        case "Testy2":
+            $.getJSON("./json/student/testy/", testyStudentZobraz).fail(chybaIframe);   
+            break;         
+        case "Zaznamy":
+            $(stranka).html("");
+            $("#log").show(); 
+            break;
+        case "Prihlaseni":
+            $(stranka).html("");
+            $("#uzivatele").show();
+            break;
+        case "DB":        
             $(stranka).load("./tabulky/");
-        }, 3000);
-    }
-    else if(hash=="Otazky"){
-        $.getJSON("./json/otazky/", function(json) {
-            otazkyZobraz("#stranka",json.otazky);	
-        }).fail(chybaIframe);
-    }
-    else if(hash=="Testy")
-        $.getJSON("./json/testy/", testyZobraz).fail(chybaIframe);
-    else if(hash=="Testy2")
-        $.getJSON("./json/student/testy/", testyStudentZobraz).fail(chybaIframe);    
-    else if(hash=="Nahrat")
-        $(stranka).load("./upload/");  
-    else if(hash=="TestyVytvorit")
-        testyUprava("pridat");
-    else if(hash=="OtazkyPridat")
-        otazkyPridat();
-    else if(hash=="Slovnik")
-        slovnikZobraz();
-    else if(hash=="Tridy")
-        tridyZobraz();     
-    else if(hash=="Studenti")
-        //osobaPridat("student");
-        studentZobraz()  
-    else if(hash=="Vysledky")
-        vysledkyZobrazSeznam();   
-    else if(hash=="Registrace")
-        osobaPridat("ucitel");         
-    else if(hash=="Zaznamy") {
-        $(stranka).html("");
-        $("#log").show();  
-    }
-    else if(hash=="VysledkyTabulka")
-        vysledkyTabulka(promenna);
-    else if(hash=="Hodnoceni")
-        vysledkyTabulka("");
-    else if(hash=="VysledkyZobrazit")
-        vysledkyZobraz(promenna);       
-    else if(hash=="Prihlaseni") {
-        $(stranka).html("");
-        $("#uzivatele").show();
+            intervalDb = setInterval(function() {
+                $(stranka).load("./tabulky/");
+            }, 3000);        
+            break;
+        case "Otazky": 
+            $.getJSON("./json/otazky/", function(json) {
+                otazkyZobraz("#stranka",json.otazky);	
+            }).fail(chybaIframe);
+            break;
     }
 }
+
+function prihlasitUzivatele() {
+    var typ = $("#typUzivatele");
+    if(typ.length == 0) return;
+
+    if(typ.text() == "učitel")
+        $("#menuUcitel").show();
+    if(typ.text() == "admin")
+        $("#menuUcitel").show();                    
+    else if(typ.text() == "student")
+        $("#menuStudent").show();
+
+    $("#prihlaseni").hide()
+}
+
 
 function prejit(adresa) {
     window.location.hash = "!" + adresa;
@@ -181,38 +191,11 @@ function tabulkaHlavicka(sloupce) {
     return "<tr>" + vysledek + "</tr>";
 }
 
-
-function zobrazitPrihlaseni() {
-    var text = '\
-        <h1>Přihlaste se</h1>\
-        <span class="login">\
-        <input placeholder="Jméno" id="login" value="ucitel" type="text"><br>\
-        <input placeholder="Heslo" id="heslo" type="password"><br> \
-        <button id="prihlasit">Přihlásit se</button>\
-        <button id="registrace">Registrace</button>\
-        </span><br>\
-        <strong><a href="./databaze/">Databáze</a></strong><br>\
-        <span id="obnovJS">obnovit</span>';
-    
-    //vymazat vsechny odpocty
-    smazIntervaly();
-    
-    //odstrani hash
-    window.location.hash = "";
-
-    $("#prihlaseno").html("");
-    $("nav").html("");
-    $("#log").html("");
-    $("#uzivatele").html("");
-    $(stranka).html(text);
-}
-
-
 function wsUdalosti() {
     websocket();
 
     ws.on('connect', function() {
-        ws.emit("prihlasit",false);
+        ws && ws.emit("prihlasit",false);
         
         ws.on('odpoved', function(o) {
             hlaska(o);

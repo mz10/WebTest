@@ -79,6 +79,12 @@ function vysledkyZobraz(id) {
         text = "";
     
         function zpracujJSON(json) {
+            if(!json.test) {
+                hlaska(json.odpoved,4);
+                return;
+            }
+
+
             var test = json.test;
             var otazky = json.test.otazky;
     

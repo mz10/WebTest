@@ -25,33 +25,5 @@
       <strong><a href="./logout/">Odhlásit se</a></strong>;
       <strong><a href="./">Hlavní strana</a></strong>
     </p>
-
-  {% else %}
-    <div id="stranka">
-      <h1>Přihlaste se</h1>
-
-      <strong style="color:red;">
-      {% if spatne is defined %}
-        Neplatné přihlašovací údaje. Zaregistrujte se nejdřív.
-      {% endif %}
-      {% if url is defined %}
-        Stránka 
-        <a href="{{request.url_root[:-1]+url}}">{{request.url_root[:-1]+url}}</a>
-        vyžaduje přihlášení.
-      {% endif %}
-      </strong>
-
-      <span class="login">
-        <input type="text" placeholder="Jméno" id="login" value="ucitel"><br>
-        <input type="password" placeholder="Heslo" id="heslo"><br> 
-        <button id="prihlasit">Přihlásit se</button>
-        <button id="registrace">Registrace</button>
-      </span>
-      <br>
-      <strong><a href="#!DB">Databáze</a></strong><br>
-      <span id="obnovJS">obnovit
-
-      </span>
-    </div>
   {% endif %}
 {% endblock main %}

@@ -1,17 +1,12 @@
 <h1>Upload</h1>
-<p>Na tomto místě můžete hromadně vložit několik úloh nebo celý test. Formát souboru je JSON a CSV</p>
-
-<input type="radio" name="typ" value="nahratOtazky"> 
-Nahrát otázky<br>
-<input type="radio" name="typ" value="nahratTest"> 
-Nahrát celý test<br>
-<br>
-
+Na tomto místě můžete hromadně nahrát nebo stráhnout otázky nebo celý test.<br>
+Formát souboru je JSON a CSV
+<br><br>
 <a href="./json/otazky/export/">Stáhnout otázky</a><br>
 <a href="./json/testy/export/">Stáhnout testy</a><br>
 <a href="./csv/slovnik/">Stáhnout slovník</a><br>
 
-<h2>Nahrát otázky nebo slovník</h2>
+<h2>Nahrát otázky, testy nebo slovník</h2>
 <input id="upSoubor" class="skryty" type="file" accept=".txt, .json, .csv">
 <button id="upProchazet">Procházet</button>
 <button id="upOdeslat" class="skryty">Odeslat</button>
@@ -19,9 +14,3 @@ Nahrát celý test<br>
 <div id="upKontrola"></div>
 
 <textarea id="upravaJSON" class="skryty"></textarea>
-
-<h2>Příklad</h2>
-<pre>
-    <code>
-    </code>
-</pre>

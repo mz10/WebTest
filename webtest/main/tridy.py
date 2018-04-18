@@ -5,7 +5,7 @@ from datetime import datetime as dt
 from .db import *
 import json as _json
 
-from .funkce import (nahodne, json, jsonStahnout, vypocitej, chyba)
+from .funkce import (nahodne, json, jsonStahnout, vypocitej, chyba, uzivatel, uzJmeno)
 from .student import Student
 
 class Trida:

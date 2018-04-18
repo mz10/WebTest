@@ -1,22 +1,23 @@
 from flask import (Flask, render_template, Markup, request, redirect, session, flash, Markup, url_for, Response)
-from werkzeug.routing import BaseConverter
-from markdown import markdown
 from pony.orm import (sql_debug, get, select, db_session)
-from datetime import datetime as dt
+from werkzeug.routing import BaseConverter
 from flask_socketio import disconnect
+from datetime import datetime as dt
+from markdown import markdown
 
-from .db import *
 from .. import socketio as ws
+from .db import *
 
-import psycopg2
-import time
-import os
 import functools
+import psycopg2
+import operator
 import random
+import time
 import sys
+import os
 import re
 
-from .funkce import (pswd_check, json, wsJSON, ted, Zaznamy)
+from .funkce import (pswd_check, json, wsJSON, ted, Zaznamy, uzivatel, uzJmeno)
 
 studenti = []
 ucitele = []
@@ -24,68 +25,70 @@ ucitele = []
 nm = "/ws"
 
 class Uzivatel:
-    def prihlasit():
+    def index():
+        if uzivatel("ucitel") or uzivatel("admin") or uzivatel("student"):
+            Uzivatel.prihlasit(True)
+
+        return render_template('base.html')
+
+    def prihlasit(prihlasen = False):
         J = request.json
-        login = J["login"]
-        heslo = J["heslo"]
+        login = ""
+        heslo = ""
+
+        if prihlasen:
+            login = uzJmeno()
+
+        else:
+            login = J["login"]
+            heslo = J["heslo"]
         
-        prihlasen = "nikdo"
+        uzivatel = "nikdo"
         html = None
         info = None
+
+        if login == "admin": Uzivatel.admin()
 
         student = get(s for s in DbStudent if s.login == login)
         ucitel = get(u for u in DbUcitel if u.login == login)
 
         if student and student.hash and pswd_check(heslo, student.hash):
-            Uzivatel.odpojLogin(student.login, student.prijmeni)
-            prihlasen = "student"
-            session['student'] = login
+            uzivatel = "student"
+            if not prihlasen:
+                session['jmeno'] = login
+                session['typ'] = "student"
             Zaznamy.pridat("prihlaseni", login)
-            html = render_template('studentMenu.html')
         elif ucitel and ucitel.hash and pswd_check(heslo, ucitel.hash):
-            Uzivatel.odpojLogin(ucitel.login, ucitel.prijmeni)
-            prihlasen = "učitel"
+            uzivatel = "učitel"
             if ucitel.admin:
-                session['admin'] = login 
-                prihlasen = "admin"   
+                uzivatel = "admin"
+                if not prihlasen:    
+                    session['jmeno'] = login
+                    session['typ'] = "admin"   
             else:
-                session['ucitel'] = login
-                prihlasen = "učitel"
-            html = render_template('ucitelMenu.html')
+                uzivatel = "učitel"
+                if not prihlasen: 
+                    session['jmeno'] = login
+                    session['typ'] = "ucitel"   
         else:  # špatně
             info = "Špatné jméno nebo heslo"
             Uzivatel.poslatZaznam("ŠH: " + login)
 
         vysledek = {
-            "prihlasen": prihlasen, 
+            "prihlasen": uzivatel, 
             "uzivatel": login,
-            "html": html,
+            "html": "",
             "info": info,
             "spojeni": "a",
         }
 
         return json(vysledek)
 
-    def zobraz():
-        if 'student' in session:
-            student = get(s for s in DbStudent if s.login == session['student'])
-            return render_template('login.html', jmeno=student.jmeno)
-        elif 'ucitel' in session:
-            ucitel = get(u for u in DbUcitel if u.login == session['ucitel'])
-            return render_template('login.html', jmeno=ucitel.jmeno)
-        elif 'admin' in session:
-            ucitel = get(u for u in DbUcitel if u.login == session['admin'])
-            return render_template('login.html', jmeno=ucitel.jmeno)
-        else:
-            return render_template('login.html')
-
     def odhlasit():
-        if 'student' in session:
-            session.pop('student', None)
-        elif 'ucitel' in session:
-            session.pop('ucitel', None)
-        elif 'admin' in session:
-            session.pop('admin', None)            
+        if "jmeno" in session:
+            session.pop('jmeno', None)
+        if "typ" in session:
+            session.pop('typ', None)          
         return json({"odpoved": "odhlaseno"})
 
     def zaznamenat(z):
@@ -95,26 +98,34 @@ class Uzivatel:
         typ = "neznamy"
         sid = request.sid
 
-        if 'student' in session:
-            student = get(s for s in DbStudent if s.login == session['student'])
+        if uzivatel("student"):
+            student = get(s for s in DbStudent if s.login == uzJmeno())
             jmeno = student.prijmeni
             login = student.login
             typ = "student"
-            Zaznamy.pridat("prihlaseni",session['student'])
+            Zaznamy.pridat("prihlaseni",uzJmeno())
 
             if student.trida:
                 tridy = get(t for t in DbTridy if t.id is student.trida.id)         
                 trida = str(tridy.poradi) + tridy.nazev
         
-        elif 'ucitel' in session:
-            ucitel = get(u for u in DbUcitel if u.login == session['ucitel'])  
+        if uzivatel("ucitel"):
+            ucitel = get(u for u in DbUcitel if u.login == uzJmeno())  
             typ = "ucitel"   
             jmeno = ucitel.prijmeni
             login = ucitel.login
-        elif 'admin' in session:
+        elif uzivatel("admin"):
+            ucitel = get(u for u in DbUcitel if u.login == uzJmeno())
             typ = "admin"
             jmeno = ucitel.prijmeni
             login = ucitel.login
+
+        # odpoji neznameho uzivatele
+        if typ == "neznamy":
+            ws.emit("uzivatelOdpojen","neznamy",namespace=nm,room=sid)
+            try: disconnect(sid,nm)
+            except: True
+            return           
 
         prihlaseniInfo = {
             "sid": sid,
@@ -125,11 +136,16 @@ class Uzivatel:
             "casPrihlaseni": ted()
         }
 
-        if 'ucitel' in session or 'admin' in session:
-            ucitele.append(prihlaseniInfo)
-        else:
+        if uzivatel("ucitel") or uzivatel("admin"):
+            ucitele.append(prihlaseniInfo) 
+            #ws.emit("odpoved","ucitelPrihlasen: " + str(ucitele),namespace=nm)
+            ucitel = get(u for u in DbUcitel if u.login == uzJmeno())  
+            Uzivatel.odpojLogin(ucitel.login)
+        elif uzivatel("student"):
             studenti.append(prihlaseniInfo)
             Uzivatel.poslatZaznam("prihlasen")
+            student = get(s for s in DbStudent if s.login == uzJmeno())
+            Uzivatel.odpojLogin(student.login)
 
         Uzivatel.zobrazPrihlasene()
         Uzivatel.pocetPrihlasenych()
@@ -153,7 +169,8 @@ class Uzivatel:
         disconnect()
         
     def poslatZaznam(z):
-        if 'ucitel' in session: return
+        if uzivatel('ucitel') or uzivatel('admin'):
+            return
         
         student = {}
 
@@ -224,12 +241,41 @@ class Uzivatel:
         pocet = len(ucitele) + len(studenti)
         ws.emit('pocet', str(pocet), namespace=nm, broadcast=True)
 
-    # odpoji uzivatele se stejnym loginem
-    def odpojLogin(login,osoba):
-        for p in studenti:
-            if login in p["login"]:
-                Uzivatel.odpojUzivatele(p["sid"],osoba)
+    # odpoji uzivatele se stejnym loginem, krome posledniho prihlaseneho (podle datumu)
+    def odpojLogin(login):
+        # odfiltruji se ostatni loginy
+        filtr = [u for u in studenti if u["login"] == login]
         
-        for p in ucitele:
-            if login in p["login"]:
-                Uzivatel.odpojUzivatele(p["sid"],osoba)
+        # seradi se podle casu prihlaseni
+        for student in sorted(filtr, key=operator.itemgetter("casPrihlaseni")):
+            # odpojit dokud nezustane jen 1 prihlaseny login
+            if len(filtr) > 1:
+                filtr.remove(student)                   
+                Uzivatel.odpojUzivatele(student["sid"])
+
+        # odfiltruji se ostatni loginy
+        filtr = [u for u in ucitele if u["login"] == login]
+
+        # seradi se podle casu prihlaseni
+        for ucitel in sorted(filtr, key=operator.itemgetter("casPrihlaseni")):
+            # odpojit dokud nezustane jen 1 prihlaseny login
+            if len(filtr) > 1:
+                filtr.remove(ucitel)                  
+                Uzivatel.odpojUzivatele(ucitel["sid"]) 
+
+    # prida admina pokud jeste neexistuje
+    def admin():
+        jmeno = "admin"
+        admin = get(u for u in DbUcitel if u.login == jmeno)
+        
+        if admin: 
+            admin.admin = True
+            return
+
+        DbUcitel(
+            login = jmeno,
+            jmeno = jmeno,
+            prijmeni = jmeno,
+            hash = "1111",
+            admin = True
+        )

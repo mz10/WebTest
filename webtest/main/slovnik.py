@@ -14,7 +14,7 @@ import random
 import sys
 import re
 
-from .funkce import (json)
+from .funkce import (json, uzivatel, uzJmeno)
 
 class Slovnik:
     def pridat(J):
@@ -43,7 +43,7 @@ class Slovnik:
 
 
     def stahnout():
-        slovnik = select((s.slovo1, s.slovo2, s.kategorie, s.jazyk) for s in DbSlovnik).order_by(3)
+        slovnik = select((s.slovo1, s.slovo2, s.kategorie, s.jazyk) for s in DbSlovnik)
         #utf-8 hlavnicka, aby csv sel spravne zobrazit v Excelu
         csv = '\ufeff'
 
@@ -55,18 +55,17 @@ class Slovnik:
         return r
         
     def zobraz():
-        slovnik = select((s.id, s.slovo1, s.slovo2, s.kategorie, s.jazyk)
-                    for s in DbSlovnik).order_by(3)
+        slovnik = select(s for s in DbSlovnik).sort_by("s.id")
 
         seznamSlov = []
         
-        for sloupec in slovnik:
+        for radek in slovnik:
             seznamSlov.append({
-                "id": sloupec[0],
-                "slovo1": sloupec[1],
-                "slovo2": sloupec[2],
-                "kategorie": sloupec[3],
-                "jazyk": sloupec[4],
+                "id": radek.id,
+                "slovo1": radek.slovo1,
+                "slovo2": radek.slovo2,
+                "kategorie": radek.kategorie,
+                "jazyk": radek.jazyk,
             })
 
         return json({'slovnik': seznamSlov})

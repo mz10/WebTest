@@ -16,6 +16,7 @@ import re
 import json as _json
 import sympy
 import math
+import cgi
 
 from decimal import Decimal
 from sympy import init_printing, Symbol
@@ -41,10 +42,10 @@ def prihlasit(klic1, klic2=""):
     def decorator(function): 
         @functools.wraps(function)
         def wrapper(*args, **kwargs):
-            if klic1 in session or klic2 in session:
+            if "typ" in session and (session["typ"] == klic1 or session["typ"] == klic2):
                 return function(*args, **kwargs)
             else:
-                return redirect(url_for('login'))
+                return redirect(url_for('.login'))
         return wrapper
     return decorator
 
@@ -52,7 +53,7 @@ def prihlasitJSON(klic1, klic2=""):
     def decorator(function):
         @functools.wraps(function)
         def wrapper(*args, **kwargs):
-            if klic1 in session or klic2 in session:
+            if "typ" in session and (session["typ"] == klic1 or session["typ"] == klic2):
                 return function(*args, **kwargs)
             else:
                 return "neprihlasen"
@@ -62,21 +63,28 @@ def prihlasitJSON(klic1, klic2=""):
 def prihlasitJSON2(klic1, klic2=""):
     def decorator(function):
         @functools.wraps(function)
-        def wrapper(*args, **kwargs):
-            if klic1 in session or klic2 in session:
+        def wrapper(*args, **kwargs):           
+            if "typ" in session and (session["typ"] == klic1 or session["typ"] == klic2):
                 return function(*args, **kwargs)
             else:
                 return wsJSON({"chyba":"neprihlasen"})
         return wrapper
     return decorator
 
+def uzivatel(typ):
+    if not "typ" in session: 
+        return False
+    if session["typ"] == typ:
+        return True
+    
+    return False
+
+def uzJmeno():
+    if not "jmeno" in session: return "" 
+    return session["jmeno"]   
+
 def pswd_check(pswd, encript):
     return True   
-
-def vysledky1():
-    if request.method == 'GET':
-        seznam_testu = select((u.jmeno, u.id) for u in DbTest)
-        return render_template('vysledky.html', seznam_testu=seznam_testu)
 
 def nahodne(a,b):
     return str(random.randint(a,b))
@@ -127,7 +135,7 @@ def vypocitej(text,promenne):
             return vyraz
         except Exception as e:
             return "[Sympy - chybný výraz]"
-        return vyraz   
+        return vyraz  
     
     def prumer(m):
         cisla = m.group(1).split(","); 
@@ -212,6 +220,69 @@ class Ucitel:
         if request.method == 'GET':
             seznam_testu = select((u.jmeno, u.id) for u in DbTest)
             return render_template('vysledky.html', seznamTestu=seznam_testu)
+
+    def seznamUcitelu():
+        ucitele = select(s for s in DbUcitel).sort_by("s.id")
+        seznam = []
+
+        for ucitel in ucitele:
+            seznam.append({
+                "id":       ucitel.id,
+                "login":    ucitel.login,
+                "jmeno":    ucitel.jmeno,
+                "prijmeni": ucitel.prijmeni,
+                "admin":    ucitel.admin
+            })
+            
+        return json({"ucitele": seznam})
+
+    def zmenObsah(J):
+        if J["tabulka"] != "Ucitel":
+            return "Nemáš oprávnění měnit obsah této tabulky!!!"
+        
+        admin = False
+        if J["bunky"][3] == "true": admin = True
+
+        # zkontroluje, jestli uz v tabulkach neni stejny login
+        login = J["bunky"][0]
+        ucitel = get(s.id for s in DbUcitel if s.login == login)
+        student = get(s.id for s in DbStudent if s.login == login)
+
+        if J["id"] == "":
+            if (student or ucitel):
+                return "Tento login už existuje!"
+
+            DbUcitel(
+                login = login,
+                jmeno =  J["bunky"][1],
+                prijmeni = J["bunky"][2],
+                admin = admin
+            )
+
+            return "Byl přidán nový učitel."
+
+        id = int(J["id"])
+
+        dbId = get(o.id for o in DbUcitel if o.id is id)
+
+        if not dbId:
+            return "Toto id neexistuje!"
+
+        ucitel = DbUcitel[id]
+
+        if J["akce"] == "smazat":
+            ucitel.delete()
+            return "Učitel byl smazán"
+
+        elif J["akce"] == "zmenit":
+            ucitel.login = login
+            ucitel.jmeno = J["bunky"][1]
+            ucitel.prijmeni = J["bunky"][2]
+            ucitel.admin = admin
+
+            return "Učitel byl změněn."
+
+        return "Chyba - záznam nebyl přidán."
 
 class Zaznamy:
     def pridat(typ,student):

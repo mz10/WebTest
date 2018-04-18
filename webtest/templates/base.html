@@ -20,15 +20,13 @@
   <header role="banner">
   {% block header %}
     <span id="prihlaseno">
-      {% if 'student' in session %}
-        student: <a id="odhlasit">ucitel</a><br>
+      {% if session.typ and session.jmeno %}
+        <span id="typUzivatele">{{session.typ}}</span>:
+        <a id="odhlasit">{{session.jmeno}}</a><br>
         Přihlášených: <span id="prihlasenych">0</span>
-    </span>                            
-      {% elif 'ucitel' in session %}
-        učitel: <a id="odhlasit">ucitel</a><br>
-        Přihlášených: <span id="prihlasenych">0</span>  
-      {% endif %}
+      {% endif %}   
     </span>
+
     <a href="./"><img class="logo" src="./static/logo.svg">WebTest</a>
     <span class="logo2">
       <span class="bar0"></span>
@@ -39,22 +37,42 @@
       <span class="bar5"></span>
       <span class="bar6"></span>
     </span>
-    <nav role="navigation">
-    {% block menu %}
-
-    {% endblock menu %}
-    </nav>
   {% endblock header %}
   </header>
 
-{% block main %}
+<nav role="navigation" id="menuStudent">
+  <ul>
+    <li><a href="#!Hodnoceni">Hodnoceni</a></li>
+    <li><a href="#!Testy2">Testy</a></li>	
+    <li><a href="#!Ucet">Účet</a></li>    
+  </ul>
+</nav>
+<nav role="navigation" id="menuUcitel">
+  <ul>
+    <li><a href="#!Vysledky">Výsledky</a></li>
+    <li><a href="#!Otazky">Otázky</a></li>
+    <li><a href="#!Testy">Testy</a></li>
+    <li><a href="#!Tridy">Třídy</a></li>  
+    <li><a href="#!Studenti">Studenti</a></li>    
+    <li><a href="#!Ucitele">Učitelé</a></li>        
+    <li><a href="#!Slovnik">Slovník</a></li>       
+    <li><a href="#!Nahrat">Upload</a></li>
+    <li><a href="#!Zaznamy">Záznamy</a></li>
+    <li><a href="#!Prihlaseni">Přihlášení</a></li>  
+    <li><a href="#!DB">DB</a></li> 
+    <li><a href="#!Ucet">Účet</a></li> 
+  </ul>  
+</nav>
 
 <div id="stranka"></div>
-
-{% endblock main %}
-
 <div id="log"></div>
 <div id="uzivatele"></div>
+<div id="prihlaseni">
+  <h1>Přihlaste se</h1>
+  <input type="text" placeholder="Jméno" id="login" value="ucitel"><br>
+  <input type="password" placeholder="Heslo" id="heslo"><br> 
+  <button id="prihlasit">Přihlásit se</button>
+</div>
 
 {% block footer %}
   <footer>

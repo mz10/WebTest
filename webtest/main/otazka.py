@@ -7,8 +7,9 @@ from .db import *
 import re
 import random
 import sympy
+import cgi
 
-from .funkce import (nahodne, json, jsonStahnout, vypocitej, seznam)
+from .funkce import (nahodne, json, jsonStahnout, vypocitej, seznam, uzivatel, uzJmeno)
 
 class Odpovedi:
     # najde odpovedi ktere patri do otazky (podle id)
@@ -19,21 +20,21 @@ class Odpovedi:
         self.oId = oId
 
     def tridit(self,typ):
-        return [i[0] for i in self.odpovedi if i[1] == typ]
+        return [cgi.escape(i[0]) for i in self.odpovedi if i[1] == typ]
 
     def vypocitat(self,typ):
-        return [vypocitej(i[0],self.promenne) for i in self.odpovedi if i[1] == typ]
+        return [cgi.escape(vypocitej(i[0],self.promenne))
+            for i in self.odpovedi if i[1] == typ]
     
     def vypocitatVsechny(self):
         vysledek = []
         for o in self.odpovedi:
-            odpoved = vypocitej(o[0],self.promenne)
+            odpoved = cgi.escape(vypocitej(o[0],self.promenne))
             typ = o[1]
             vysledek.append([odpoved, typ])
 
         return vysledek
-
-
+        
     def pridat(self,odpovedi,typOdpovedi):
         for od in odpovedi:
             if od == "": continue
@@ -42,10 +43,26 @@ class Odpovedi:
                 odpoved = od,
                 typ = typOdpovedi,
                 otazka = self.oId
-            ) 
-
+            )
 
 class Otazka:
+    def smazat():
+        idOtazky = J["id"]
+        DbOtazka[idOtazky].delete()
+        return "Otázka s id " + idOtazky + " byla smazána"
+
+    def smazatVsechny():
+        if uzivatel("ucitel"):
+            otazky = select(o for o in DbOtazka if o.ucitel.login == uzJmeno())
+        elif uzivatel("admin"):
+            otazky = select(o for o in DbOtazka)
+        else:
+            return "!!!"
+
+        for otazka in otazky:
+            otazka.delete()
+        
+        return "Všechny vaše otázky byly smazány."
 
     def vytvorZadani(m):
         promenne = {}
@@ -163,7 +180,8 @@ class Otazka:
         m = re.compile('\[\$*([a-z])\=(.*?)\]').sub(nahraditPromenne2,m)
         #vybere slovo ze slovniku
         m = re.compile("\$slovo[1-9]\.\w+.\w+?$", re.UNICODE).sub(nahraditSlova,m)
-
+        #vyhleda a odstrani komentare /** komentar **/
+        m = re.compile(r"\/\*\*(.*?)\*\*\/?",re.DOTALL).sub("",m)
         #prevede markdown do HTML
         m = markdown(m)
         #nahradi \n novym radkem <br>
@@ -210,7 +228,14 @@ class Otazka:
 
     def zobrazOtazky():
         seznamOtazek = []
-        otazky = select(o for o in DbOtazka).order_by(1)
+        otazky = None
+
+        if uzivatel("ucitel"):
+            otazky = select(o for o in DbOtazka if o.ucitel.login == uzJmeno()).order_by(1)
+        elif uzivatel("admin"):
+            otazky = select(o for o in DbOtazka).order_by(1)
+        else:
+            return "!!!"
 
         for otazka in otazky:
             zadani = Otazka.vytvorZadani(otazka.obecneZadani)
@@ -229,7 +254,14 @@ class Otazka:
 
     def export():
         seznamOtazek = []
-        otazky = select(o for o in DbOtazka).order_by(1)
+        otazky = None
+
+        if uzivatel("ucitel"):
+            otazky = select(o for o in DbOtazka if o.ucitel.login == uzJmeno()).order_by(1)
+        elif uzivatel("admin"):
+            otazky = select(o for o in DbOtazka).order_by(1)
+        else: 
+            return "!!!"
 
         for otazka in otazky:
             odpovedi = Odpovedi(otazka.id)
@@ -255,18 +287,21 @@ class Otazka:
         #return json(jsOtazka)
 
     def pridatVsechny(J):
-            for otazka in J["otazky"]:
-                Otazka.pridat(otazka)
+        for otazka in J["otazky"]:
+            Otazka.pridat(otazka)
 
-            return "Otázky byly přidány"
+        return "Otázky byly přidány"
 
     def pridat(J):
+        if get(o.id for o in DbOtazka if o.jmeno == J["jmeno"]):
+            return "Tato otázka s tímto jménem už existuje."
+        
         nahodneJmeno = "_" + str(nahodne(1000,10000))
 
         # vytvorit prazdnou otazku, id je nezname!
         # pro prirazeni odpovedi je potreba znat id
         DbOtazka(
-            ucitel = get(u for u in DbUcitel if u.login == session['ucitel']),
+            ucitel = get(u for u in DbUcitel if u.login == uzJmeno()),
             jmeno = nahodneJmeno
         )           
         
@@ -278,19 +313,28 @@ class Otazka:
 
         return "Uzavřená otázka byla přidána. " + str(idOtazky)
 
-    def upravit(J,id=0):    
+    def upravit(J,id=0):
+        if get(o.id for o in DbOtazka if o.jmeno == J["jmeno"]):
+            return "Tato otázka s tímto jménem už existuje."
+
         idOtazky = id or int(J['id'])
         oId = get(o.id for o in DbOtazka if o.id is idOtazky)
 
         if not oId:
             return "Tato otázka neexistuje!"
 
-        otazka = DbOtazka[idOtazky]                 
-        otazka.ucitel = get(u for u in DbUcitel if u.login == session['ucitel'])
+        # odstrani JS kod ze zadani
+        zadani = J['zadani'] \
+            .replace("<script>","&lt;script&gt;") \
+            .replace("</script>","&lt;/script&gt;")
+
+        otazka = DbOtazka[idOtazky] 
+
+        otazka.ucitel = get(u for u in DbUcitel if u.login == uzJmeno())
         
         otazka.jmeno = J['jmeno']
         otazka.bodu = J['bodu']
-        otazka.obecneZadani = J['zadani']
+        otazka.obecneZadani = zadani
         otazka.hodnotit = J['hodnotit']
 
         #smazat puvodni odpovedi

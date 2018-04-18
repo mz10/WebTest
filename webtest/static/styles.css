@@ -32,7 +32,7 @@ pre {
   padding: 5px; }
 
 body {
-  max-width: 960px;
+  max-width: 1100px;
   margin: 1ex auto;
   overflow: auto; 
 }
@@ -690,4 +690,9 @@ input.seda {
 
 .odDobre.oznaceno {
   background: green;
+}
+
+
+#menuUcitel, #menuStudent {
+  display: none;
 }

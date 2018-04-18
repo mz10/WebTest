@@ -7,9 +7,10 @@ from .db import *
 import time
 import os
 import functools
+import cgi
 
 from .testy import Testy
-from .funkce import (Zaznamy, naDesetinne, delka, datum, ted)
+from .funkce import (Zaznamy, naDesetinne, delka, datum, ted, uzivatel, uzJmeno)
 from .otazka import *
 
 from collections import defaultdict
@@ -49,7 +50,8 @@ class Student:
         return studentInfo
 
     def vyplnitTest(id): 
-        Zaznamy.pridat("vyplneni",session['student'])
+        if uzivatel("student"):
+            Zaznamy.pridat("vyplneni",uzJmeno())
         
         # vytvori se 3 tabulky:
         # vysledekTestu, vyslednaOtazka a vyslednaOdpoved
@@ -58,7 +60,7 @@ class Student:
         test = get(u for u in DbTest if u.id is id)
 
         vTestu = DbVysledekTestu(
-            student = get(s.id for s in DbStudent if s.login == session['student']),
+            student = get(s.id for s in DbStudent if s.login == uzJmeno()),
             test = test.id,
             jmeno = test.jmeno,
             limit = test.limit,
@@ -129,7 +131,7 @@ class Student:
         if not vId:
             return "Tento výsledek testu neexistuje!"
 
-        Zaznamy.pridat("vyplneno",session['student'])      
+        Zaznamy.pridat("vyplneno",uzJmeno())      
         
         vTestu = DbVysledekTestu[idTestu]
         vTestu.casUkonceni = dt.now().strftime(formatCasu)
@@ -144,13 +146,13 @@ class Student:
             # nebo pokud bude otevrena, vyhleda typ
             if idVOdpovedi:
                 vOdpoved = DbVyslednaOdpoved[idVOdpovedi]                
-                vOdpoved.odpoved = text
+                vOdpoved.odpoved = cgi.escape(text)
             else:
                 idOtOdpovedi = get(o.id for o in DbVyslednaOdpoved 
                     if o.vyslednaOtazka.id is idOtazky and o.typ == "O")
                 
                 vOdpoved = DbVyslednaOdpoved[idOtOdpovedi]                
-                vOdpoved.odpoved = text   
+                vOdpoved.odpoved = cgi.escape(text)
         
         return "Test byl odeslán"                  
 
@@ -158,16 +160,16 @@ class Student:
         vId = get(v.id for v in DbVysledekTestu if v.id is id)
 
         if not vId:
-            return "Tento výsledek testu neexistuje!"        
+            return json({"odpoved": "Tento výsledek testu neexistuje!"})       
 
         vTestu = DbVysledekTestu[id]
 
         # zjisti, jestli ma student si tento vysledek pravo zobrazit
-        if "student" in session:
-            sId = get(s.id for s in DbStudent if s.login == session['student'])   
+        if uzivatel("student"):
+            sId = get(s.id for s in DbStudent if s.login == uzJmeno())   
  
             if sId != vTestu.student.id:
-                return "Nemáš právo zobrazit tento výsledek!"
+                return json({"odpoved": "Nemáš právo zobrazit tento výsledek!"})
 
         vsechnyOdpovedi = select((o.ocekavanaOdpoved, o.odpoved, o.typ, o.vyslednaOtazka.id) 
             for o in DbVyslednaOdpoved if o.vysledekTestu.id is id).order_by(3)
@@ -357,33 +359,28 @@ class Student:
 
         return json({"test": jsTest})
 
-    def testy():
-        if request.method == 'GET':
-            pritomnost = dt.strptime(
-                time.strftime("%d.%m.%Y %H:%M"), "%d.%m.%Y %H:%M")
-            testy = select((u.id, u.jmeno, u.zobrazenoOd, u.zobrazenoDo)
-                        for u in DbTest if (pritomnost >= u.zobrazenoOd and
-                                            pritomnost <= u.zobrazenoDo))
-            return render_template('student.html', testy=testy)
-
-    def vysledky():
-        if request.method == 'GET':
-            testy_uzivatele = select((u.test.jmeno, u.casUkonceni, u.id) for u in DbVysledekTestu
-                                    if u.student.login is session['student'])
-            for test in testy_uzivatele:
-                print (test)
-        return render_template('student_vysledky.html', testyUzivatele=testy_uzivatele)
-
     def zmenObsah(J):
         if J["tabulka"] != "Student":
             return "Nemáš oprávnění měnit obsah této tabulky!!!"
         
+        trida = J["bunky"][3]   
+        if trida == "null": trida = None
+        else: trida = int(trida)
+
+        # zkontroluje, jestli uz v tabulkach neni stejny login
+        login = J["bunky"][0]
+        ucitel = get(s.id for s in DbUcitel if s.login == login)
+        student = get(s.id for s in DbStudent if s.login == login)
+
         if J["id"] == "":
+            if (student or ucitel):
+                return "Tento login už existuje!"
+                
             DbStudent(
                 login = J["bunky"][0],
                 jmeno =  J["bunky"][1],
                 prijmeni = J["bunky"][2],
-                trida = int(J["bunky"][3])
+                trida = trida
             )
 
             return "Byl vložen nový student."
@@ -406,6 +403,6 @@ class Student:
             student.jmeno = J["bunky"][1]
             student.prijmeni = J["bunky"][2]
             if J["bunky"][3] != "null":
-                student.trida = int(J["bunky"][3])
+                student.trida = trida
 
             return "Student byl změněn."

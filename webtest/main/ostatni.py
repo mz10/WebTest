@@ -7,7 +7,7 @@ from .db import *
 
 udaje = "host='localhost' user='postgres' password='a' dbname='webtest'"
 
-from .funkce import (json)
+from .funkce import (json, uzivatel, uzJmeno)
 from .tridy import Trida
 
 class Ostatni:

@@ -1,9 +1,12 @@
 function postJSON(json, odeslano, url) {
-    cl("Odeslaný JSON:");
-    cl(json);
     
     if(json && typeof json === "object")
         json = JSON.stringify(json);
+    else
+        json = JSON.stringify(JSON.parse(json)); 
+        
+    cl("Odeslaný JSON:");
+    cl(json);
 
     $.ajax({
         url: url || '/json/post/',
@@ -119,8 +122,10 @@ function chybaIframe(ch) {
         zobrazitPrihlaseni();
         hlaska("Nejsi příhlášen, přihlas se.",3);
     }
-    else 
+    else if(ch.responseText)
         hlaskaIframe(ch.responseText);
+    else
+        hlaska("Chyba serveru.",3);
 }
 
 function dialog(zprava, ano, ne) {    

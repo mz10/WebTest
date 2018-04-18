@@ -17,7 +17,7 @@ import sys
 import re
 
 from collections import defaultdict
-from .funkce import (pswd_check, json, wsJSON, ted, Zaznamy, datum)
+from .funkce import (pswd_check, json, wsJSON, ted, Zaznamy, datum, uzivatel, uzJmeno)
 
 class Vysledky:
     def zobrazVysledek(id,vysledek):
@@ -27,6 +27,10 @@ class Vysledky:
         procent = 0
         if vysledek.boduMax != 0:
             procent = 100*vysledek.boduVysledek/vysledek.boduMax
+
+        trida = "-"
+        if vysledek.student.trida:
+            trida = str(vysledek.student.trida.poradi) + vysledek.student.trida.nazev
 
         info = {
             'id': vysledek.id,
@@ -43,7 +47,7 @@ class Vysledky:
                 'id': vysledek.student.id,
                 'login': vysledek.student.login,
                 'prijmeni': vysledek.student.prijmeni,
-                'trida': str(vysledek.student.trida.poradi) + vysledek.student.trida.nazev
+                'trida': trida
             }
         }
 
@@ -68,10 +72,9 @@ class Vysledky:
         student = False
         seznam = defaultdict(dict)
 
-        if "student" in session:
-            vysledky = select(t for t in DbVysledekTestu if t.student.login == session["student"])
-            #seznam["student"] = session["student"]
-        elif "ucitel" in session:
+        if uzivatel("student"):
+            vysledky = select(t for t in DbVysledekTestu if t.student.login == uzJmeno())
+        elif uzivatel("ucitel"):
             vysledky = select(t for t in DbVysledekTestu)
         else:
             return "neprihasen"

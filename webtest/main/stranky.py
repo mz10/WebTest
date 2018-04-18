@@ -33,13 +33,7 @@ nm = "/ws"
 
 @main.route('/')
 @db_session
-def index():
-    if 'student' in session:
-        return render_template('student.html')
-    elif 'ucitel' in session:
-        return render_template('ucitel.html')
-    else:
-        return Uzivatel.zobraz()
+def index(): return Uzivatel.index()
 
 @main.errorhandler(404)
 def nenalezeno(ch): return render_template('404.html', e=ch), 404
@@ -49,23 +43,23 @@ def nenalezeno(ch): return render_template('404.html', e=ch), 404
 def registrace(): return Ostatni.registrace()
 
 @main.route('/tabulky/')
+@prihlasitJSON('admin')
 def databaze(): return Ostatni.databaze()
 
 @main.route('/tabulky/', methods=('get','post'), endpoint='new')
+@prihlasitJSON('admin')
 def SmazTabulku(): return Ostatni.smazTabulku()
 
 @main.route('/tabulky/uklid/')
+@prihlasitJSON('admin')
 def uklidDb(): return Ostatni.uklidDb()
 
 @main.route('/db/')
+@prihlasitJSON('admin')
 def db(): return render_template('db.html') 
 
 @main.route('/vytvor/')
 def NovaTabulka1(): return Ostatni.novaTabulka()
-
-@main.route('/login/', methods=["GET", "POST"])
-@db_session
-def login(): return Uzivatel.prihlasit2()
     
 @main.route('/prihlasit/', methods=["GET", "POST"])
 @db_session
@@ -75,152 +69,157 @@ def login2(): return Uzivatel.prihlasit()
 def logout(): return Uzivatel.odhlasit()
 
 @main.route('/vysledky/', methods=['GET'])
-@prihlasit('ucitel','admin')
+@prihlasitJSON('ucitel','admin')
 @db_session
 def vysledky(): return Ucitel.vysledky()
 
 @main.route('/vysledky/<id>', methods=['GET'])
-@prihlasit('ucitel','admin')
+@prihlasitJSON('ucitel','admin')
 @db_session
 def vypracovan_testi(id): return Ucitel.vyplneno(id)
 
 @main.route('/vysledky/zobraz/<id>', methods=['GET'])
-@prihlasit('ucitel','admin')
+@prihlasitJSON('ucitel','admin')
 @db_session
 def zobraz_test_studenta(id): return Ucitel.zobrazTest(id)
 
 @main.route('/otazky/ucitel/<login>', methods=['GET'])
-@prihlasit('ucitel','admin')
+@prihlasitJSON('ucitel','admin')
 @db_session
 def otazky_ucitel(login): return Otazka.ucitel(login)
 
 @main.route('/otazky/editovat/<id>', methods=['GET', 'POST'])
-@prihlasit('ucitel','admin')
+@prihlasitJSON('ucitel','admin')
 @db_session
 def otazka_editovat(id): return Otazka.upravit(id)
 
 @main.route('/otazky/smazat/<id>', methods=['GET', 'POST'])
-@prihlasit('ucitel','admin')
+@prihlasitJSON('ucitel','admin')
 @db_session
 def otazka_smazat(id): return Otazka.smazat(id)
 
 @main.route('/pridat/otazku/', methods=['GET', 'POST'])
-@prihlasit('ucitel','admin')
+@prihlasitJSON('ucitel','admin')
 def pridat_otazku(): return Otazka.pridat()
 
 @main.route('/pridat/test/', methods=['GET', 'POST'])
-@prihlasit('ucitel','admin')
+@prihlasitJSON('ucitel','admin')
 @db_session
 def pridat_test(): return Testy.pridat()
 
 @main.route('/testy/<id_test>', methods=['GET', 'POST'])
-@prihlasit('ucitel','admin')
+@prihlasitJSON('ucitel','admin')
 @db_session
 def uprav_test(id_test): return Testy.uprav(id_test)
 
 @main.route('/student/testy/', methods=['GET', 'POST'])
-@prihlasit('student')
+@prihlasitJSON('student')
 @db_session
 def student_testy(): return Student.testy()
 
 @main.route('/student/testy/<id>', methods=['GET', 'POST'])
-@prihlasit('student')
+@prihlasitJSON('student')
 @db_session
 def student_zobrazit(id): return Student.zobrazit(id)
 
 @main.route('/student/vysledky/')
-@prihlasit('student')
+@prihlasitJSON('student')
 @db_session
 def student_vysledek(): return Student.vysledky()
 
-@main.route('/upload/', methods=['GET', 'POST'])
-@prihlasit('ucitel','admin')
-@db_session
-def upload(): return render_template('upload.html')
-
-@main.route('/vzory/testy/')
-def testy1(): return render_template('upravit_test1.html') 
-
-@main.route('/vzory/otazky/')
-def otazky1(): return render_template('upravit_otazku1.html') 
-
 @main.route('/csv/slovnik/', methods=['GET', 'POST'])
-@prihlasit('ucitel','admin')
+@prihlasitJSON('ucitel','admin')
 @db_session
 def sl(): return Slovnik.stahnout()
 
+@main.route('/vzory/testy/')
+def testy1(): return render_template('test.html') 
+
+@main.route('/vzory/otazky/')
+def otazky1(): return render_template('otazka.html') 
+
+@main.route('/vzory/upload/')
+def upload1(): return render_template('upload.html') 
+
+
+
 ################JSON#################
 @main.route('/json/slovnik/', methods=['GET', 'POST'])
-@prihlasit('ucitel','admin')
+@prihlasitJSON('ucitel','admin')
 @db_session
 def sl2(): return Slovnik.zobraz()
 
 @main.route('/json/testy/', methods=['GET', 'POST'])
-@prihlasit('ucitel','admin')
+@prihlasitJSON('ucitel','admin')
 @db_session
 def testy(): return Testy.zobraz()
 
 @main.route('/json/student/testy/', methods=['GET', 'POST'])
-@prihlasit('ucitel','admin')
 @db_session
 def testyS(): return Testy.zobrazStudent()
 
-@main.route('/json/testy/<id>', methods=['GET', 'POST'])
-@prihlasit('ucitel','admin')
-@db_session
-def testy2(id): return Testy.zobrazTest(id)
-
 @main.route('/json/student/testy/<id>', methods=['GET', 'POST'])
-@prihlasit('ucitel','admin')
 @db_session
 def testy3(id): return Student.vyplnitTest(id)
 
+@main.route('/json/testy/<id>', methods=['GET', 'POST'])
+@prihlasitJSON('ucitel','admin')
+@db_session
+def testy2(id): return Testy.zobrazTest(id)
+
 @main.route('/json/otazky/', methods=['GET', 'POST'])
-@prihlasit('ucitel','admin')
+@prihlasitJSON('ucitel','admin')
 @db_session
 def otazky(): return Otazka.zobrazOtazky()
 
 @main.route('/json/otazky/export/', methods=['GET', 'POST'])
-@prihlasit('ucitel','admin')
+@prihlasitJSON('ucitel','admin')
 @db_session
 def otazkyE(): return Otazka.export()
+
+@main.route('/json/testy/export/', methods=['GET', 'POST'])
+#@prihlasitJSON('ucitel','admin')
+@db_session
+def testyE(): return Testy.export()
 
 @main.route('/json/registrace/', methods=['GET', 'POST'])
 @db_session
 def reg(): return Ostatni.registrace(request.json)
 
 @main.route('/json/tridy/<id>', methods=['GET', 'POST'])
-@prihlasit('ucitel','admin')
+@prihlasitJSON('ucitel','admin')
 @db_session
 def trId(id): return Trida.zobrazCelouTridu(id)
 
 @main.route('/json/tridy/', methods=['GET', 'POST'])
-@prihlasit('ucitel','admin')
+@prihlasitJSON('ucitel','admin')
 @db_session
 def tr(): return Trida.zobrazTridy()
 
 @main.route('/json/studenti/', methods=['GET', 'POST'])
-@prihlasit('ucitel','admin')
+@prihlasitJSON('ucitel','admin')
 @db_session
 def st(): return Student.seznamStudentu()
 
+@main.route('/json/ucitele/', methods=['GET', 'POST'])
+#@prihlasitJSON('ucitel','admin')
+@db_session
+def uc(): return Ucitel.seznamUcitelu()
+
 @main.route('/json/otazky/<id>', methods=['GET'])
-@prihlasit('ucitel','admin')
+@prihlasitJSON('ucitel','admin')
 @db_session
 def otazka_zobrazit(id): return Otazka.zobraz(id)
 
 @main.route('/json/vysledky/', methods=['GET'])
-@prihlasit('ucitel','admin')
 @db_session
 def vz(): return Vysledky.vsechnyVysledky()
 
 @main.route('/json/vysledky/seznam/', methods=['GET'])
-@prihlasit('ucitel','admin')
 @db_session
 def vs(): return Vysledky.seznamVysledku()
 
 @main.route('/json/vysledky/<id>/', methods=['GET'])
-@prihlasit('ucitel','admin')
 @db_session
 def vt(id): return Vysledky.test(id)
 
@@ -252,19 +251,21 @@ def ttt(id):
     return Student.vysledekTestu(id)
 
 @main.route('/json/post/', methods=['POST'])
-@prihlasit('ucitel','admin')
+@prihlasitJSON('ucitel','admin')
 @db_session
 def postU(): 
+    odpoved = "zadna akce" 
+    
+    #try:
     J = request.json
     akce = J["akce"]
     co = J["co"]
-    odpoved = "zadna akce"
 
     if(co == "otazka"):
         if akce == "smazat":
-            idOtazky = J["id"]
-            DbOtazka[idOtazky].delete()
-            odpoved = "Otázka s id " + idOtazky + " byla smazána"
+            odpoved = Otazka.smazat()
+        if akce == "smazatVsechny":
+            odpoved = Otazka.smazatVsechny()
         elif akce == "pridat":
             odpoved = Otazka.pridat(J)
         elif akce == "upravit":
@@ -280,6 +281,8 @@ def postU():
             odpoved = Testy.pridat(J)
         elif akce == "upravit":
             odpoved = Testy.uprav(J)
+        elif akce == "nahrat":
+            odpoved = Testy.pridatVsechny(J)
     elif(co == "tabulka"):
         if akce == "smazat":
             Ostatni.smazTabulku(J["nazev"],"smazat")
@@ -294,9 +297,6 @@ def postU():
     elif(co == "trida"):
         if akce == "pridat":
             odpoved = Trida.pridat(J)
-    elif(co == "osoba"):
-        if akce == "pridat":
-            odpoved = Ostatni.registrace(J)
     elif(co == "csvSlovnik"):
         if akce == "nahrat":
             odpoved = Slovnik.nahrat(J)
@@ -308,13 +308,14 @@ def postU():
             odpoved = Trida.zmenObsah(J)
         elif tabulka == "Slovnik":
             odpoved = Slovnik.zmenObsah(J)
+        elif tabulka == "Ucitel":
+            odpoved = Ucitel.zmenObsah(J)
 
-    js = {
-        "odpoved":odpoved,
-        "stav":"ok",
-    }           
 
-    return json(js)
+    #except Exception as e:
+    #    odpoved = "Chyba v JSON!: " + str(e)
+
+    return json({"odpoved":odpoved})
 
 #@prihlasitJSON2('ucitel')
 @db_session
@@ -334,8 +335,7 @@ def zpracovatJSON(J):
         elif akce == "upravit":
             odpoved = Otazka.upravit(J)
         elif akce == "nahrat":
-            odpoved = Otazka.pridatVsechny(J)
-                        
+            odpoved = Otazka.pridatVsechny(J)                     
     if(co == "test"):
         if akce == "smazat":
             idTestu = J["id"]

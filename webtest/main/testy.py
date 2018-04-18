@@ -7,7 +7,7 @@ from .db import *
 import json as _json
 import random
 
-from .funkce import (nahodne, json, jsonStahnout, vypocitej)
+from .funkce import (nahodne, json, jsonStahnout, vypocitej, uzivatel, uzJmeno)
 from .otazka import Otazka, Odpovedi
 
 formatCasu = "%d.%m.%Y %H:%M"
@@ -17,10 +17,10 @@ class Testy:
         seznam = []
         testy = None
 
-        if "admin" in session:
+        if uzivatel("admin"):
             testy = select(o for o in DbTest)
-        elif "ucitel" in session:
-            testy = select(o for o in DbTest if o.ucitel.login == session["ucitel"])
+        elif uzivatel("ucitel"):
+            testy = select(o for o in DbTest if o.ucitel.login == uzJmeno())
         else:
             return "!!!"
 
@@ -41,7 +41,7 @@ class Testy:
         testy = None
 
         # info o studentovi
-        student = get(s for s in DbStudent if s.login == session["student"])
+        student = get(s for s in DbStudent if s.login == uzJmeno())
         testy = select(o for o in DbTest)
 
         for test in testy:
@@ -115,13 +115,13 @@ class Testy:
             'tridy':    Testy.seznamTrid(test.id)
         }
 
-    def pridat(J):
+    def pridat(J,hromadne=False):
         nahodneJmeno = "_" + str(nahodne(1000,10000))
 
         # vytvorit prazdny test, id je nezname!
         # pro prirazeni odpovedi je potreba znat id
         DbTest(
-            ucitel = get(u for u in DbUcitel if u.login == session['ucitel']),
+            ucitel = get(u for u in DbUcitel if u.login == uzJmeno()),
             jmeno = nahodneJmeno
         )           
         
@@ -130,17 +130,17 @@ class Testy:
         
         # vyplnit
         if idTestu:
-            Testy.uprav(J,idTestu)
+            Testy.uprav(J,idTestu,hromadne)
             return 'Vytvořen test: ' + J['jmeno']
         else:
             return 'Test nebyl vytvořen!'
 
-    def uprav(J,tid=0):
+    def uprav(J,tid=0,hromadne=False):
         idTestu = tid or J['id']
         test = DbTest[idTestu]
 
         test.jmeno = J['jmeno']
-        test.ucitel = get(u for u in DbUcitel if u.login == session['ucitel'])
+        test.ucitel = get(u for u in DbUcitel if u.login == uzJmeno())
         test.zobrazenoOd = dt.strptime(J['od'], formatCasu)
         test.zobrazenoDo = dt.strptime(J['do'], formatCasu)
         test.limit = J["limit"]
@@ -153,12 +153,24 @@ class Testy:
         select(o for o in DbOtazkaTestu if o.test.id is idTestu).delete()
         select(o for o in DbTridyTestu if o.test.id is idTestu).delete()
 
-        for idOtazky in J['otazky']:
-            DbOtazkaTestu(
-                poradi = 0, 
-                test = get(u.id for u in DbTest if u.jmeno == J['jmeno']),
-                otazka = get(o for o in DbOtazka if o.id == idOtazky)
-            )
+        # pokud se testy nahraji hromadne,
+        # nejdriv se musi zjistit id otazek
+        if hromadne:
+            for otazka in J['otazky']:
+                DbOtazkaTestu(
+                    poradi = 0, 
+                    test = test.id,
+                    otazka = get(o.id for o in DbOtazka if o.jmeno == otazka["jmeno"])
+                )
+
+   
+        else:
+            for idOtazky in J['otazky']:
+                DbOtazkaTestu(
+                    poradi = 0, 
+                    test = test.id,
+                    otazka = get(o for o in DbOtazka if o.id == idOtazky)
+                )
 
         for idTridy in J['tridy']:
             DbTridyTestu(
@@ -182,3 +194,61 @@ class Testy:
             })
 
         return seznam
+
+    def export():
+        """
+        if uzivatel("admin"):
+            testy = select(o for o in DbTest)
+        elif uzivatel("ucitel"):
+            testy = select(o for o in DbTest if o.ucitel.login == uzJmeno())
+        else:
+            return "!!!"
+
+        """
+
+        testy = select(o for o in DbTest)
+
+        seznamTestu = []
+
+        for test in testy:
+            seznamOtazek = []
+
+            #ziskat seznam otazek v testu
+            for o in select(o for o in DbOtazkaTestu if o.test.id is test.id):
+                otazka = DbOtazka[o.otazka.id]
+                odpovedi = Odpovedi(otazka.id)
+
+                seznamOtazek.append({
+                    'id':       otazka.id,
+                    'jmeno':    otazka.jmeno,
+                    'bodu':     otazka.bodu,
+                    'hodnotit': otazka.hodnotit,
+                    'zadani':   otazka.obecneZadani,
+                    'spravne':  odpovedi.tridit("D"),  
+                    'spatne':   odpovedi.tridit("S"), 
+                    'otevrena': odpovedi.tridit("O"),  
+                })
+
+            seznamTestu.append(
+                Testy.testInfo(test,seznamOtazek)
+            )
+
+        seznam = {
+            'akce': 'nahrat', 
+            'co': 'test',
+            'testy': seznamTestu,
+        }
+
+        return jsonStahnout(seznam,"testy.txt")
+        #return json(seznam)
+
+
+    def pridatVsechny(J):
+        for test in J["testy"]:
+            # přidá otázky
+            for otazka in test["otazky"]:
+                Otazka.pridat(otazka)            
+            
+            # přidá test a přiřadí k nim otázky
+            Testy.pridat(test,True)
+        return "Testy byly přidány."

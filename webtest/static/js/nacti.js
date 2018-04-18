@@ -3,6 +3,7 @@ spustJS("hlavni");
 spustJS("otazky"); 
 spustJS("testy"); 
 spustJS("vysledky");
+spustJS("tabulky");
 spustJS("zaklad");    
 spustJS("hodnoceni"); 
 spustJS("kalendar");
@@ -10,20 +11,28 @@ spustJS("kalendar");
 //web sockety
 ws = null;
 
+
 window.onload = function() {
     //hlaska("stranka nactena");
     spustJS("udalosti");
+    prihlasitUzivatele();
     zmenHash();
     menuNahore();
+    
     
     //navaze WS spojeni pokud je uz uzivatel prihlasen pres http
     if ($("#odhlasit").length > 0)
         wsUdalosti();
 
-    MathJax.Hub.Config({
-        tex2jax: {inlineMath: [["$","$"],["\\(","\\)"]]},
-        displayAlign: "left"
-    });
+    try {
+        MathJax.Hub.Config({
+            tex2jax: {inlineMath: [["$","$"],["\\(","\\)"]]},
+            displayAlign: "left"
+        });
+    }
+    catch(e) { 
+        hlaska("MathJax není načten. Zkontrolujte připojení k internetu."); 
+    }
 
     document.getElementsByClassName("logo2")[0].onclick = function() {
         console.log("Obnovit JS");
@@ -32,7 +41,8 @@ window.onload = function() {
         obnovJS("hlavni"); 
         obnovJS("otazky"); 
         obnovJS("testy");  
-        obnovJS("vysledky");        
+        obnovJS("vysledky"); 
+        obnovJS("tabulky");       
         obnovJS("zaklad");    
         obnovJS("hodnoceni"); 
         obnovJS("kalendar");

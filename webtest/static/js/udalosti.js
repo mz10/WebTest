@@ -152,8 +152,8 @@ $(document).on("click", ".otPridat", function(e) {
     //otazkyPridat();
 });
 
-$(document).on("click", ".otUpravitVsechny", function(e) {
-    otazkyUpravVsechny(e);
+$(document).on("click", ".otSmazatVsechny", function(e) {
+    otazkySmazatVsechny(e);
 });
 
 //vyzkouset test
@@ -238,15 +238,6 @@ $(document).on("click", ".odpoved", function(e) {
 //vyhodnotit test - student
 $(document).on("click", "#odeslatTest", testyVyhodnotit);
 
-//pridat tridu
-$(document).on("click", ".trPridat", tridyPridat);
-
-//odeslat tridu
-$(document).on("click", "#trOdeslat", tridyOdeslat);
-
-//odeslat osobu - student/ucitel
-$(document).on("click", "#osOdeslat", osobaOdeslat);
-
 //prihlaseni
 $(document).on("click", "#prihlasit", prihlasit);
 
@@ -267,18 +258,18 @@ $(document).on("mouseenter", ".tabDb tr", function(e) {
 });
 
 //zmena hodnoty v tabulce
-$(document).on("keyup", ".tabInput", function(e) {
-    var tlacitko = e.currentTarget.parentElement
-        .parentElement.lastChild.firstChild;
-    $(tlacitko).text("Změnit");
-});
+$(document).on("keyup", ".tabInput", tabulkyZmenaHodnoty);
 
 //zmena hodnoty v tabulce - u selectu
-$(document).on("change", ".tbTridy", function(e) {
-    var tlacitko = e.currentTarget.parentElement
-        .parentElement.lastChild.firstChild;
-   
-    $(tlacitko).text("Změnit");
+$(document).on("change", ".tbTridy", tabulkyZmenaHodnoty);
+
+//zmena hodnoty v tabulce - checkbox
+$(document).on("change", ".tabCh", function(e) {
+    tabulkyZmenaHodnoty(e);
+    this.value = false;
+
+    if (this.checked)
+        this.value = true;
 });
 
 

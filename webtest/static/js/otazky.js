@@ -75,30 +75,16 @@ function vlozitOdpoved(trida, text) {
     $("#vlozitOtazky").append(div);        
 }
 
-function otazkyUpravVsechny(e) {
-    var otazky = $(".otazka");
-    $.each(otazky, foreach);
+function otazkySmazatVsechny(e) {
+    dialog('Smazat všechny otázky?', ano, Function);
+    
+    var json = {
+        akce:'smazatVsechny', 
+        co:'otazka',
+    };
 
-    function foreach(i, o) {
-        cl(o);
-        var zadani = o.children[3];
-        var typ = zadani.localName;      
-        
-        var textarea = $('<textarea />', {
-            type: 'text',
-            class: 'txOtazka',
-            html: $(zadani).html()
-        });
- 
-        var span = $('<span />', {
-            class: 'otZadani',
-            html: $(zadani).val()
-        });
-
-        if(typ=="span")
-            $(zadani).replaceWith(textarea);
-        else if(typ=="textarea")
-            $(zadani).replaceWith(span); 
+    function ano() {
+        postJSON(json, odpovedJSON);
     }
 }
 
