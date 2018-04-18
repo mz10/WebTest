@@ -268,17 +268,20 @@ class Ucitel:
         if not dbId:
             return "Toto id neexistuje!"
 
-        ucitel = DbUcitel[id]
+        dbUcitel = DbUcitel[id]
+
+        if (student or ucitel):
+            login = dbUcitel.login 
 
         if J["akce"] == "smazat":
-            ucitel.delete()
+            dbUcitel.delete()
             return "Učitel byl smazán"
 
         elif J["akce"] == "zmenit":
-            ucitel.login = login
-            ucitel.jmeno = J["bunky"][1]
-            ucitel.prijmeni = J["bunky"][2]
-            ucitel.admin = admin
+            dbUcitel.login = login
+            dbUcitel.jmeno = J["bunky"][1]
+            dbUcitel.prijmeni = J["bunky"][2]
+            dbUcitel.admin = admin
 
             return "Učitel byl změněn."
 

@@ -314,9 +314,6 @@ class Otazka:
         return "Uzavřená otázka byla přidána. " + str(idOtazky)
 
     def upravit(J,id=0):
-        if get(o.id for o in DbOtazka if o.jmeno == J["jmeno"]):
-            return "Tato otázka s tímto jménem už existuje."
-
         idOtazky = id or int(J['id'])
         oId = get(o.id for o in DbOtazka if o.id is idOtazky)
 
@@ -332,7 +329,14 @@ class Otazka:
 
         otazka.ucitel = get(u for u in DbUcitel if u.login == uzJmeno())
         
-        otazka.jmeno = J['jmeno']
+        jmeno = J['jmeno']
+        
+        # pokud se otazka prejmenuje na jmeno, ktere uz existuje,
+        # zabrani prejmenovani teto otazky
+        if get(o.id for o in DbOtazka if o.jmeno == J["jmeno"]):
+            jmeno = otazka.jmeno
+
+        otazka.jmeno = jmeno
         otazka.bodu = J['bodu']
         otazka.obecneZadani = zadani
         otazka.hodnotit = J['hodnotit']

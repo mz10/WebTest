@@ -392,17 +392,20 @@ class Student:
         if not dbId:
             return "Toto id neexistuje!"
 
-        student = DbStudent[id]
+        dbStudent = DbStudent[id]
+
+        if (student or ucitel):
+            login = dbStudent.login 
 
         if J["akce"] == "smazat":
-            student.delete()
+            dbStudent.delete()
             return "Student byl smazán"
 
         elif J["akce"] == "zmenit":
-            student.login = J["bunky"][0]
-            student.jmeno = J["bunky"][1]
-            student.prijmeni = J["bunky"][2]
+            dbStudent.login = login
+            dbStudent.jmeno = J["bunky"][1]
+            dbStudent.prijmeni = J["bunky"][2]
             if J["bunky"][3] != "null":
-                student.trida = trida
+                dbStudent.trida = trida
 
             return "Student byl změněn."
