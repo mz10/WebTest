@@ -4,43 +4,13 @@ from pony.orm import (sql_debug, get, select, db_session)
 import psycopg2
 from datetime import datetime as dt
 from .db import *
-
-udaje = "host='localhost' user='postgres' password='a' dbname='webtest'"
-
+from .spojeni import pripojit
 from .funkce import (json, uzivatel, uzJmeno)
 from .tridy import Trida
 
 class Ostatni:
-    def registrace(J):
-        odpoved = ""
-        
-        with db_session:
-            if J['typ'] == "student":
-                DbStudent(
-                    login = J['login'],
-                    jmeno = J['jmeno'],
-                    prijmeni = J['prijmeni'],
-                    hash =  J['heslo'],
-                    trida = get(t for t in DbTridy if t.id == J['trida'])
-                )
-
-                odpoved = "Nový student byl přidán"
-
-            elif J['typ'] == "ucitel":
-                DbUcitel(
-                    login = J['login'],
-                    jmeno = J['jmeno'],
-                    prijmeni = J['prijmeni'],
-                    hash =  J['heslo'],
-                    admin = J['admin']
-                )
-
-                odpoved = "Nový učitel byl přidán"
-            
-            return json({"odpoved": odpoved})
-
     def novaTabulka():
-        db = psycopg2.connect(udaje)
+        db = psycopg2.connect(**pripojit)
         sql = db.cursor()
         db.autocommit = True
 
@@ -53,7 +23,7 @@ class Ostatni:
         return "vytvoreno"
 
     def uklidDb():
-        db = psycopg2.connect(udaje)
+        db = psycopg2.connect(**pripojit)
         sql = db.cursor()
         db.autocommit = True
 
@@ -70,7 +40,7 @@ class Ostatni:
         return Markup(html)
 
     def databaze():
-        db = psycopg2.connect(udaje)
+        db = psycopg2.connect(**pripojit)
         sql = db.cursor()
         db.autocommit = True
 
@@ -112,7 +82,7 @@ class Ostatni:
         #return render_template('tabulky.html', html=Markup(html)) 
 
     def smazTabulku(tabulka,akce):
-        db = psycopg2.connect(udaje)
+        db = psycopg2.connect(**pripojit)
         sql = db.cursor()
         db.autocommit = True
 

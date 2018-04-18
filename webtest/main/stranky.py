@@ -38,10 +38,6 @@ def index(): return Uzivatel.index()
 @main.errorhandler(404)
 def nenalezeno(ch): return render_template('404.html', e=ch), 404
 
-@main.route('/registrace/', methods=['GET', 'POST'])
-@db_session
-def registrace(): return Ostatni.registrace()
-
 @main.route('/tabulky/')
 @prihlasitJSON('admin')
 def databaze(): return Ostatni.databaze()
