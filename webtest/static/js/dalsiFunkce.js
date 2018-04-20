@@ -70,6 +70,17 @@ function prihlasitUzivatele() {
 }
 
 
+function uzivatel(typ) {
+    var div = $("#typUzivatele");
+    if(div.length == 0) 
+        return false;
+    if (typ == $("#typUzivatele").text())
+        return true
+    
+    return false;
+}
+
+
 function prejit(adresa) {
     window.location.hash = "!" + adresa;
 }
@@ -132,14 +143,13 @@ function nazevStranky() {
     return nazev;    
 }
 
-function odpocet(prvek,cas) {
+function odpocet(prvek,cas, konec) {
     var sekunda = 1000;
     var minuta = sekunda * 60;
     var hodina = minuta * 60;
     cas = cas*60000;
     
     if(intOdpocet) clearInterval(intOdpocet);
-
     var intOdpocet = setInterval(tik, sekunda);
 
     function tik() {
@@ -148,7 +158,8 @@ function odpocet(prvek,cas) {
         cas-=sekunda;
         
         if (cas < sekunda) {
-            $(prvek).text("Konec testu!!!");
+            clearInterval(intOdpocet);
+            konec();
             return;
         }
         

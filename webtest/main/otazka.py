@@ -212,6 +212,8 @@ class Otazka:
             'zadani':         otazka.obecneZadani,
             'hodnotit':       otazka.hodnotit,
             'zadaniHTML':     zadani["html"],
+            'tolerance':      otazka.tolerance,
+            'zaokrouhlit':    otazka.zaokrouhlit,
             'spravneZadano':  odpovedi.tridit("D"),
             'spatneZadano':   odpovedi.tridit("S"),
             'otevrenaZadano': odpovedi.tridit("O"),
@@ -247,6 +249,8 @@ class Otazka:
                 'hodnotit':     otazka.hodnotit,
                 'zadani':       otazka.obecneZadani,               
                 'zadaniHTML':   zadani["html"],
+                'tolerance':    otazka.tolerance,
+                'zaokrouhlit':  otazka.zaokrouhlit,
                 'autor':        otazka.ucitel.jmeno,
             })
 
@@ -267,14 +271,16 @@ class Otazka:
             odpovedi = Odpovedi(otazka.id)
 
             seznamOtazek.append({
-                'id':       otazka.id,
-                'jmeno':    otazka.jmeno,
-                'bodu':     otazka.bodu,
-                'hodnotit': otazka.hodnotit,
-                'zadani':   otazka.obecneZadani,
-                'spravne':  odpovedi.tridit("D"),  
-                'spatne':   odpovedi.tridit("S"), 
-                'otevrena': odpovedi.tridit("O"),  
+                'id':           otazka.id,
+                'jmeno':        otazka.jmeno,
+                'bodu':         otazka.bodu,
+                'hodnotit':     otazka.hodnotit,
+                'zadani':       otazka.obecneZadani,
+                'tolerance':    otazka.tolerance,
+                'zaokrouhlit':  otazka.zaokrouhlit,
+                'spravne':      odpovedi.tridit("D"),  
+                'spatne':       odpovedi.tridit("S"), 
+                'otevrena':     odpovedi.tridit("O"),  
             })
 
             jsOtazka = {
@@ -340,6 +346,8 @@ class Otazka:
         otazka.bodu = J['bodu']
         otazka.obecneZadani = zadani
         otazka.hodnotit = J['hodnotit']
+        otazka.tolerance = J['tolerance']
+        otazka.zaokrouhlit = J['zaokrouhlit']
 
         #smazat puvodni odpovedi
         select(o for o in DbOdpoved if o.otazka.id is idOtazky).delete()

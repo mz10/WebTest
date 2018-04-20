@@ -1,18 +1,25 @@
 function studentZobrazTabulku(nacteno) {
     $.getJSON("./json/studenti/", zpracujJSON).fail(chybaIframe);
 
-    var tabulka = tabulkaHlavicka(["id", "Login", "Jméno", "Příjmení", "Třída", ""]);
+    var tabulka = tabulkaHlavicka(["id", "Login", "Jméno", "Příjmení", "Třída",]);
+
+    if(uzivatel("admin"))
+        var tabulka = tabulkaHlavicka(["id", "Login", "Jméno", "Příjmení", "Třída", ""]);
 
     function tlacitko(text) {
         return "<button class='radekAkce'>" + text + "</button>";
     }
 
     function zpracujJSON(json) {
-        $.each(json.studenti, zobrazTabulku);
-        var select = `<select class="tbTridy">
-                <option selected value="null">null</option>\
-            </select>`;
-        tabulka += tabulkaRadek(4, ["", "", "", "", select, tlacitko("Přidat")]);
+        if(uzivatel("admin")) {
+            $.each(json.studenti, zobrazTabulku);
+            var select = `<select class="tbTridy">
+                            <option selected value="null">null</option>\
+                          </select>`;
+            tabulka += tabulkaRadek(4, ["", "", "", "", select, tlacitko("Přidat")]);
+        }
+        else
+            $.each(json.studenti, zobrazTabulkuUc);
         nacteno("<table class='tabDb' nazev='Student'>" + tabulka + "</table>");
     }
 
@@ -22,8 +29,12 @@ function studentZobrazTabulku(nacteno) {
                 <option selected value="null">null</option>\
                 <option selected value="${t.trida.id}">${t.trida.nazev}</option>\
             </select>`;
-        tabulka += tabulkaRadek(4, [t.id, t.login, t.jmeno, t.prijmeni, select, tlacitko("Smazat")]);
+        tabulka += tabulkaRadek(4, [t.id, t.login, t.jmeno, 
+            t.prijmeni, select, tlacitko("Smazat")]);
     }
+
+    function zobrazTabulkuUc(i, t)
+        tabulka += tabulkaRadek(0, [t.id, t.login, t.jmeno, t.prijmeni, t.trida.nazev]);
 }
 
 function studentZobraz() {
@@ -49,7 +60,10 @@ function studentZobraz() {
 function uciteleZobrazTabulku() {
     $.getJSON("./json/ucitele/", zpracujJSON).fail(chybaIframe);
 
-    var tabulka = tabulkaHlavicka(["id", "Login", "Jméno", "Příjmení", "Admin", ""]);
+    var tabulka = tabulkaHlavicka(["id", "Login", "Jméno", "Příjmení", "Admin"]);    
+
+    if(uzivatel("admin"))
+        tabulka = tabulkaHlavicka(["id", "Login", "Jméno", "Příjmení", "Admin", ""]);
 
     function tlacitko(text) {
         return `<button class='radekAkce'>${text}</button>`;
@@ -66,14 +80,21 @@ function uciteleZobrazTabulku() {
     }
 
     function zpracujJSON(json) {
-        $.each(json.ucitele, zobrazTabulku);
-        tabulka += tabulkaRadek(4, ["", "", "", "", checkbox(false), tlacitko("Přidat")]);
-        $(stranka).html("<table class='tabDb' nazev='Ucitel'>" + tabulka + "</table>");
+        if(uzivatel("admin")) {
+            $.each(json.ucitele, zobrazTabulku);
+            tabulka += tabulkaRadek(4, ["", "", "", "", checkbox(false), tlacitko("Přidat")]);
+        }
+        else
+            $.each(json.ucitele, zobrazTabulkuUc);
+        var nadpis = "<h1>Učitelé</h1>";
+        $(stranka).html(nadpis + "<table class='tabDb' nazev='Ucitel'>" + tabulka + "</table>");
     }
 
-    function zobrazTabulku(i, t) {
+    function zobrazTabulku(i, t)
         tabulka += tabulkaRadek(4, [t.id, t["login"], t.jmeno, t.prijmeni, checkbox(t.admin), tlacitko("Smazat")]);
-    }
+
+    function zobrazTabulkuUc(i, t)
+        tabulka += tabulkaRadek(0, [t.id, t["login"], t.jmeno, t.prijmeni, checkbox(t.admin)]);           
 }
 
 function slovnikZobrazTabulku(nacteno) {
@@ -97,19 +118,28 @@ function slovnikZobrazTabulku(nacteno) {
 function tridyZobrazTabulku(nacteno) {
     $.getJSON("./json/tridy/", zpracujJSON).fail(chybaIframe);
 
-    var tabulka = tabulkaHlavicka(["id", "Pořadí", "Název", "Rok", ""]);
+    var tabulka = tabulkaHlavicka(["id", "Pořadí", "Název", "Rok"]);
+
+    if(uzivatel("admin"))
+        var tabulka = tabulkaHlavicka(["id", "Pořadí", "Název", "Rok", ""]);
 
     function tlacitko(text) { return "<button class='radekAkce'>" + text + "</button>"; }
 
     function zpracujJSON(json) {
-        $.each(json.tridy, zobrazTabulku);
-        tabulka += tabulkaRadek(4, ["", "", "", "", tlacitko("Přidat")]);
+        if(uzivatel("admin")) {
+            $.each(json.tridy, zobrazTabulku);
+            tabulka += tabulkaRadek(4, ["", "", "", "", tlacitko("Přidat")]);
+        }
+        else
+            $.each(json.tridy, zobrazTabulkuUc);
         nacteno("<table class='tabDb' nazev='Tridy'>" + tabulka + "</table>");
     }
 
-    function zobrazTabulku(i, t) {
+    function zobrazTabulku(i, t)
         tabulka += tabulkaRadek(4, [t.id, t.poradi, t.nazev, t.rokUkonceni, tlacitko("Smazat")]);
-    }
+    
+    function zobrazTabulkuUc(i, t)
+        tabulka += tabulkaRadek(0, [t.id, t.poradi, t.nazev, t.rokUkonceni]);
 }
 
 function tabulkaZmenitZaznam(e) {

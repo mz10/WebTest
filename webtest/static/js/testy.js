@@ -108,7 +108,12 @@ function testyVyzkouset(idTestu) {
         text += '<button id="odeslatTest" value="' + test.id + '">Odeslat</button>';
         $(stranka).html(text);
         MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
-        var interval = odpocet("#odpocet",test.limit);
+        var interval = odpocet("#odpocet",test.limit, konecTestu);
+    }
+
+    function konecTestu() {
+        pr("#odpocet").text("Čas vypršel!!!");
+        testyVyhodnotit();
     }
 
     function zpracujOtazky(i, o) {
@@ -170,6 +175,7 @@ function testyUprava(akce,idTestu) {
 
     function zpracujTest(i, t) {
         if(t.id==idTestu) {
+            
             pr('#ttNazev').val(t.jmeno);
             pr('#ttId').text(t.id); 
             pr('#ttOd').val(t.od);

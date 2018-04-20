@@ -27,7 +27,6 @@
             '<h1>Otázky</h1>\
             <span class="otPridat">Přidat | </span>\
             <span class="otSmazatVsechny">Smazat všechny | </span>\
-            <span class="otUpravitVsechny">Upravit všechny | </span>\
             ' + text + '\
             <div class="otPridat">Přidat</div>';
         
@@ -47,11 +46,13 @@ function otazkyUprav(idOtazky) {
     }
 
     function nactiOtazku(i, o) {
-        pr('#otJmeno').val(o.jmeno);
         Simplemde.value(o.zadani), //soubor lista.js
+        pr('#otJmeno').val(o.jmeno);
         pr('#otId').text(o.id);
         pr('#otTyp').val(o.typ);
         pr('#otBodu').val(o.bodu);
+        pr('#otTolerance').val(o.tolerance);
+        pr('#otZaokrouhlit').val(o.zaokrouhlit);
         pr('#otVyhodnotit').val(o.hodnotit);
 
         $(o.spravneZadano).each(function(i, o)  {vlozitOdpoved("dobre",o); });
@@ -197,9 +198,10 @@ function otazkyOdeslat() {
         co: 'otazka',
         id: idOtazky,
         jmeno: ph('#otJmeno'),
-        typ: ph('#otTyp'),
         bodu: ph('#otBodu') || 0,
         hodnotit: ph('#otVyhodnotit')*1 || 1,
+        tolerance: ph('#otTolerance')*1,
+        zaokrouhlit: ph('#otZaokrouhlit')*1,
         zadani: Simplemde.value(), //soubor lista.js
         spravne: seznamDobre,
         spatne: seznamSpatne,

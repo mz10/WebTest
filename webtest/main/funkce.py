@@ -195,6 +195,22 @@ def naDesetinne(text,mista):
     
     return round(cislo,mista)
 
+# zkontroluje zadanou odchylku v % 2 cisel
+def tolerance(c1,c2,procent):
+    odchylka = 0
+    
+    if c1 == c2:
+        odchylka = 100    
+    elif c1 < c2 and c2 != 0:
+        odchylka = (c1/c2)*100
+    elif c2 < c1 and c1 != 0:
+        odchylka = (c2/c1)*100
+        
+    if 100-odchylka <= procent:
+        return True
+        
+    return False
+
 class Ucitel:
     def zobrazTest(id):
         """zobrazi obsah vyplneneho testu studenta"""
@@ -237,7 +253,7 @@ class Ucitel:
         return json({"ucitele": seznam})
 
     def zmenObsah(J):
-        if J["tabulka"] != "Ucitel":
+        if J["tabulka"] != "Ucitel" or not uzivatel("admin"):
             return "Nemáš oprávnění měnit obsah této tabulky!!!"
         
         admin = False

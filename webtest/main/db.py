@@ -13,10 +13,6 @@ from .spojeni import pripojit
 
 db = Database("postgres", **pripojit)
 
-
-
-
-
 class DbAkce(db.Entity):
     """evidence toho, co student v aplikací dělá: logIn, logOut"""
     _table_ = 'Akce'
@@ -34,8 +30,8 @@ class DbVysledekTestu(db.Entity):
     casUkonceni = Optional(datetime, column='casU')
     limit = Optional(str)
     pokus = Optional(int)
-    boduVysledek = Optional(float, column='bVysledek')
-    boduMax = Optional(float, column='bMax')
+    boduVysledek = Optional(float, column='bVysledek', default=0)
+    boduMax = Optional(float, column='bMax', default=0)
     hodnoceni = Optional(str)
     test = Optional('DbTest')
     otazky = Set('DbVyslednaOtazka')
@@ -69,10 +65,11 @@ class DbOtazka(db.Entity):
     _table_ = 'Otazka'
     id = PrimaryKey(int, column='idOtazka', auto=True)
     jmeno = Required(str, 80)
-    typOtazky = Optional(str, 1, column='typOtazky', sql_type='char')
     obecneZadani = Optional(str, column='oZadani', nullable=True)
     bodu = Optional(float, default=1)
     hodnotit = Optional(int, default=1)
+    zaokrouhlit = Optional(int, default=2)
+    tolerance = Optional(float, default=0)
     ucitel = Required('DbUcitel')
     odpovedi = Set('DbOdpoved')
     otazkyTestu = Set('DbOtazkaTestu')
@@ -90,6 +87,8 @@ Obsahuje znovu (redundantně) zadání a odpověď. Je to proto, že otázku mů
     bodu = Optional(float)
     boduVysledek = Optional(float, column='bVysledek')
     hodnotit = Optional(int, default=1)
+    zaokrouhlit = Optional(int, default=2)
+    tolerance = Optional(float, default=0)
     vyslednaOdpoved = Set('DbVyslednaOdpoved')
     vysledekTestu = Optional(DbVysledekTestu, column='vTestu')
     puvodniOtazka = Optional(int, column='pOtazka')
@@ -179,7 +178,6 @@ class DbTridyTestu(db.Entity):
     id = PrimaryKey(int, column='idTrTestu', auto=True)
     test = Optional(DbTest)
     trida = Optional(DbTridy)
-
     
 sql_debug(True)
 db.generate_mapping(create_tables=True)

@@ -53,7 +53,7 @@ class Trida:
         return json({"trida": tridaInfo})
 
     def zmenObsah(J):
-        if J["tabulka"] != "Tridy":
+        if J["tabulka"] != "Tridy" or not uzivatel("admin"):
             return "Nemáš oprávnění měnit obsah této tabulky!!!"
         
         if J["id"] == "":

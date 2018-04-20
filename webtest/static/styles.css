@@ -693,6 +693,6 @@ input.seda {
 }
 
 
-#menuUcitel, #menuStudent {
+#menuUcitel, #menuStudent, #menuAdmin {
   display: none;
 }

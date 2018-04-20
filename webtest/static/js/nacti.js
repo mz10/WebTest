@@ -8,9 +8,8 @@ spustJS("zaklad");
 spustJS("hodnoceni"); 
 spustJS("kalendar");
 
-//web sockety
+//web sockety - spojeni se navaze az po prihlaseni
 ws = null;
-
 
 window.onload = function() {
     //hlaska("stranka nactena");
@@ -84,5 +83,12 @@ function odebratJS(jsSoubor){
 }
 
 function websocket() {
-    ws = io.connect(location.protocol + '//' + document.domain + ':' + location.port + "/ws");    
+    /*
+    ws = io.connect(location.protocol + '//' + document.domain + ':' + location.port + "/ws", {
+        upgrade: false,
+        transports: ['websocket']        
+    });   
+*/
+
+    ws = io.connect(location.protocol + '//' + document.domain + ':' + location.port + "/ws"); 
 }

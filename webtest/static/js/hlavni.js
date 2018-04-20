@@ -159,7 +159,7 @@ function prihlasit(e) {
         if(o.prihlasen == "učitel")
             $("#menuUcitel").show();
         if(o.prihlasen == "admin")
-            $("#menuUcitel").show();
+            $("#menuAdmin").show();
         else if(o.prihlasen == "student")
             $("#menuStudent").show();
         $(stranka).html("");
@@ -189,15 +189,12 @@ function zobrazitPrihlaseni() {
     //odstrani hash
     window.location.hash = "";
 
-    $("#menuUcitel").hide();
-    $("#menuStudent").hide();
-
+    $("nav").hide();
     $("#prihlaseno").html("");
     $("#log").html("");
     $("#uzivatele").html("");
     $(stranka).html("");
 }
-
 
 function pridatZaznam(json) {
     //hlaska(json,10);

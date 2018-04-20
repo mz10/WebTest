@@ -10,7 +10,8 @@ import functools
 import cgi
 
 from .testy import Testy
-from .funkce import (Zaznamy, naDesetinne, delka, datum, ted, uzivatel, uzJmeno)
+from .funkce import (Zaznamy, naDesetinne, delka, 
+    datum, ted, uzivatel, uzJmeno, tolerance)
 from .otazka import *
 
 from collections import defaultdict
@@ -37,13 +38,13 @@ class Student:
             idTridy = tridy.id
 
         studentInfo = {
-            "id": student.id,
-            "login": student.login,
-            "jmeno": student.jmeno,
+            "id":       student.id,
+            "login":    student.login,
+            "jmeno":    student.jmeno,
             "prijmeni": student.prijmeni,
             "trida": {
-                "id": idTridy,
-                "nazev": trida,
+                "id":     idTridy,
+                "nazev":  trida,
             },
         }
             
@@ -84,6 +85,8 @@ class Student:
                 konkretniZadani = zadani["html"],
                 vysledekTestu = vTestu.id,
                 puvodniOtazka = idOtazky,
+                zaokrouhlit = otazka.zaokrouhlit,
+                tolerance = otazka.tolerance,
                 bodu = otazka.bodu,
                 hodnotit = otazka.hodnotit
             )
@@ -106,20 +109,22 @@ class Student:
             random.shuffle(seznamOdpovedi)            
              
             seznamOtazek.append({
-                'id': vOtazka.id,
-                'jmeno': otazka.jmeno,
-                'zadani': zadani["html"],
-                'spravnych': len(odpovedi.tridit("D")),
-                'odpovedi': seznamOdpovedi
+                'id':           vOtazka.id,
+                'jmeno':        otazka.jmeno,
+                'zadani':       zadani["html"],
+                'zaokrouhlit':  otazka.zaokrouhlit,
+                'tolerance':    otazka.tolerance,
+                'spravnych':    len(odpovedi.tridit("D")),
+                'odpovedi':     seznamOdpovedi
             })
 
         random.shuffle(seznamOtazek)
 
         test = {
-            'id': vTestu.id,
-            'do': "limit",
-            'limit': seznam(test.limit)[0],
-            'otazky': seznamOtazek
+            'id':       vTestu.id,
+            'do':       "limit",
+            'limit':    seznam(test.limit)[0],
+            'otazky':   seznamOtazek
         }
 
         return json({"test": test})
@@ -171,8 +176,7 @@ class Student:
             if sId != vTestu.student.id:
                 return json({"odpoved": "Nemáš právo zobrazit tento výsledek!"})
 
-        vsechnyOdpovedi = select((o.ocekavanaOdpoved, o.odpoved, o.typ, o.vyslednaOtazka.id) 
-            for o in DbVyslednaOdpoved if o.vysledekTestu.id is id).order_by(3)
+        vsechnyOdpovedi = select(o for o in DbVyslednaOdpoved if o.vysledekTestu.id is id).sort_by("o.typ")
 
         typDobre = "zadaniDobre"
         typSpatne = "zadaniSpatne"
@@ -187,15 +191,15 @@ class Student:
 
         # projdou se vsechny odpovedi
         for o in vsechnyOdpovedi:
-            oId = o[3]
-            typ = o[2]
+            oId = o.vyslednaOtazka.id
+            typ = o.typ
 
             if typ == "D": typ = typDobre
             elif typ == "S": typ = typSpatne
             elif typ == "O": typ = typOtevrena 
 
-            ocOdpoved = o[0]
-            odpoved = o[1]
+            ocOdpoved = o.ocekavanaOdpoved
+            odpoved = o.odpoved
             
             if not oId in vysledek:
               vysledek[oId] = {}  
@@ -219,11 +223,13 @@ class Student:
             # prida info o otazce
             otazka = get(o for o in DbVyslednaOtazka if o.id == oId)
             vysledek[oId].update({
-                "jmeno": otazka.jmeno,
-                "zadani": otazka.konkretniZadani,
-                "bodu": otazka.bodu,
-                "hodnotit": otazka.hodnotit,
-                "hodnoceni": 0 
+                "jmeno":        otazka.jmeno,
+                "zadani":       otazka.konkretniZadani,
+                "bodu":         otazka.bodu,
+                "hodnotit":     otazka.hodnotit,
+                "zaokrouhlit":  otazka.zaokrouhlit,
+                "tolerance":    otazka.tolerance,
+                "hodnoceni":    0 
             })
 
             # priradi, ktere odpovedi jsou spravne a spatne
@@ -237,18 +243,21 @@ class Student:
 
             if typ == typOtevrena:
                 #cislena odpoved - desetinne cislo?:
-                # zaokrouhli na 2 DM, nahradi carku za tecku a porovna
+                # zaokrouhli na pocet DM v DB, nahradi carku za tecku a porovna
                 vysledek[oId]["ciselna"] = False
+                dMista = otazka.zaokrouhlit
 
+                # hleda cislo v odpovedi:
                 if not re.match("^\d+?[\.\,]\d+?$", ocOdpoved) is None:
-                    ocCislo = naDesetinne(ocOdpoved,2)
-                    stCislo = naDesetinne(odpoved,2)
+                    ocCislo = naDesetinne(ocOdpoved,dMista)
+                    stCislo = naDesetinne(odpoved,dMista)
                     vysledek[oId]["ciselna"] = True                   
 
-                    if ocCislo == stCislo:
+                    # pokusi se pouzit zadanou toleranci
+                    if tolerance(ocCislo,stCislo,otazka.tolerance): 
                         vysledek[oId][oznaceneDobre] = odpoved
                         vysledek[oId]["hodnoceni"] = otazka.bodu
-                    else:
+                    else: # pokud ne tak oznaci odpoved za spatnou
                         vysledek[oId][oznaceneSpatne] = odpoved
                 
                 # obycejna odpoved - spatne/spravne
@@ -314,14 +323,14 @@ class Student:
 
 
         jsTest = {
-            "id": vTestu.id,
-            "student": vTestu.student.login,
-            "od": datum(vTestu.casZahajeni),
-            "do": datum(vTestu.casUkonceni),
-            "boduMax": boduMax,
+            "id":       vTestu.id,
+            "student":  vTestu.student.login,
+            "od":       datum(vTestu.casZahajeni),
+            "do":       datum(vTestu.casUkonceni),
+            "boduMax":  boduMax,
             "boduTest": boduTest,
-            "procent": 100*boduTest/boduMax,          
-            "otazky": vysledek,
+            "procent":  100*boduTest/boduMax,          
+            "otazky":   vysledek,
         }
 
         return json({"test": jsTest})
@@ -340,27 +349,27 @@ class Student:
             odpovedi = select(o.odpoved for o in DbVyslednaOdpoved if o.vysledekTestu.id is test.id)
 
             seznamOtazek.append({
-                'id': otazka.id,
-                'jmeno': otazka.jmeno,
-                'zadani': otazka.konkretniZadani,
-                'bodu': otazka.bodu,
-                'odpovedi': seznam(odpovedi)
+                'id':           otazka.id,
+                'jmeno':        otazka.jmeno,
+                'zadani':       otazka.konkretniZadani,
+                'bodu':         otazka.bodu,
+                'odpovedi':     seznam(odpovedi)
             })
 
         jsTest = {
-            'id': test.id,
-            'od': test.casZahajeni.strftime(formatCasu),
-            'do': test.casUkonceni.strftime(formatCasu),
+            'id':           test.id,
+            'od':           test.casZahajeni.strftime(formatCasu),
+            'do':           test.casUkonceni.strftime(formatCasu),
             'boduVysledek': str(test.boduVysledek),
-            'boduMax': str(test.boduMax),
-            'student': test.student.login,
-            'otazky': seznamOtazek,
+            'boduMax':      str(test.boduMax),
+            'student':      test.student.login,
+            'otazky':       seznamOtazek,
         }
 
         return json({"test": jsTest})
 
     def zmenObsah(J):
-        if J["tabulka"] != "Student":
+        if J["tabulka"] != "Student" or not uzivatel("admin"):
             return "Nemáš oprávnění měnit obsah této tabulky!!!"
         
         trida = J["bunky"][3]   
