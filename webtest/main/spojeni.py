@@ -4,5 +4,5 @@ pripojit = {
     "host": "localhost",
     "user": "postgres",
     "database": "webtest",
-    "password": "a"
+    "password": "a",
 }

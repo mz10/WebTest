@@ -5,8 +5,9 @@ from datetime import datetime as dt
 from .db import *
 import json as _json
 
-from .funkce import (nahodne, json, jsonStahnout, vypocitej, chyba, uzivatel, uzJmeno)
+from .funkce import (nahodne, json, jsonStahnout, chyba, uzivatel, uzJmeno)
 from .student import Student
+from .zadani import Zadani
 
 class Trida:
     def pridat(J):

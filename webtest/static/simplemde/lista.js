@@ -8,6 +8,12 @@ function editor(el) {
         cm.replaceSelection(tabulka);
     }
 
+    function vlozZavorky(editor) {
+        var cm = editor.codemirror;
+        var vybranyText = "[" + cm.getSelection() + "]";
+        cm.replaceSelection(vybranyText);
+    }
+
     Simplemde = new SimpleMDE({  
         element: document.getElementById(el),
         spellChecker: false,
@@ -134,7 +140,15 @@ function editor(el) {
             action: "https://simplemde.com/markdown-guide",
             className: "fa fa-question-circle",
             title: "Nápověda",
-        },        
+        }, 
+        {
+            name: "zavorky",
+            action: vlozZavorky,
+            className: "fa zavorky",
+            title: "Vložit závorky",
+        },         
+        
+
     ],
     });
 }

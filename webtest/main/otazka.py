@@ -9,7 +9,8 @@ import random
 import sympy
 import cgi
 
-from .funkce import (nahodne, json, jsonStahnout, vypocitej, seznam, uzivatel, uzJmeno)
+from .funkce import (nahodne, json, jsonStahnout, seznam, uzivatel, uzJmeno)
+from .zadani import Zadani
 
 class Odpovedi:
     # najde odpovedi ktere patri do otazky (podle id)
@@ -23,13 +24,13 @@ class Odpovedi:
         return [cgi.escape(i[0]) for i in self.odpovedi if i[1] == typ]
 
     def vypocitat(self,typ):
-        return [cgi.escape(vypocitej(i[0],self.promenne))
+        return [cgi.escape(Zadani.vytvorOdpovedi(i[0],self.promenne))
             for i in self.odpovedi if i[1] == typ]
     
     def vypocitatVsechny(self):
         vysledek = []
         for o in self.odpovedi:
-            odpoved = cgi.escape(vypocitej(o[0],self.promenne))
+            odpoved = cgi.escape(Zadani.vytvorOdpovedi(o[0],self.promenne))
             typ = o[1]
             vysledek.append([odpoved, typ])
 
@@ -46,7 +47,7 @@ class Odpovedi:
             )
 
 class Otazka:
-    def smazat():
+    def smazat(J):
         idOtazky = J["id"]
         DbOtazka[idOtazky].delete()
         return "Otázka s id " + idOtazky + " byla smazána"
@@ -64,136 +65,6 @@ class Otazka:
         
         return "Všechny vaše otázky byly smazány."
 
-    def vytvorZadani(m):
-        promenne = {}
-
-        def nahraditPromenne(m):
-            rozdeleno = m.groups(0)[0].split(",")
-            promenna = rozdeleno[0]
-
-            #overi jestli promenna uz existuje
-            #pokud jo, tak ji nahradi stejnou hodnotou   
-            if promenna in promenne:
-                return str(promenne[promenna])
-
-            try:
-                vysledek = "[spatne zadano]"
-                
-                if len(rozdeleno) == 1:
-                    vysledek = random.randint(0,1000)
-                elif len(rozdeleno) == 2:
-                    od = int(rozdeleno[1])
-                    
-                    if od < 0:
-                        vysledek = random.randint(od,0)
-                    else:
-                        vysledek = random.randint(0,od)
-                elif len(rozdeleno) == 3:
-                    od = int(rozdeleno[1])
-                    do = int(rozdeleno[2]) 
-                    
-                    if od>do:
-                        vysledek = random.randint(do,od)
-                    else:
-                        vysledek = random.randint(od,do)
-                elif len(rozdeleno) == 4:
-                    od = float(rozdeleno[1])
-                    do =  float(rozdeleno[2])  
-                    zaokrouhlit = int(rozdeleno[3])
-                    
-                    if od>do:
-                        vysledek = random.uniform(do,od)     
-                    else:
-                        vysledek = random.uniform(od,do)
-                    
-                    vysledek = round(vysledek,zaokrouhlit)
-                
-            except Exception as e:
-                promenne[promenna] = 0
-                return "[chyba ve vyrazu 1]"
-                #return str(e)
-
-            promenne[promenna] = str(vysledek)
-            return str(vysledek)
-
-        def nahraditPromenne2(m):
-            promenna = m.group(1)
-            vyraz = m.group(2)
-            
-            #dosadit promenne do vyrazu
-            for p, hodnota in sorted(promenne.items()):
-                vyraz = vyraz.replace("$" + p,hodnota)    
-            
-            #vypocitat vyraz 
-            try:
-                vysledek = str(sympy.simplify(vyraz))
-            except:
-                promenne[promenna] = "0"
-                return "[chyba ve vyrazu 2]"
-            
-            #pridat vysledek do seznamu promennych
-            promenne[promenna] = vysledek
-            return vysledek
-
-        def nahraditSlova(m):
-            vyraz = m.group(0).split(".")
-            slovo = vyraz[0]
-            jazyk = vyraz[1]
-            kategorie = vyraz[2]
-            vsechno = True if kategorie == "vsechno" else False
-
-            slova = select((s.slovo1, s.slovo2) 
-                for s in DbSlovnik if (s.kategorie is kategorie or vsechno) and s.jazyk is jazyk)
-            seznamSlov = seznam(slova)
-
-            random.shuffle(seznamSlov)
-
-            if len(seznamSlov) == 0:
-                return "[spatne zadani]"
-
-            spravne1 = seznamSlov[0][0]
-            spravne2 = seznamSlov[0][1]
-
-            promenne["slovo1.spravne"] = spravne1
-            promenne["slovo2.spravne"] = spravne2
-
-            #odebere spravne slova ze seznamu a zustanou jen spatne
-            seznamSlov.pop(0)
-            
-            promenne["slovo1.spatne"] = []
-            promenne["slovo2.spatne"] = []      
-
-            for sl in seznamSlov:
-                promenne["slovo1.spatne"].append(sl[0])
-                promenne["slovo2.spatne"].append(sl[1])
-
-            if slovo == "$slovo1":
-                return spravne1
-            elif slovo == "$slovo2":
-                return spravne2
-
-            return str(slovo)
-
-        #nahradi textove promenne v [] nahodnymi cisly
-        m = re.compile('\[\$*([a-z][,\-*\d+[.d+]*]*)\]').sub(nahraditPromenne,m)
-        #nahradi textove promenne vypocitanym vyrazem
-        m = re.compile('\[\$*([a-z])\=(.*?)\]').sub(nahraditPromenne2,m)
-        #vybere slovo ze slovniku
-        m = re.compile("\$slovo[1-9]\.\w+.\w+?$", re.UNICODE).sub(nahraditSlova,m)
-        #vyhleda a odstrani komentare /** komentar **/
-        m = re.compile(r"\/\*\*(.*?)\*\*\/?",re.DOTALL).sub("",m)
-        #prevede markdown do HTML
-        m = markdown(m)
-        #nahradi \n novym radkem <br>
-        m = m.replace("\n","<br>")
-
-        hotovo = {}
-        hotovo["promenne"] = promenne
-        hotovo["html"] = Markup(m)
-
-        return hotovo
-
-
     def zobraz(id):
         #try:
         oId = get(o.id for o in DbOtazka if o.id is id)
@@ -202,7 +73,8 @@ class Otazka:
             return "Tato otázka neexistuje!"
 
         otazka = DbOtazka[id]
-        zadani = Otazka.vytvorZadani(otazka.obecneZadani)
+        Zadani.promenne = {}
+        zadani = Zadani.vytvorZadani(otazka.obecneZadani)
         odpovedi = Odpovedi(otazka.id, zadani["promenne"])
         
         jsOtazka = {
@@ -240,7 +112,7 @@ class Otazka:
             return "!!!"
 
         for otazka in otazky:
-            zadani = Otazka.vytvorZadani(otazka.obecneZadani)
+            zadani = Zadani.vytvorZadani(otazka.obecneZadani)
 
             seznamOtazek.append({
                 'id':           otazka.id,

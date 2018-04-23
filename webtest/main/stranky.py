@@ -19,6 +19,7 @@ from .tridy import *
 from .uzivatel import Uzivatel
 from .slovnik import Slovnik
 from .vysledky import Vysledky
+from .ucitel import Ucitel
 
 import time
 import os
@@ -27,6 +28,8 @@ import random
 import sys
 import json as _json
 import traceback
+
+psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
 
 # socket IO
 nm = "/ws"
@@ -39,19 +42,19 @@ def index(): return Uzivatel.index()
 def nenalezeno(ch): return render_template('404.html', e=ch), 404
 
 @main.route('/tabulky/')
-@prihlasitJSON('admin')
+@prihlasit('admin')
 def databaze(): return Ostatni.databaze()
 
 @main.route('/tabulky/', methods=('get','post'), endpoint='new')
-@prihlasitJSON('admin')
+@prihlasit('admin')
 def SmazTabulku(): return Ostatni.smazTabulku()
 
 @main.route('/tabulky/uklid/')
-@prihlasitJSON('admin')
+@prihlasit('admin')
 def uklidDb(): return Ostatni.uklidDb()
 
 @main.route('/db/')
-@prihlasitJSON('admin')
+@prihlasit('admin')
 def db(): return render_template('db.html') 
 
 @main.route('/vytvor/')
@@ -64,67 +67,52 @@ def login2(): return Uzivatel.prihlasit()
 @main.route('/odhlasit/', methods=['GET', 'POST'])
 def logout(): return Uzivatel.odhlasit()
 
-@main.route('/vysledky/', methods=['GET'])
-@prihlasitJSON('ucitel','admin')
-@db_session
-def vysledky(): return Ucitel.vysledky()
-
-@main.route('/vysledky/<id>', methods=['GET'])
-@prihlasitJSON('ucitel','admin')
-@db_session
-def vypracovan_testi(id): return Ucitel.vyplneno(id)
-
-@main.route('/vysledky/zobraz/<id>', methods=['GET'])
-@prihlasitJSON('ucitel','admin')
-@db_session
-def zobraz_test_studenta(id): return Ucitel.zobrazTest(id)
-
 @main.route('/otazky/ucitel/<login>', methods=['GET'])
-@prihlasitJSON('ucitel','admin')
+@prihlasit('ucitel','admin')
 @db_session
 def otazky_ucitel(login): return Otazka.ucitel(login)
 
 @main.route('/otazky/editovat/<id>', methods=['GET', 'POST'])
-@prihlasitJSON('ucitel','admin')
+@prihlasit('ucitel','admin')
 @db_session
 def otazka_editovat(id): return Otazka.upravit(id)
 
 @main.route('/otazky/smazat/<id>', methods=['GET', 'POST'])
-@prihlasitJSON('ucitel','admin')
+@prihlasit('ucitel','admin')
 @db_session
 def otazka_smazat(id): return Otazka.smazat(id)
 
 @main.route('/pridat/otazku/', methods=['GET', 'POST'])
-@prihlasitJSON('ucitel','admin')
+@prihlasit('ucitel','admin')
 def pridat_otazku(): return Otazka.pridat()
 
 @main.route('/pridat/test/', methods=['GET', 'POST'])
-@prihlasitJSON('ucitel','admin')
+@prihlasit('ucitel','admin')
 @db_session
 def pridat_test(): return Testy.pridat()
 
 @main.route('/testy/<id_test>', methods=['GET', 'POST'])
-@prihlasitJSON('ucitel','admin')
+@prihlasit('ucitel','admin')
 @db_session
 def uprav_test(id_test): return Testy.uprav(id_test)
 
 @main.route('/student/testy/', methods=['GET', 'POST'])
-@prihlasitJSON('student')
+@prihlasit('student')
 @db_session
 def student_testy(): return Student.testy()
 
 @main.route('/student/testy/<id>', methods=['GET', 'POST'])
-@prihlasitJSON('student')
+@prihlasit('student')
 @db_session
 def student_zobrazit(id): return Student.zobrazit(id)
 
 @main.route('/student/vysledky/')
-@prihlasitJSON('student')
+@prihlasit('student')
 @db_session
 def student_vysledek(): return Student.vysledky()
 
 @main.route('/csv/slovnik/', methods=['GET', 'POST'])
-@prihlasitJSON('ucitel','admin')
+@prihlasit('ucitel','admin')
 @db_session
 def sl(): return Slovnik.stahnout()
 
@@ -141,12 +129,12 @@ def upload1(): return render_template('upload.html')
 
 ################JSON#################
 @main.route('/json/slovnik/', methods=['GET', 'POST'])
-@prihlasitJSON('ucitel','admin')
+@prihlasit('ucitel','admin')
 @db_session
 def sl2(): return Slovnik.zobraz()
 
 @main.route('/json/testy/', methods=['GET', 'POST'])
-@prihlasitJSON('ucitel','admin')
+@prihlasit('ucitel','admin')
 @db_session
 def testy(): return Testy.zobraz()
 
@@ -159,22 +147,22 @@ def testyS(): return Testy.zobrazStudent()
 def testy3(id): return Student.vyplnitTest(id)
 
 @main.route('/json/testy/<id>', methods=['GET', 'POST'])
-@prihlasitJSON('ucitel','admin')
+@prihlasit('ucitel','admin')
 @db_session
 def testy2(id): return Testy.zobrazTest(id)
 
 @main.route('/json/otazky/', methods=['GET', 'POST'])
-@prihlasitJSON('ucitel','admin')
+@prihlasit('ucitel','admin')
 @db_session
 def otazky(): return Otazka.zobrazOtazky()
 
 @main.route('/json/otazky/export/', methods=['GET', 'POST'])
-@prihlasitJSON('ucitel','admin')
+@prihlasit('ucitel','admin')
 @db_session
 def otazkyE(): return Otazka.export()
 
 @main.route('/json/testy/export/', methods=['GET', 'POST'])
-#@prihlasitJSON('ucitel','admin')
+#@prihlasit('ucitel','admin')
 @db_session
 def testyE(): return Testy.export()
 
@@ -183,27 +171,27 @@ def testyE(): return Testy.export()
 def reg(): return Ostatni.registrace(request.json)
 
 @main.route('/json/tridy/<id>', methods=['GET', 'POST'])
-@prihlasitJSON('ucitel','admin')
+@prihlasit('ucitel','admin')
 @db_session
 def trId(id): return Trida.zobrazCelouTridu(id)
 
 @main.route('/json/tridy/', methods=['GET', 'POST'])
-@prihlasitJSON('ucitel','admin')
+@prihlasit('ucitel','admin')
 @db_session
 def tr(): return Trida.zobrazTridy()
 
 @main.route('/json/studenti/', methods=['GET', 'POST'])
-@prihlasitJSON('ucitel','admin')
+@prihlasit('ucitel','admin')
 @db_session
 def st(): return Student.seznamStudentu()
 
 @main.route('/json/ucitele/', methods=['GET', 'POST'])
-#@prihlasitJSON('ucitel','admin')
+#@prihlasit('ucitel','admin')
 @db_session
 def uc(): return Ucitel.seznamUcitelu()
 
 @main.route('/json/otazky/<id>', methods=['GET'])
-@prihlasitJSON('ucitel','admin')
+@prihlasit('ucitel','admin')
 @db_session
 def otazka_zobrazit(id): return Otazka.zobraz(id)
 
@@ -220,7 +208,7 @@ def vs(): return Vysledky.seznamVysledku()
 def vt(id): return Vysledky.test(id)
 
 @main.route('/json/post/student/', methods=['POST'])
-@prihlasitJSON('student')
+@prihlasit('student')
 @db_session
 def postS():
     J = request.json
@@ -247,7 +235,7 @@ def ttt(id):
     return Student.vysledekTestu(id)
 
 @main.route('/json/post/', methods=['POST'])
-@prihlasitJSON('ucitel','admin')
+@prihlasit('ucitel','admin')
 @db_session
 def postU(): 
     odpoved = "zadna akce" 
@@ -259,7 +247,7 @@ def postU():
 
     if(co == "otazka"):
         if akce == "smazat":
-            odpoved = Otazka.smazat()
+            odpoved = Otazka.smazat(J)
         if akce == "smazatVsechny":
             odpoved = Otazka.smazatVsechny()
         elif akce == "pridat":
@@ -313,7 +301,7 @@ def postU():
 
     return json({"odpoved":odpoved})
 
-#@prihlasitJSON2('ucitel')
+#@prihlasitWS('ucitel')
 @db_session
 def zpracovatJSON(J): 
     J = _json.loads(J)

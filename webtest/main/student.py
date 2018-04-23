@@ -8,10 +8,11 @@ import time
 import os
 import functools
 import cgi
+import re
 
 from .testy import Testy
 from .funkce import (Zaznamy, naDesetinne, delka, 
-    datum, ted, uzivatel, uzJmeno, tolerance)
+    datum, ted, uzivatel, uzJmeno, tolerance, dtRozdil)
 from .otazka import *
 
 from collections import defaultdict
@@ -51,14 +52,20 @@ class Student:
         return studentInfo
 
     def vyplnitTest(id): 
-        if uzivatel("student"):
-            Zaznamy.pridat("vyplneni",uzJmeno())
-        
         # vytvori se 3 tabulky:
         # vysledekTestu, vyslednaOtazka a vyslednaOdpoved
         # az student vyplni test, do sloupce 'odpoved' se odeslou jeho odpovedi
 
         test = get(u for u in DbTest if u.id is id)
+
+        if dt.now() < test.zobrazenoOd:
+            return json({"info": dtRozdil(dt.now(),test.zobrazenoOd)})
+
+        if dt.now() > test.zobrazenoDo:          
+            return json({"info": "Tento test už není možné vyplnit."})
+
+        if uzivatel("student"):
+            Zaznamy.pridat("vyplneni",uzJmeno())
 
         vTestu = DbVysledekTestu(
             student = get(s.id for s in DbStudent if s.login == uzJmeno()),
@@ -76,12 +83,15 @@ class Student:
             seznamOdpovedi = []
             idOtazky = cislo.id   
             otazka = DbOtazka[idOtazky]
-            zadani = Otazka.vytvorZadani(otazka.obecneZadani)
+            zadani = Zadani.vytvorZadani(otazka.obecneZadani)
             odpovedi = Odpovedi(idOtazky, zadani["promenne"])
+
+            # odstrani komentar
+            pZadani = re.compile(r"\/\*\*(.*?)\*\*\/?",re.DOTALL).sub("",otazka.obecneZadani)
 
             vOtazka = DbVyslednaOtazka(
                 jmeno = otazka.jmeno,
-                puvodniZadani = otazka.obecneZadani,
+                puvodniZadani = pZadani,
                 konkretniZadani = zadani["html"],
                 vysledekTestu = vTestu.id,
                 puvodniOtazka = idOtazky,
@@ -156,8 +166,9 @@ class Student:
                 idOtOdpovedi = get(o.id for o in DbVyslednaOdpoved 
                     if o.vyslednaOtazka.id is idOtazky and o.typ == "O")
                 
-                vOdpoved = DbVyslednaOdpoved[idOtOdpovedi]                
-                vOdpoved.odpoved = cgi.escape(text)
+                if idOtOdpovedi:
+                    vOdpoved = DbVyslednaOdpoved[idOtOdpovedi]                
+                    vOdpoved.odpoved = cgi.escape(text)
         
         return "Test byl odeslán"                  
 
@@ -321,6 +332,8 @@ class Student:
         if not vTestu.boduMax:
             vTestu.boduMax = boduMax
 
+        procent = 100
+        if boduMax != 0: procent = 100*boduTest/boduMax
 
         jsTest = {
             "id":       vTestu.id,
@@ -329,7 +342,7 @@ class Student:
             "do":       datum(vTestu.casUkonceni),
             "boduMax":  boduMax,
             "boduTest": boduTest,
-            "procent":  100*boduTest/boduMax,          
+            "procent":  procent,          
             "otazky":   vysledek,
         }
 

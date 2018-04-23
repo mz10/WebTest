@@ -100,6 +100,11 @@ function testyVyzkouset(idTestu) {
     smazIntervaly();
 
     function zpracujJSON(json) {
+        if(json.info) {
+            hlaska(json.info,3);
+            return;
+        }
+
         var test = json.test;
 
         text += "<h1>" + test.jmeno + "</h1>";

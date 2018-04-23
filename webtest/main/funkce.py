@@ -35,21 +35,6 @@ def pswd_check(pswd, encript):
 formatCasu = "%d.%m.%Y %H:%M"
 
 def prihlasit(klic1, klic2=""):
-    #Dekoruje funkce, které vyžadují přihlášení
-    #@prihlasit(klic)
-    #klic: je klic ve slovniku session, který se kontroluje.
-    
-    def decorator(function): 
-        @functools.wraps(function)
-        def wrapper(*args, **kwargs):
-            if "typ" in session and (session["typ"] == klic1 or session["typ"] == klic2):
-                return function(*args, **kwargs)
-            else:
-                return redirect(url_for('.login'))
-        return wrapper
-    return decorator
-
-def prihlasitJSON(klic1, klic2=""):
     def decorator(function):
         @functools.wraps(function)
         def wrapper(*args, **kwargs):
@@ -60,7 +45,7 @@ def prihlasitJSON(klic1, klic2=""):
         return wrapper
     return decorator
 
-def prihlasitJSON2(klic1, klic2=""):
+def prihlasitWS(klic1, klic2=""):
     def decorator(function):
         @functools.wraps(function)
         def wrapper(*args, **kwargs):           
@@ -86,68 +71,32 @@ def uzJmeno():
 def pswd_check(pswd, encript):
     return True   
 
+# vytvori nahodne cislo s promenlivou delkou
 def nahodne(a,b):
-    return str(random.randint(a,b))
+    cislo = random.randint(a,b)
+    delkaOd = abs(a).__str__().__len__()
+    delkaDo = abs(cislo).__str__().__len__()
+    delka = abs(delkaOd - delkaDo)
+    nahodnaDelka = random.randint(0,delka)
+    return str(int(cislo/(10**nahodnaDelka)))
+
+# vytvori nahodne desetinne cislo s promenlivou delkou
+def nahodneDes(a,b):
+    cislo = random.uniform(a,b)
+    delkaOd = abs(int(a)).__str__().__len__()
+    delkaDo = abs(int(cislo)).__str__().__len__()
+    delka = abs(delkaOd - delkaDo)
+    nahodnaDelka = random.randint(0,delka)
+    cislo = cislo/(10**nahodnaDelka)
+    return str(cislo)
+
+def zaokrouhlit(cislo,mista):
+    cislo = float(cislo)
+    mista = int(mista)
+    return ('%.10f' % round(cislo,mista)).rstrip('0').rstrip('.')
 
 def ted():
     return dt.now().strftime("%d.%m.%Y %H:%M:%S")
-
-def vypocitej(text,promenne):
-    #najde a vypocita vyraz v [ ]
-    def nahraditVyrazy(m):
-        vyraz = m.group(1)
-        priklad = True
-
-        #nahradi promenne ze zadani a dosadi jeji hodnotou
-        for promenna, hodnota in sorted(promenne.items()):
-            # pokud promenna obsah seznam           
-            if type(hodnota) is list:
-                priklad = False
-                if len(hodnota) >= 1:
-                    hodnota = hodnota[0]
-                    # odebere pridane slovo ze seznamu
-                    promenne[promenna].pop(0)
-                else:
-                    hodnota = "[Chyba: málo slov v DB]"
-
-            vyraz = vyraz.replace("$" + promenna, hodnota)  
-
-        if not priklad:
-            return vyraz
-
-        try:
-            #vykona funkci prumer pokud je zadana
-            vyraz = re.compile("Prumer\((.*?)\)").sub(prumer,vyraz)
-            #zjednodusi vyraz
-            vyraz = str(sympy.simplify(vyraz))
-            #nahradi mocninu v pythonu, aby se zobrazila spravne v MathJax
-            vyraz = vyraz.replace("**", "^")
-
-            #pokusi se zaokrouhlit vyraz na max 4 mista
-            try:    
-                vyraz = float(vyraz)
-                vyraz = ('%.14f' % round(vyraz,4)).rstrip('0').rstrip('.')
-            except: True
-            
-            return vyraz
-
-        except NameError:
-            return vyraz
-        except Exception as e:
-            return "[Sympy - chybný výraz]"
-        return vyraz  
-    
-    def prumer(m):
-        cisla = m.group(1).split(","); 
-        soucet=0
-        for c in cisla:
-            soucet += float(c)
-
-        return str(float(soucet/len(cisla)))
-
-    #regularni vyraz - funkce nahore
-    text = re.compile("\[(.*?)\]").sub(nahraditVyrazy,text)
-    return str(text)
 
 def datum(d):
     if d:
@@ -195,6 +144,21 @@ def naDesetinne(text,mista):
     
     return round(cislo,mista)
 
+def dtRozdil(od,do):
+    r = abs(do - od)
+    dnu = str(r.days) + "d, "
+    hodin = r.seconds//3600
+    minut = (r.seconds - hodin*3600)//60
+    sekund = r.seconds - (hodin*3600 + minut*60)
+
+    hodin = str(hodin) + "h, "
+    minut = str(minut) + "m, "
+    sekund = str(sekund) + "s"
+
+    zprava = "Test bude možné spustit za: "
+
+    return zprava + dnu + hodin + minut + sekund
+
 # zkontroluje zadanou odchylku v % 2 cisel
 def tolerance(c1,c2,procent):
     odchylka = 0
@@ -211,97 +175,119 @@ def tolerance(c1,c2,procent):
         
     return False
 
-class Ucitel:
-    def zobrazTest(id):
-        """zobrazi obsah vyplneneho testu studenta"""
-        if request.method == 'GET':
-            otazky = select((u.konkretni_zadani, u.ocekavana_odpoved,
-                            u.konkretniOdpoved,
-                            u.otazkaTestu.otazka.typOtazky) for u in Odpoved if
-                
-                            u.vysledek_testu.id is id)[:]
-            print(otazky)
-            return render_template('student_vysledky_zobraz.html', otazky=otazky)
+def spVypocitat(vyraz):
+    #return str(sympy.latex(sympy.N(vyraz)))
+    return str(sympy.N(vyraz))
 
+def prumer(cisla):
+    if cisla[0] == "": return 0
+    soucet = 0
+    for c in cisla:
+        soucet += float(c)
+    return str(float(soucet/len(cisla)))
 
-    def vyplneno(id):
-        """seznam uzivatelu, kteri vyplnili test"""
-        if request.method == 'GET':
-            nazev_testu = get(u.jmeno for u in DbTest if u.id is id)
-            seznam_zaku = select((u.student.jmeno, u.id, u.casUkonceni) for u in
-                                DbVysledekTestu if u.test.id is id)
-            return render_template('vypracovane_testy.html', seznamZaku=seznam_zaku, nazevTestu=nazev_testu)
+def rovnice(zadani):
+    strana2 = "0"
+    if len(zadani) == 2:
+       strana2 = zadani[1] 
 
-    def vysledky():
-        if request.method == 'GET':
-            seznam_testu = select((u.jmeno, u.id) for u in DbTest)
-            return render_template('vysledky.html', seznamTestu=seznam_testu)
+    rovnice = "Eq(%s,%s)" % (zadani[0], strana2)
+    vysledek = sympy.N(sympy.solveset(rovnice)) 
+    vysledek = list(vysledek)
+    
+    if len(vysledek) > 1:
+        return vysledek[1]
+    else:
+        return vysledek[0]
 
-    def seznamUcitelu():
-        ucitele = select(s for s in DbUcitel).sort_by("s.id")
-        seznam = []
+# prevede cislo na nejakou jednotku - napr mV, MB, A, ...
+def jednotka(cislo,typ, mista = -1):  
+    cislo = float(cislo)
+    mista = int(mista)
 
-        for ucitel in ucitele:
-            seznam.append({
-                "id":       ucitel.id,
-                "login":    ucitel.login,
-                "jmeno":    ucitel.jmeno,
-                "prijmeni": ucitel.prijmeni,
-                "admin":    ucitel.admin
-            })
-            
-        return json({"ucitele": seznam})
+    velikosti = {
+                 "a": -15,
+                 "f": -12,
+                 "n":  -9,
+                 "µ":  -6,
+                 "m":  -3,
+                  "":   0,
+                 "k":   3,
+                 "M":   6,
+                 "G":   9,
+                 "T":  12,
+                 "P":  15,
+                 "E":  18,                                  
+    }
+    mocnina = 0
+    velikost = "" 
+    
+    # najde velikost jednotky - k, M, G ...
+    # a priradi mocninu
+    # typ muze obsahovat napr. "mV", "A", "kB", ...
+    if len(typ) == 2:
+        velikost = typ[0]
+        typ = typ[1]
+        if velikost in velikosti:
+            mocnina = velikosti[velikost] 
+    
+    if cislo > -1 and cislo < 1:
+        while cislo > -1 and cislo < 1:
+            cislo = cislo*1000    
+            mocnina -= 3        
+    
+    if cislo <= -1000 or cislo >= 1000:
+        while cislo <= -1000 or cislo >= 1000:
+            cislo = cislo/1000    
+            mocnina += 3
+      
+    # priradi velikost pred hlavni jednotku
+    for klic, vel in velikosti.items():
+        if velikosti[klic] == mocnina:
+            velikost = klic
+            break
 
-    def zmenObsah(J):
-        if J["tabulka"] != "Ucitel" or not uzivatel("admin"):
-            return "Nemáš oprávnění měnit obsah této tabulky!!!"
+    if mista >= 0:
+        cislo = zaokrouhlit(cislo,mista) 
+
+    return str(cislo) + " " + velikost + typ
+
+# opak k funkci jednotka - prevede zpet na cislo
+def jednotka2(text, mista = -1): 
+    mista = int(mista)
+    parametry = text.split(" ")
+    cislo = float(parametry[0])
+    typ = ""
+    velikost = ""
+    mocnina = 0 
+    
+    if len(parametry) >= 2: typ = parametry[1]   
+    if len(typ) >=1: velikost = typ[0]
+    
+    velikosti = {
+                 "a": -15,
+                 "f": -12,
+                 "n":  -9,
+                 "µ":  -6,
+                 "m":  -3,
+                  "":   0,
+                 "k":   3,
+                 "M":   6,
+                 "G":   9,
+                 "T":  12,
+                 "P":  15,
+                 "E":  18,                                  
+    }
+    
+    if velikost in velikosti:
+        mocnina = velikosti[velikost] 
+         
+        cislo = cislo*(10**mocnina)
         
-        admin = False
-        if J["bunky"][3] == "true": admin = True
-
-        # zkontroluje, jestli uz v tabulkach neni stejny login
-        login = J["bunky"][0]
-        ucitel = get(s.id for s in DbUcitel if s.login == login)
-        student = get(s.id for s in DbStudent if s.login == login)
-
-        if J["id"] == "":
-            if (student or ucitel):
-                return "Tento login už existuje!"
-
-            DbUcitel(
-                login = login,
-                jmeno =  J["bunky"][1],
-                prijmeni = J["bunky"][2],
-                admin = admin
-            )
-
-            return "Byl přidán nový učitel."
-
-        id = int(J["id"])
-
-        dbId = get(o.id for o in DbUcitel if o.id is id)
-
-        if not dbId:
-            return "Toto id neexistuje!"
-
-        dbUcitel = DbUcitel[id]
-
-        if (student or ucitel):
-            login = dbUcitel.login 
-
-        if J["akce"] == "smazat":
-            dbUcitel.delete()
-            return "Učitel byl smazán"
-
-        elif J["akce"] == "zmenit":
-            dbUcitel.login = login
-            dbUcitel.jmeno = J["bunky"][1]
-            dbUcitel.prijmeni = J["bunky"][2]
-            dbUcitel.admin = admin
-
-            return "Učitel byl změněn."
-
-        return "Chyba - záznam nebyl přidán."
+    if mista >= 0:
+        cislo = zaokrouhlit(cislo,mista)        
+        
+    return str(cislo)
 
 class Zaznamy:
     def pridat(typ,student):

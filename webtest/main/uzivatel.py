@@ -244,6 +244,10 @@ class Uzivatel:
     # odpoji uzivatele se stejnym loginem, krome posledniho prihlaseneho (podle datumu)
     def odpojLogin(login):
         # odfiltruji se ostatni loginy
+
+        #ws.emit("odpoved","Bude odpojen: " + login,namespace=nm,broadcast=True)   
+
+
         filtr = [u for u in studenti if u["login"] == login]
         
         # seradi se podle casu prihlaseni

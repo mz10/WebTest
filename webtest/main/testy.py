@@ -7,8 +7,10 @@ from .db import *
 import json as _json
 import random
 
-from .funkce import (nahodne, json, jsonStahnout, vypocitej, uzivatel, uzJmeno)
+from .funkce import (nahodne, json, jsonStahnout, uzivatel, uzJmeno)
 from .otazka import Otazka, Odpovedi
+
+from .zadani import Zadani
 
 formatCasu = "%d.%m.%Y %H:%M"
 
