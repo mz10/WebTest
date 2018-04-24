@@ -14,6 +14,9 @@ class Zadani:
     promenne = {}
 
     def vytvorZadani(zadani):
+        # smazat vsechny promenne z predchozi otazky
+        Zadani.promenne = {}
+        
         m = zadani
 
         #vybere cizí slovo ze slovniku

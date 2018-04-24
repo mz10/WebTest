@@ -129,7 +129,7 @@ $(document).on("click", ".otTlacitka .tlZadani", function(e) {
         $(".otazka[cislo=" + idOtazky + "] .otZadani").html(zadani);
         
         if(!zadaniJakoHTML)
-            MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
+            mathjax();
     });
 });
 

@@ -33,7 +33,7 @@
     }
 
     $(div).html(text);
-    MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
+    mathjax();
 }
 
 function otazkyUprav(idOtazky) {
@@ -117,7 +117,7 @@ function otazkyKostka(e) {
         });
 
         otOdpoved.html(kod);
-        MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
+        mathjax();
     }
 }
 

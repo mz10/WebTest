@@ -116,6 +116,11 @@ def student_vysledek(): return Student.vysledky()
 @db_session
 def sl(): return Slovnik.stahnout()
 
+@main.route('/csv/studenti/', methods=['GET', 'POST'])
+@prihlasit('ucitel','admin')
+@db_session
+def sts(): return Student.stahnout()
+
 @main.route('/vzory/testy/')
 def testy1(): return render_template('test.html') 
 
@@ -281,9 +286,11 @@ def postU():
     elif(co == "trida"):
         if akce == "pridat":
             odpoved = Trida.pridat(J)
-    elif(co == "csvSlovnik"):
-        if akce == "nahrat":
+    elif(co == "csv"):
+        if akce == "nahrat" and J["studenti"] == False:
             odpoved = Slovnik.nahrat(J)
+        elif akce == "nahrat" and J["studenti"] == True:
+            odpoved = Student.nahrat(J)
     elif(co == "radek"):
         tabulka = J["tabulka"]
         if tabulka == "Student":

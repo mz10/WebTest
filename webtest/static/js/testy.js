@@ -112,7 +112,7 @@ function testyVyzkouset(idTestu) {
         $.each(test.otazky, zpracujOtazky);
         text += '<button id="odeslatTest" value="' + test.id + '">Odeslat</button>';
         $(stranka).html(text);
-        MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
+        mathjax();
         var interval = odpocet("#odpocet",test.limit, konecTestu);
     }
 

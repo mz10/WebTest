@@ -106,7 +106,8 @@ function uploadNahled() {
         if(pripona == ".csv") {
             $("#upKontrola").text("CSV soubor");
             $("#upOdeslat").addClass("csv"); 
-            return
+            $("#upCh").removeClass("skryty");
+            return;
         }
 
         try {
@@ -125,8 +126,9 @@ function uploadOdeslat(e) {
     if(e.target.className == "csv") {
         soubor = {
             akce: "nahrat", 
-            co: "csvSlovnik",
-            data: soubor
+            co: "csv",
+            studenti: pr("#upStudenti")[0].checked,
+            data: soubor,
         }
     }
 

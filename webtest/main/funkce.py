@@ -32,7 +32,7 @@ def pswd_check(pswd, encript):
 """
 ############################################################################
 
-formatCasu = "%d.%m.%Y %H:%M"
+formatCasu = "%d.%m.%Y %H:%M:%S"
 
 def prihlasit(klic1, klic2=""):
     def decorator(function):

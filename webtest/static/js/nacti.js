@@ -17,21 +17,12 @@ window.onload = function() {
     prihlasitUzivatele();
     zmenHash();
     menuNahore();
-    
-    
+       
     //navaze WS spojeni pokud je uz uzivatel prihlasen pres http
     if ($("#odhlasit").length > 0)
         wsUdalosti();
 
-    try {
-        MathJax.Hub.Config({
-            tex2jax: {inlineMath: [["$","$"],["\\(","\\)"]]},
-            displayAlign: "left"
-        });
-    }
-    catch(e) { 
-        hlaska("MathJax není načten. Zkontrolujte připojení k internetu."); 
-    }
+    mathjax1();
 
     document.getElementsByClassName("logo2")[0].onclick = function() {
         console.log("Obnovit JS");
@@ -91,4 +82,26 @@ function websocket() {
 */
 
     ws = io.connect(location.protocol + '//' + document.domain + ':' + location.port + "/ws"); 
+}
+
+
+function mathjax1() {
+    try {
+        MathJax.Hub.Config({
+            tex2jax: {inlineMath: [["$","$"],["\\(","\\)"]]},
+            displayAlign: "left"
+        });
+    }
+    catch(e) { 
+        hlaska("MathJax není načten. Zkontrolujte připojení k internetu.",2); 
+    }
+}
+
+function mathjax() {
+    try {
+        MathJax.Hub.Queue(["Typeset",MathJax.Hub])
+    }
+    catch(e) { 
+        hlaska("MathJax není načten. Zkontrolujte připojení k internetu.",1); 
+    }
 }

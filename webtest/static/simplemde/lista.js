@@ -23,7 +23,7 @@ function editor(el) {
             var preview = document.getElementsByClassName("editor-preview-side")[0];
             preview.innerHTML = this.parent.markdown(plainText);
             preview.setAttribute('id','editor-preview')
-            MathJax.Hub.Queue(["Typeset", MathJax.Hub,"editor-preview"]);
+            mathjax();
             return preview.innerHTML;
         },
         toolbar: [

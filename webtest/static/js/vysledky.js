@@ -96,7 +96,7 @@ function vysledkyZobraz(id) {
             $.each(otazky, zpracujOtazky);
     
             $(stranka).html(text);
-            MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
+            mathjax();
         }
     
         function zpracujOtazky(i, otazky) {

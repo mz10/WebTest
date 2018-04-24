@@ -17,7 +17,7 @@ from .otazka import *
 
 from collections import defaultdict
 
-formatCasu = "%d.%m.%Y %H:%M"
+formatCasu = "%d.%m.%Y %H:%M:%S"
 
 class Student:
     def seznamStudentu():
@@ -64,6 +64,13 @@ class Student:
         if dt.now() > test.zobrazenoDo:          
             return json({"info": "Tento test už není možné vyplnit."})
 
+        # ziska pocet pokusu u 1 testu
+        pokusu = select(v for v in DbVysledekTestu 
+            if v.test.id is id and v.student.login == uzJmeno()).count()
+
+        if test.pokusu <= pokusu:
+            return json({"info": "Smůla, už nemáš další pokus!"})
+
         if uzivatel("student"):
             Zaznamy.pridat("vyplneni",uzJmeno())
 
@@ -86,7 +93,7 @@ class Student:
             zadani = Zadani.vytvorZadani(otazka.obecneZadani)
             odpovedi = Odpovedi(idOtazky, zadani["promenne"])
 
-            # odstrani komentar
+            # odstrani komentar z otazky
             pZadani = re.compile(r"\/\*\*(.*?)\*\*\/?",re.DOTALL).sub("",otazka.obecneZadani)
 
             vOtazka = DbVyslednaOtazka(
@@ -128,7 +135,12 @@ class Student:
                 'odpovedi':     seznamOdpovedi
             })
 
-        random.shuffle(seznamOtazek)
+        if test.nahodny:
+            random.shuffle(seznamOtazek)
+
+        # oreze seznam otazek na maximalni pocet
+        if test.maxOtazek > 0:
+            seznamOtazek = seznamOtazek[:test.maxOtazek]
 
         test = {
             'id':       vTestu.id,
@@ -149,7 +161,7 @@ class Student:
         Zaznamy.pridat("vyplneno",uzJmeno())      
         
         vTestu = DbVysledekTestu[idTestu]
-        vTestu.casUkonceni = dt.now().strftime(formatCasu)
+        vTestu.casUkonceni = ted()
 
         for odpoved in J["odpovedi"]:
             text = odpoved[1]
@@ -380,6 +392,56 @@ class Student:
         }
 
         return json({"test": jsTest})
+
+    def nahrat(J):
+        text = J["data"].split("\n")
+        
+        # ziska seznam vsech loginu:
+        studenti = select(s.login for s in DbStudent)
+        ucitele = select(s.login for s in DbUcitel)
+        loginy = seznam(studenti) + seznam(ucitele)
+
+        for radek in text:
+            bunka = radek.split(";")                   
+            if len(bunka) < 5: continue           
+            prerusit = False
+
+            # kontrola jestli login uz existuje:
+            for login in loginy:
+                if login == bunka[0]: 
+                    prerusit = True
+                    break
+
+            if prerusit: continue
+
+            trida = None
+
+            if bunka[3].isdigit():
+                trida = get(t.id for t in DbTridy if t.poradi == bunka[3] and t.nazev == bunka[4])
+
+            DbStudent(
+                login = bunka[0],
+                jmeno = bunka[1],
+                prijmeni = bunka[2],         
+                trida = trida
+            ) 
+
+        return "CSV soubor se seznamem studentů byl úspěšně nahrán"
+
+    def stahnout():
+        studenti = select(s for s in DbStudent)
+        #utf-8 hlavnicka, aby csv sel spravne zobrazit v Excelu
+        csv = '\ufeff'
+
+        for s in studenti:
+            trida = "-;-"
+            if s.trida:
+                trida = str(s.trida.poradi) + ";" + s.trida.nazev
+            csv += s.login + ";" + s.jmeno + ";" + s.prijmeni + ";" + trida + "\r\n"
+
+        r = Response(response=csv,status=200,mimetype="text/plain")
+        r.headers["Content-Disposition"] = 'attachment; filename="studenti.csv"'
+        return r
 
     def zmenObsah(J):
         if J["tabulka"] != "Student" or not uzivatel("admin"):
