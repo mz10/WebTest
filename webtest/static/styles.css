@@ -696,3 +696,7 @@ input.seda {
 #menuUcitel, #menuStudent, #menuAdmin {
   display: none;
 }
+
+.fa.zavorky::after {
+  content: "[]";
+}
