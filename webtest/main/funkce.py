@@ -203,7 +203,8 @@ def rovnice(zadani):
 # prevede cislo na nejakou jednotku - napr mV, MB, A, ...
 def jednotka(cislo,typ, mista = -1):  
     cislo = float(cislo)
-    mista = int(mista)
+    try: mista = int(mista)
+    except: mista = 0
 
     velikosti = {
                  "a": -15,
@@ -253,8 +254,10 @@ def jednotka(cislo,typ, mista = -1):
     return str(cislo) + " " + velikost + typ
 
 # opak k funkci jednotka - prevede zpet na cislo
-def jednotka2(text, mista = -1): 
-    mista = int(mista)
+def jednotka2(text, mista = -1):
+    try: mista = int(mista)
+    except: mista = 0
+
     parametry = text.split(" ")
     cislo = float(parametry[0])
     typ = ""
