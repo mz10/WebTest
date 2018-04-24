@@ -57,6 +57,9 @@ class Zadani:
         # nahodna cisla 
         m = re.compile('\[\$([A-ž]+[\d+]*,.*?)\]').sub(Zadani.nahodnePromenne,m)
 
+        #vyhleda překlad cizího slova z databáze
+        m = re.compile("\$slovo[1-9]\.\w+").sub(Zadani.odpovediSlPromenne,m)
+
         #nahradi vsechny promenne v []
         m = re.compile('\[(.*?)\]').sub(Zadani.odpovediPromenne,m)
 
@@ -65,9 +68,6 @@ class Zadani:
 
         # odstrani [] pokud vyraz obsahuje
         if m[0] == "[": m = m[1:-1]
-
-        #vyhleda překlad cizího slova z databáze
-        m = re.compile("\$slovo[1-9]\.\w+").sub(Zadani.odpovediPromenne,m)
 
         return str(m)
 
@@ -182,7 +182,7 @@ class Zadani:
         
         #pridat vysledek do seznamu promennych
         promenne[promenna] = vysledek
-        return vysledek
+        return vysledek.rstrip('0').rstrip('.')
 
     def vyhodnotitFunkce(m):
         promenne = Zadani.promenne
@@ -229,10 +229,27 @@ class Zadani:
          
         # zkontrolovat jestli se vyraz zmenil
         if vyraz == m.group(1): return m.group(0)
-
-        else: return vyraz
+        else: return vyraz.rstrip('0').rstrip('.')
 
     def odpovediPromenne(m):
+        promenne = Zadani.promenne       
+        vyraz = m.group()
+        try: vyraz = m.group(1)
+        except: True
+
+        #nahradi promenne ze zadani a dosadi jeji hodnotou
+        for promenna, hodnota in sorted(promenne.items()): 
+            if type(hodnota) is list: continue         
+            vyraz = vyraz.replace("$" + promenna, hodnota)
+
+        # zkusi vypocitat vyraz:
+        try: vyraz = spVypocitat(vyraz)
+        except: True
+
+        vyraz = vyraz.rstrip('0').rstrip('.')
+        return "[" + str(vyraz) + "]"
+
+    def odpovediSlPromenne(m):
         promenne = Zadani.promenne       
         vyraz = m.group()
         try: vyraz = m.group(1)
@@ -251,8 +268,4 @@ class Zadani:
             
             vyraz = vyraz.replace("$" + promenna, hodnota)
 
-        # zkusi vypocitat vyraz:
-        try: vyraz = spVypocitat(vyraz)
-        except: True
-
-        return "[" + str(vyraz) + "]"
+        return str(vyraz)        
