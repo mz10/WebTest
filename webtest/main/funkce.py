@@ -92,7 +92,8 @@ def nahodneDes(a,b):
 
 def zaokrouhlit(cislo,mista):
     cislo = float(cislo)
-    mista = int(mista)
+    try: mista = int(mista)
+    except: mista = 0
     return ('%.10f' % round(cislo,mista)).rstrip('0').rstrip('.')
 
 def ted():

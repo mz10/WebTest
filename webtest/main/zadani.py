@@ -67,7 +67,7 @@ class Zadani:
         m = re.compile('\[([A-ž]+[\d+]*)\((.*?)\)\]').sub(Zadani.vyhodnotitFunkce,m)
 
         # odstrani [] pokud vyraz obsahuje
-        if m[0] == "[": m = m[1:-1]
+        m = m.replace("[","").replace("]","")
 
         return str(m)
 
