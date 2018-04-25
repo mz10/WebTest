@@ -221,14 +221,16 @@ class Testy:
                 odpovedi = Odpovedi(otazka.id)
 
                 seznamOtazek.append({
-                    'id':       otazka.id,
-                    'jmeno':    otazka.jmeno,
-                    'bodu':     otazka.bodu,
-                    'hodnotit': otazka.hodnotit,
-                    'zadani':   otazka.obecneZadani,
-                    'spravne':  odpovedi.tridit("D"),  
-                    'spatne':   odpovedi.tridit("S"), 
-                    'otevrena': odpovedi.tridit("O"),  
+                    'id':           otazka.id,
+                    'jmeno':        otazka.jmeno,
+                    'bodu':         otazka.bodu,
+                    'tolerance':    otazka.tolerance,
+                    'zaokrouhlit':  otazka.zaokrouhlit,   
+                    'hodnotit':     otazka.hodnotit,             
+                    'zadani':       otazka.obecneZadani,
+                    'spravne':      odpovedi.tridit("D"),  
+                    'spatne':       odpovedi.tridit("S"), 
+                    'otevrena':     odpovedi.tridit("O"),  
                 })
 
             seznamTestu.append(
