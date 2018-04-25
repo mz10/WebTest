@@ -265,3 +265,21 @@ function zobrazPrihlasene(json) {
 
     $("#uzivatele").html(tabulka);
 }
+
+
+/*********účet ***************/
+
+function ucetInfo() {
+    $(stranka).html($("#ucet").html());
+
+    $.getJSON("./ucet/", odpoved).fail(chybaIframe);
+    
+    function odpoved(o) {
+        pr("#ucLogin").text(o.prihlasen.login);
+        pr("#ucJmeno").text(o.prihlasen.jmeno);
+        pr("#ucPrijmeni").text(o.prihlasen.prijmeni);
+        pr("#ucTrida").text(o.prihlasen.trida);       
+    }
+
+
+}

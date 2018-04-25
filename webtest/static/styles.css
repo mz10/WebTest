@@ -674,7 +674,7 @@ input.seda {
 }
 
 
-#uzivatele, #log {
+#uzivatele, #log, #ucet {
   display: none;
 }
 
@@ -697,6 +697,18 @@ input.seda {
   display: none;
 }
 
-.fa.zavorky::after {
-  content: "[]";
-}
+.fa.zavorky::after    { content: "[]"; }
+.fa.alfa::after       { content: "α"; }
+.fa.beta::after       { content: "β"; }
+.fa.gama::after       { content: "γ"; }
+.fa.omega::after      { content: "Ω"; }
+.fa.pi::after         { content: "π"; }
+.fa.mi::after         { content: "µ"; }
+.fa.sipka::after      { content: "→"; }
+.fa.nerovnost::after  { content: "≠"; }
+.fa.dolar::after      { content: "$"; }
+.fa.zavorkySl::after  { content: "{}"; }
+
+
+/*.fa.::after           { content: ""; }
+.fa.::after           { content: ""; }*/

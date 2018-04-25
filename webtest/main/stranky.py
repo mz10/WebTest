@@ -64,6 +64,10 @@ def NovaTabulka1(): return Ostatni.novaTabulka()
 @db_session
 def login2(): return Uzivatel.prihlasit()
     
+@main.route('/ucet/', methods=["GET", "POST"])
+@db_session
+def ucet2(): return Uzivatel.ucet()
+
 @main.route('/odhlasit/', methods=['GET', 'POST'])
 def logout(): return Uzivatel.odhlasit()
 
@@ -130,7 +134,8 @@ def otazky1(): return render_template('otazka.html')
 @main.route('/vzory/upload/')
 def upload1(): return render_template('upload.html') 
 
-
+@main.route('/vzory/ucet/')
+def ucet1(): return render_template('ucet.html') 
 
 ################JSON#################
 @main.route('/json/slovnik/', methods=['GET', 'POST'])

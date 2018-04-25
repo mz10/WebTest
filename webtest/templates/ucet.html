@@ -1,0 +1,16 @@
+<h1>Účet</h1>
+Login: <span id="ucLogin"></span>
+Jméno: <span id="ucJmeno"></span>
+Příjmení: <span id="ucPrijmeni"></span>
+
+{% if session.typ and session.jmeno %}
+    {% if session.typ == 'student' %}
+        Třída: <span id="ucTrida"></span>
+    {% endif %} 
+{% endif %}   
+
+<h3>Změna hesla</h3>
+<input type="password" placeholder="Současné heslo" id="ucHeslo1"><br> 
+<input type="password" placeholder="Nové heslo" id="ucHeslo2"><br> 
+<input type="password" placeholder="Znovu" id="ucHeslo3"><br> 
+<button id="ucZmenitHeslo">Změnit</button>

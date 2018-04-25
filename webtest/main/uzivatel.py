@@ -283,3 +283,34 @@ class Uzivatel:
             hash = "1111",
             admin = True
         )
+
+    def ucet():
+        student = get(s for s in DbStudent if s.login == uzJmeno())
+        ucitel = get(u for u in DbUcitel if u.login == uzJmeno())
+        
+        info = {}
+        trida = "-"
+
+        if student:
+            if student.trida:
+                tridy = get(t for t in DbTridy if t.id is student.trida.id)         
+                trida = str(tridy.poradi) + tridy.nazev
+
+            info = {
+                "login": student.login, 
+                "jmeno": student.jmeno,
+                "prijmeni": student.prijmeni,
+                "trida": trida,
+                "student": True
+            }
+        
+        elif ucitel:
+           info = {
+                "login": ucitel.login, 
+                "jmeno": ucitel.jmeno,
+                "prijmeni": ucitel.prijmeni,
+                "trida": "-",
+                "student": False
+            }
+
+        return json({"prihlasen": info})

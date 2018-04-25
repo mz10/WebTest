@@ -206,6 +206,7 @@ def jednotka(cislo,typ, mista = -1):
     cislo = float(cislo)
     try: mista = int(mista)
     except: mista = 0
+    typ = typ.replace("u","µ")
 
     velikosti = {
                  "a": -15,

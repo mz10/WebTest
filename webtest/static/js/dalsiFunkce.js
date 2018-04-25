@@ -24,6 +24,7 @@ function zmenHash() {
         case "VysledkyTabulka":  vysledkyTabulka(promenna);    break;
         case "Hodnoceni":        vysledkyTabulka("");          break;
         case "VysledkyZobrazit": vysledkyZobraz(promenna);     break;   
+        case "Ucet":             ucetInfo();                   break;
         case "Nahrat":
             $(stranka).load("./vzory/upload/"); 
             break;           

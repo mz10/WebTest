@@ -3,14 +3,19 @@ var Simplemde;
 function editor(el) {
     function vlozTabulku(editor) {
         var cm = editor.codemirror;
-        var vybranyText = cm.getSelection();
         var tabulka = "| | | |\n|-|-|-|\n| | | |\n| | | |";
         cm.replaceSelection(tabulka);
     }
 
-    function vlozZavorky(editor) {
+    function vlozZnaky(editor, znakPred, znakPo) {
         var cm = editor.codemirror;
-        var vybranyText = "[" + cm.getSelection() + "]";
+        var vybranyText = znakPred + cm.getSelection() + znakPo;
+        cm.replaceSelection(vybranyText);
+    }
+
+    function vlozZnak(editor,text) {
+        var cm = editor.codemirror;
+        var vybranyText = text + cm.getSelection();
         cm.replaceSelection(vybranyText);
     }
 
@@ -143,12 +148,70 @@ function editor(el) {
         }, 
         {
             name: "zavorky",
-            action: vlozZavorky,
+            action: function(editor) {vlozZnaky(editor,"[", "]")},
             className: "fa zavorky",
             title: "Vložit závorky",
-        },         
-        
-
+        },  
+        {
+            name: "zavorkySl",
+            action: function(editor) {vlozZnaky(editor,"{", "}")},
+            className: "fa zavorkySl",
+            title: "Vložit závorky",
+        },
+        {
+            name: "dolar",
+            action: function(editor) {vlozZnak(editor,"$")},
+            className: "fa dolar",
+            title: "Vložit proměnnou",
+        },               
+        {
+            name: "alfa",
+            action: function(editor) {vlozZnak(editor,"α")},
+            className: "fa alfa",
+            title: "Znak alfa",
+        }, 
+        {
+            name: "beta",
+            action: function(editor) {vlozZnak(editor,"β")},
+            className: "fa beta",
+            title: "Znak beta",
+        }, 
+        {
+            name: "gama",
+            action: function(editor) {vlozZnak(editor,"γ")},
+            className: "fa gama",
+            title: "Znak gama",
+        }, 
+        {
+            name: "pi",
+            action: function(editor) {vlozZnak(editor,"π")},
+            className: "fa pi",
+            title: "Znak pí",
+        }, 
+        {
+            name: "mi",
+            action: function(editor) {vlozZnak(editor,"µ")},
+            className: "fa mi",
+            title: "Znak mí",
+        },
+        {
+            name: "omega",
+            action: function(editor) {vlozZnak(editor,"Ω")},
+            className: "fa omega",
+            title: "Znak omega",
+        },
+        {
+            name: "sipka",
+            action: function(editor) {vlozZnak(editor,"→")},
+            className: "fa sipka",
+            title: "Vložit šipku",
+        },
+        {
+            name: "nerovnost",
+            action: function(editor) {vlozZnak(editor,"≠")},
+            className: "fa nerovnost",
+            title: "Znak nerovnost",
+        },
     ],
     });
 }
