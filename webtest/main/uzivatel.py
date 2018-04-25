@@ -1,4 +1,5 @@
 from flask import (Flask, render_template, Markup, request, redirect, session, flash, Markup, url_for, Response)
+from werkzeug.security import generate_password_hash, check_password_hash
 from pony.orm import (sql_debug, get, select, db_session)
 from werkzeug.routing import BaseConverter
 from flask_socketio import disconnect
@@ -12,12 +13,14 @@ import functools
 import psycopg2
 import operator
 import random
+import ldap3
 import time
 import sys
 import os
 import re
 
 from .funkce import (pswd_check, json, wsJSON, ted, Zaznamy, uzivatel, uzJmeno)
+from .student import Student
 
 studenti = []
 ucitele = []
@@ -52,13 +55,15 @@ class Uzivatel:
         student = get(s for s in DbStudent if s.login == login)
         ucitel = get(u for u in DbUcitel if u.login == login)
 
-        if student and student.hash and pswd_check(heslo, student.hash):
+        if student:
             uzivatel = "student"
-            if not prihlasen:
+            if not prihlasen:               
+                #if uzivatel.ldap(login,""):
+                #Student.vlozitStudenta(login, "-", "-")  
                 session['jmeno'] = login
                 session['typ'] = "student"
             Zaznamy.pridat("prihlaseni", login)
-        elif ucitel and ucitel.hash and pswd_check(heslo, ucitel.hash):
+        elif ucitel and ucitel.hash:
             uzivatel = "učitel"
             if ucitel.admin:
                 uzivatel = "admin"
@@ -244,9 +249,7 @@ class Uzivatel:
     # odpoji uzivatele se stejnym loginem, krome posledniho prihlaseneho (podle datumu)
     def odpojLogin(login):
         # odfiltruji se ostatni loginy
-
         #ws.emit("odpoved","Bude odpojen: " + login,namespace=nm,broadcast=True)   
-
 
         filtr = [u for u in studenti if u["login"] == login]
         
@@ -314,3 +317,41 @@ class Uzivatel:
             }
 
         return json({"prihlasen": info})
+
+
+    def zmenaHesla(J):    
+        if uzivatel("student"):
+            student = get(s for s in DbStudent if s.login == uzJmeno())
+            if not check_password_hash(J["soucasne"], student.hash):
+                a = 5/0
+                return "Špatné heslo!"
+
+            student.hash = generate_password_hash(J["nove"])
+            return "Heslo bylo změněno"
+        elif uzivatel("ucitel") or uzivatel("admin"):
+            if not check_password_hash(J["soucasne"], ucitel.hash):
+                a = 5/0
+                return "Špatné heslo!"
+
+            ucitel.hash = generate_password_hash(J["nove"])
+            return "Heslo bylo změněno"
+
+        return "Chyba - uživatel není přihlášen!"
+
+    def ldap(login, heslo):
+        server = Server("172.16.0.104", get_info=ALL)
+        conn = Connection(
+            server,
+            user="spseol.cz\\{}".format(login),
+            password=heslo,
+            authentication=NTLM
+        )
+        try:
+            if conn.bind():
+                return True
+            else:
+                return False
+        except:
+            return False
+
+        return True

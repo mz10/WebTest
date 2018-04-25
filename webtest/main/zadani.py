@@ -5,7 +5,7 @@ from .db import *
 import random
 
 from .funkce import (nahodne, nahodneDes, jednotka, 
-    jednotka2, rovnice, spVypocitat, prumer, zaokrouhlit, seznam)
+    jednotka2, rovnice, spVypocitat, prumer, zaokrouhlit, platneMista, seznam)
 
 import sympy
 sympy.init_printing()
@@ -153,7 +153,7 @@ class Zadani:
                 if od>do:   vysledek = nahodneDes(do,od)     
                 else:       vysledek = nahodneDes(od,do)
                 
-                vysledek = zaokrouhlit(vysledek,mista)
+                vysledek = platneMista(vysledek,mista)
             
         except Exception as e:
             promenne[promenna] = 0
@@ -203,7 +203,9 @@ class Zadani:
             if funkce == "prumer":
                 vysledek = prumer(argumenty)
             elif funkce == "zk" and delka == 2:
-                vysledek = zaokrouhlit(*argumenty)             
+                vysledek = zaokrouhlit(*argumenty)  
+            elif funkce == "pmista" and delka == 2:
+                vysledek = platneMista(*argumenty)
             elif funkce == "jednotka" and delka >= 2:
                 vysledek = jednotka(*argumenty) 
             elif funkce == "jednotka2":

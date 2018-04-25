@@ -493,3 +493,16 @@ class Student:
                 dbStudent.trida = trida
 
             return "Student byl změněn."
+
+        def vlozitStudenta(login, jmeno, prijmeni):
+            student = get(s.id for s in DbStudent if s.login == login)
+            if student: return
+
+            J = {}
+            J["bunky"][0] = login,
+            J["bunky"][1] = jmeno,
+            J["bunky"][2] = prijmeni,
+            J["bunky"][3] = ""  
+
+            return Student.zmenObsah(J)
+                        

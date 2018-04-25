@@ -317,3 +317,6 @@ $(document).on("click", ".vsZobrazit", function(e) {
     var idVysledku = this.parentElement.parentElement.children[0].textContent;
     prejit("VysledkyZobrazit/" + idVysledku*1);
 }); 
+
+
+$(document).on("click", "#ucZmenitHeslo", ucetHeslo); 

@@ -29,8 +29,6 @@ import sys
 import json as _json
 import traceback
 
-psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
-
 # socket IO
 nm = "/ws"
 
@@ -218,25 +216,22 @@ def vs(): return Vysledky.seznamVysledku()
 def vt(id): return Vysledky.test(id)
 
 @main.route('/json/post/student/', methods=['POST'])
-@prihlasit('student')
+#@prihlasit('student')
 @db_session
 def postS():
     J = request.json
     akce = J["akce"]
     co = J["co"]
-    odpoved = "zadna akce"
+    odpoved = "Žádná akce"
 
     if(co == "test"):
         if akce == "vyhodnotit":
             Student.odeslatTest(J)
             return Student.vysledekTestu(J["idTestu"])
+    elif(co == "zmenaHesla"):
+        odpoved = Uzivatel.zmenaHesla(J)
 
-    js = {
-        "odpoved":odpoved,
-        "stav":"ok",
-    }           
-
-    return json(js)
+    return json({"odpoved":odpoved})
 
 
 @main.route('/student/vyhodnotit/<id>', methods=['GET'])
@@ -248,132 +243,70 @@ def ttt(id):
 @prihlasit('ucitel','admin')
 @db_session
 def postU(): 
-    odpoved = "zadna akce" 
+    odpoved = "Žádná akce"
     
-    #try:
-    J = request.json
-    akce = J["akce"]
-    co = J["co"]
+    try:
+        J = request.json
+        akce = J["akce"]
+        co = J["co"]
 
-    if(co == "otazka"):
-        if akce == "smazat":
-            odpoved = Otazka.smazat(J)
-        if akce == "smazatVsechny":
-            odpoved = Otazka.smazatVsechny()
-        elif akce == "pridat":
-            odpoved = Otazka.pridat(J)
-        elif akce == "upravit":
-            odpoved = Otazka.upravit(J)
-        elif akce == "nahrat":
-            odpoved = Otazka.pridatVsechny(J)                       
-    if(co == "test"):
-        if akce == "smazat":
-            idTestu = J["id"]
-            DbTest[idTestu].delete()
-            odpoved = "Test s id " + idTestu + " byl smazán"
-        elif akce == "pridat":
-            odpoved = Testy.pridat(J)
-        elif akce == "upravit":
-            odpoved = Testy.uprav(J)
-        elif akce == "nahrat":
-            odpoved = Testy.pridatVsechny(J)
-    elif(co == "tabulka"):
-        if akce == "smazat":
-            Ostatni.smazTabulku(J["nazev"],"smazat")
-            odpoved = "Tabulka " + J["nazev"] + " byla smazána."
-        elif akce == "vysypat":
-            Ostatni.smazTabulku(J["nazev"],"vysypat")
-            odpoved = "Tabulka " + J["nazev"] + " byla vysypána."
-    elif(co == "slovnik"):
-        if akce == "pridat":
-            Slovnik.pridat(J)
-            odpoved = "Slovo bylo přidáno."
-    elif(co == "trida"):
-        if akce == "pridat":
-            odpoved = Trida.pridat(J)
-    elif(co == "csv"):
-        if akce == "nahrat" and J["studenti"] == False:
-            odpoved = Slovnik.nahrat(J)
-        elif akce == "nahrat" and J["studenti"] == True:
-            odpoved = Student.nahrat(J)
-    elif(co == "radek"):
-        tabulka = J["tabulka"]
-        if tabulka == "Student":
-            odpoved = Student.zmenObsah(J)
-        elif tabulka == "Tridy":
-            odpoved = Trida.zmenObsah(J)
-        elif tabulka == "Slovnik":
-            odpoved = Slovnik.zmenObsah(J)
-        elif tabulka == "Ucitel":
-            odpoved = Ucitel.zmenObsah(J)
+        if(co == "otazka"):
+            if akce == "smazat":
+                odpoved = Otazka.smazat(J)
+            if akce == "smazatVsechny":
+                odpoved = Otazka.smazatVsechny()
+            elif akce == "pridat":
+                odpoved = Otazka.pridat(J)
+            elif akce == "upravit":
+                odpoved = Otazka.upravit(J)
+            elif akce == "nahrat":
+                odpoved = Otazka.pridatVsechny(J)                       
+        if(co == "test"):
+            if akce == "smazat":
+                idTestu = J["id"]
+                DbTest[idTestu].delete()
+                odpoved = "Test s id " + idTestu + " byl smazán"
+            elif akce == "pridat":
+                odpoved = Testy.pridat(J)
+            elif akce == "upravit":
+                odpoved = Testy.uprav(J)
+            elif akce == "nahrat":
+                odpoved = Testy.pridatVsechny(J)
+        elif(co == "tabulka"):
+            if akce == "smazat":
+                Ostatni.smazTabulku(J["nazev"],"smazat")
+                odpoved = "Tabulka " + J["nazev"] + " byla smazána."
+            elif akce == "vysypat":
+                Ostatni.smazTabulku(J["nazev"],"vysypat")
+                odpoved = "Tabulka " + J["nazev"] + " byla vysypána."
+        elif(co == "slovnik"):
+            if akce == "pridat":
+                Slovnik.pridat(J)
+                odpoved = "Slovo bylo přidáno."
+        elif(co == "trida"):
+            if akce == "pridat":
+                odpoved = Trida.pridat(J)
+        elif(co == "csv"):
+            if akce == "nahrat" and J["studenti"] == False:
+                odpoved = Slovnik.nahrat(J)
+            elif akce == "nahrat" and J["studenti"] == True:
+                odpoved = Student.nahrat(J)
+        elif(co == "radek"):
+            tabulka = J["tabulka"]
+            if tabulka == "Student":
+                odpoved = Student.zmenObsah(J)
+            elif tabulka == "Tridy":
+                odpoved = Trida.zmenObsah(J)
+            elif tabulka == "Slovnik":
+                odpoved = Slovnik.zmenObsah(J)
+            elif tabulka == "Ucitel":
+                odpoved = Ucitel.zmenObsah(J)
 
 
-    #except Exception as e:
-    #    odpoved = "Chyba v JSON!: " + str(e)
+    except Exception as e:
+        odpoved = "Chyba v JSON!: " + str(e)
 
     return json({"odpoved":odpoved})
-
-#@prihlasitWS('ucitel')
-@db_session
-def zpracovatJSON(J): 
-    J = _json.loads(J)
-    akce = J["akce"]
-    co = J["co"]
-    odpoved = "zadna akce"
-
-    if(co == "otazka"):
-        if akce == "smazat":
-            idOtazky = J["id"]
-            DbOtazka[idOtazky].delete()
-            odpoved = "Otázka s id " + idOtazky + " byla smazána"
-        elif akce == "pridat":
-            odpoved = Otazka.pridat(J)
-        elif akce == "upravit":
-            odpoved = Otazka.upravit(J)
-        elif akce == "nahrat":
-            odpoved = Otazka.pridatVsechny(J)                     
-    if(co == "test"):
-        if akce == "smazat":
-            idTestu = J["id"]
-            DbTest[idTestu].delete()
-            odpoved = "Test s id " + idTestu + " byl smazán"
-        elif akce == "pridat":
-            odpoved = Testy.pridat(J)
-        elif akce == "upravit":
-            odpoved = Testy.uprav(J)
-    elif(co == "tabulka"):
-        if akce == "smazat":
-            Ostatni.smazTabulku(J["nazev"],"smazat")
-            odpoved = "Tabulka " + J["nazev"] + " byla smazána."
-        elif akce == "vysypat":
-            Ostatni.smazTabulku(J["nazev"],"vysypat")
-            odpoved = "Tabulka " + J["nazev"] + " byla vysypána."
-    elif(co == "slovnik"):
-        if akce == "pridat":
-            Slovnik.pridat(J)
-            odpoved = "Slovo bylo přidáno."
-    elif(co == "trida"):
-        if akce == "pridat":
-            odpoved = Trida.pridat(J)
-    elif(co == "osoba"):
-        if akce == "pridat":
-            odpoved = Ostatni.registrace(J)
-    elif(co == "csvSlovnik"):
-        if akce == "nahrat":
-            odpoved = Slovnik.nahrat(J)
-    elif(co == "csvSlovnik"):
-        if akce == "nahrat":
-            odpoved = Slovnik.nahrat(J)
-
-
-
-    js = {
-        "odpoved":odpoved,
-        "stav":"ok",
-    }           
-
-    return wsJSON(js)
-
 
 ##########################################
 
@@ -383,7 +316,6 @@ def odjson(J):
         return zpracovatJSON(J)
     except Exception as e:
         return wsJSON({"traceback": traceback.format_exc().split("\n")})
-
 
 @ws.on('prihlasit', namespace=nm)
 @db_session

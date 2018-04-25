@@ -283,3 +283,27 @@ function ucetInfo() {
 
 
 }
+
+function ucetHeslo() {
+    var nove = ph("#ucHeslo2");
+    var znovu = ph("#ucHeslo3");
+
+    if (nove != znovu) {
+        hlaska("Hesla se neshodují!",2);
+        return
+    }
+
+    if (nove.length < 8) {
+        hlaska("Heslo by mělo mít aspoň 8 znaků!",2);
+        return        
+    }
+
+    var json = {
+        akce: "ucet", 
+        co: 'zmenaHesla',
+        soucasne: ph("#ucHeslo1"),
+        nove: ph("#ucHeslo2"),
+    };
+
+    postJSON(json, odpovedJSON, "./json/post/student/");
+}

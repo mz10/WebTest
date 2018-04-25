@@ -96,6 +96,15 @@ def zaokrouhlit(cislo,mista):
     except: mista = 0
     return ('%.10f' % round(cislo,mista)).rstrip('0').rstrip('.')
 
+# zaokrouhli cislo na pocet platnych mist
+def platneMista(cislo, mista=0):   
+    cislo = float(cislo)
+    try: mista = int(mista)
+    except: mista = 0       
+    if mista <= 0: return cislo
+    
+    return round(cislo, mista-int(math.floor(math.log10(abs(cislo))))-1)
+
 def ted():
     return dt.now().strftime("%d.%m.%Y %H:%M:%S")
 
@@ -251,7 +260,7 @@ def jednotka(cislo,typ, mista = -1):
             break
 
     if mista >= 0:
-        cislo = zaokrouhlit(cislo,mista) 
+        cislo = platneMista(cislo,mista) 
 
     return str(cislo) + " " + velikost + typ
 
@@ -290,7 +299,7 @@ def jednotka2(text, mista = -1):
         cislo = cislo*(10**mocnina)
         
     if mista >= 0:
-        cislo = zaokrouhlit(cislo,mista)        
+        cislo = platneMista(cislo,mista)        
         
     return str(cislo)
 
