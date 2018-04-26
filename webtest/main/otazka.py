@@ -232,7 +232,7 @@ class Otazka:
         return "Uzavřená otázka byla upravena. " + str(idOtazky)
 
     # vytvoří náhled zadani v editoru
-    def nahled(J):
+    def nahled(zadani):
         Zadani.promenne = {}
-        zadani = Zadani.vytvorZadani(J["zadani"])
-        return json({'zadani': zadani["html"]})
+        zadani = Zadani.vytvorZadani(zadani)
+        return zadani["html"]

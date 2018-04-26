@@ -26,9 +26,16 @@ function editor(el) {
         //podpora MathJax v nahledu
         previewRender: function(plainText) {
             var preview = document.getElementsByClassName("editor-preview-side")[0];
-            preview.innerHTML = this.parent.markdown(plainText);
-            preview.setAttribute('id','editor-preview')
-            mathjax();
+            var text = this.parent.markdown(plainText);
+
+            //odesle websocket se zadanim
+            wsJSON(text, function(json) {
+                preview.innerHTML = json.odpoved;
+                console.log(json);
+                preview.setAttribute('id','editor-preview')
+                mathjax();             
+            }, 'nahled');
+
             return preview.innerHTML;
         },
         toolbar: [

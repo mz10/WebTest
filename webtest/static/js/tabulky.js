@@ -33,8 +33,9 @@ function studentZobrazTabulku(nacteno) {
             t.prijmeni, select, tlacitko("Smazat")]);
     }
 
-    function zobrazTabulkuUc(i, t)
+    function zobrazTabulkuUc(i, t) {
         tabulka += tabulkaRadek(0, [t.id, t.login, t.jmeno, t.prijmeni, t.trida.nazev]);
+    }
 }
 
 function studentZobraz() {
@@ -90,11 +91,13 @@ function uciteleZobrazTabulku() {
         $(stranka).html(nadpis + "<table class='tabDb' nazev='Ucitel'>" + tabulka + "</table>");
     }
 
-    function zobrazTabulku(i, t)
+    function zobrazTabulku(i, t) {
         tabulka += tabulkaRadek(4, [t.id, t["login"], t.jmeno, t.prijmeni, checkbox(t.admin), tlacitko("Smazat")]);
+    }
 
-    function zobrazTabulkuUc(i, t)
-        tabulka += tabulkaRadek(0, [t.id, t["login"], t.jmeno, t.prijmeni, checkbox(t.admin)]);           
+    function zobrazTabulkuUc(i, t) {
+        tabulka += tabulkaRadek(0, [t.id, t["login"], t.jmeno, t.prijmeni, checkbox(t.admin)]);
+    }           
 }
 
 function slovnikZobrazTabulku(nacteno) {
@@ -135,11 +138,13 @@ function tridyZobrazTabulku(nacteno) {
         nacteno("<table class='tabDb' nazev='Tridy'>" + tabulka + "</table>");
     }
 
-    function zobrazTabulku(i, t)
+    function zobrazTabulku(i, t) {
         tabulka += tabulkaRadek(4, [t.id, t.poradi, t.nazev, t.rokUkonceni, tlacitko("Smazat")]);
-    
-    function zobrazTabulkuUc(i, t)
+    }
+
+    function zobrazTabulkuUc(i, t) {
         tabulka += tabulkaRadek(0, [t.id, t.poradi, t.nazev, t.rokUkonceni]);
+    }
 }
 
 function tabulkaZmenitZaznam(e) {

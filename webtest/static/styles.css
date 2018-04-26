@@ -7,8 +7,13 @@
 
 body {
   width: 100%;
-  *zoom: 1; }
+  *zoom: 1; 
+}
   
+html, body{
+  overflow: auto !important;  
+}
+
   body:before, body:after {
     content: "";
     display: table; 
@@ -712,3 +717,8 @@ input.seda {
 
 /*.fa.::after           { content: ""; }
 .fa.::after           { content: ""; }*/
+
+
+.editor-toolbar.fullscreen {
+  width: auto !important;
+}

@@ -322,7 +322,7 @@ def postU():
 @ws.on('odeslatJSON', namespace=nm)
 def odjson(J):
     try:
-        return zpracovatJSON(J)
+        return "nic" #zpracovatJSON(J)
     except Exception as e:
         return wsJSON({"traceback": traceback.format_exc().split("\n")})
 
@@ -343,3 +343,10 @@ def info(z):
 @ws.on('odpojUzivatele', namespace=nm)
 def odU(sid): 
     Uzivatel.odpojUzivatele(sid)
+
+@ws.on('nahled', namespace=nm)
+def nahled(zadani):
+    try:
+        return wsJSON({"odpoved": Otazka.nahled(zadani)})
+    except Exception as e:
+        return wsJSON({"traceback": traceback.format_exc().split("\n")})

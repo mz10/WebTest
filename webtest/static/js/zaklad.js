@@ -22,14 +22,16 @@ function postJSON(json, odeslano, url) {
 
 //odesle websocket a pocka na odpoved
 //zobrazi traceback pokud je chyba na serveru
-function wsJSON(json, odpoved) {
+function wsJSON(json, odpoved, udalost) {
     cl("JSON k odeslání:");
     cl(json);
     
     if(json && typeof json === "object")
         json = JSON.stringify(json);
     
-    ws.emit('odeslatJSON', json, function(o) {
+    if (!udalost) udalost = 'odeslatJSON';
+
+    ws.emit(udalost, json, function(o) {
         var prijato = "";
         
         try {

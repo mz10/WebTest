@@ -248,6 +248,7 @@ $(document).on("click", "#registrace", function(e) {
     prejit("Registrace");
 });
 
+
 $(document).on("click", ".radekAkce", tabulkaZmenitZaznam);
 
 //vkladani textu do tabulky
@@ -271,7 +272,6 @@ $(document).on("change", ".tabCh", function(e) {
     if (this.checked)
         this.value = true;
 });
-
 
 $(window).on("visibilitychange", function(e) {
     if(document.hidden) {

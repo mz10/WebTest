@@ -1,11 +1,11 @@
 spustJS("dalsiFunkce"); 
-spustJS("hlavni"); 
+spustJS("hlavni");
+spustJS("tabulky");  
 spustJS("otazky"); 
 spustJS("testy"); 
 spustJS("vysledky");
-spustJS("tabulky");
 spustJS("zaklad");    
-spustJS("hodnoceni"); 
+spustJS("hodnoceni");
 spustJS("kalendar");
 
 //web sockety - spojeni se navaze az po prihlaseni
