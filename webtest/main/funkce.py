@@ -249,11 +249,11 @@ def jednotka(cislo,typ, mista = -1):
     # najde velikost jednotky - k, M, G ...
     # a priradi mocninu
     # typ muze obsahovat napr. "mV", "A", "kB", ...
-    if len(typ) == 2:
+    if len(typ) >= 2:
         velikost = typ[0]
-        typ = typ[1]
         if velikost in velikosti:
-            mocnina = velikosti[velikost] 
+            mocnina = velikosti[velikost]
+            typ = typ[1:]          
     
     # desetinne cislo
     if cislo > -1 and cislo < 1:
@@ -276,6 +276,9 @@ def jednotka(cislo,typ, mista = -1):
     if mista >= 0:
         cislo = platneMista(cislo,mista) 
 
+    #odstrani 0 na konci za teckou
+    cislo = str(cislo).rstrip('0').rstrip('.')   
+        
     return str(cislo) + " " + velikost + typ
 
 # opak k funkci jednotka - prevede zpet na cislo
