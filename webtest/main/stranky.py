@@ -124,12 +124,15 @@ def sl(): return Slovnik.stahnout()
 def sts(): return Student.stahnout()
 
 @main.route('/vzory/testy/')
+@prihlasit('ucitel','admin')
 def testy1(): return render_template('test.html') 
 
 @main.route('/vzory/otazky/')
+@prihlasit('ucitel','admin')
 def otazky1(): return render_template('otazka.html') 
 
 @main.route('/vzory/upload/')
+@prihlasit('ucitel','admin')
 def upload1(): return render_template('upload.html') 
 
 @main.route('/vzory/ucet/')
@@ -147,10 +150,12 @@ def sl2(): return Slovnik.zobraz()
 def testy(): return Testy.zobraz()
 
 @main.route('/json/student/testy/', methods=['GET', 'POST'])
+@prihlasit('student','ucitel','admin')
 @db_session
 def testyS(): return Testy.zobrazStudent()
 
 @main.route('/json/student/testy/<id>', methods=['GET', 'POST'])
+@prihlasit('student','ucitel','admin')
 @db_session
 def testy3(id): return Student.vyplnitTest(id)
 
@@ -194,7 +199,7 @@ def tr(): return Trida.zobrazTridy()
 def st(): return Student.seznamStudentu()
 
 @main.route('/json/ucitele/', methods=['GET', 'POST'])
-#@prihlasit('ucitel','admin')
+@prihlasit('ucitel','admin')
 @db_session
 def uc(): return Ucitel.seznamUcitelu()
 
@@ -205,18 +210,21 @@ def otazka_zobrazit(id): return Otazka.zobraz(id)
 
 @main.route('/json/vysledky/', methods=['GET'])
 @db_session
+@prihlasit('student','ucitel','admin')
 def vz(): return Vysledky.vsechnyVysledky()
 
 @main.route('/json/vysledky/seznam/', methods=['GET'])
 @db_session
+@prihlasit('student','ucitel','admin')
 def vs(): return Vysledky.seznamVysledku()
 
 @main.route('/json/vysledky/<id>/', methods=['GET'])
 @db_session
+@prihlasit('student','ucitel','admin')
 def vt(id): return Vysledky.test(id)
 
 @main.route('/json/post/student/', methods=['POST'])
-#@prihlasit('student')
+@prihlasit('student','ucitel','admin')
 @db_session
 def postS():
     J = request.json
@@ -235,6 +243,7 @@ def postS():
 
 
 @main.route('/student/vyhodnotit/<id>', methods=['GET'])
+@prihlasit('student','ucitel','admin')
 @db_session
 def ttt(id):
     return Student.vysledekTestu(id)

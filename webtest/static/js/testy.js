@@ -113,7 +113,10 @@ function testyVyzkouset(idTestu) {
         text += '<button id="odeslatTest" value="' + test.id + '">Odeslat</button>';
         $(stranka).html(text);
         mathjax();
-        var interval = odpocet("#odpocet",test.limit, konecTestu);
+        //5 sekund jako rezerva
+        limit = (test.limit*60)-5;
+
+        var interval = odpocet("#odpocet",limit, konecTestu);
     }
 
     function konecTestu() {
@@ -301,6 +304,7 @@ function testyVymenOtazky() {
 
 //vyhodnotit test - student
 function testyVyhodnotit(e) {
+    smazIntervaly(); //smaze odpocet zbyvajiciho testu
     var seznamOdpovedi = [];
 
     $.each($(".odpoved.oznacena"), foreach);  

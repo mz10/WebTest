@@ -148,7 +148,9 @@ function odpocet(prvek,cas, konec) {
     var sekunda = 1000;
     var minuta = sekunda * 60;
     var hodina = minuta * 60;
-    cas = cas*60000;
+    
+    //cas v sekundach na ms
+    cas = cas*1000;
     
     if(intOdpocet) clearInterval(intOdpocet);
     var intOdpocet = setInterval(tik, sekunda);

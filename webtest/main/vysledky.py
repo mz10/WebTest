@@ -32,22 +32,38 @@ class Vysledky:
         if vysledek.student.trida:
             trida = str(vysledek.student.trida.poradi) + vysledek.student.trida.nazev
 
+        cas = "-"
+
+        if vysledek.casUkonceni:
+            cas = vysledek.casUkonceni - vysledek.casZahajeni
+
+            hodiny =  cas.seconds//3600
+            minuty = (cas.seconds -  hodiny*3600)//60
+            sekundy = cas.seconds - (hodiny*3600 + minuty*60)
+
+            if minuty  < 10: minuty  = "0" + str(minuty)
+            if sekundy < 10: sekundy = "0" + str(sekundy)
+
+            if hodiny > 0: cas = str(hodiny) + ":" + minuty + ":" + sekundy
+            else:          cas = str(minuty) + ":" + str(sekundy)
+
         info = {
-            'id': vysledek.id,
-            'jmeno': vysledek.jmeno,
-            'casZahajeni': datum(vysledek.casZahajeni),
-            'casUkonceni': datum(vysledek.casUkonceni),
-            'limit': vysledek.limit,
-            'pokus': vysledek.pokus,
-            'boduVysledek': vysledek.boduVysledek,
-            'boduMax': vysledek.boduMax,
-            'procent': procent,
-            'hodnoceni': vysledek.hodnoceni,
+            'id':               vysledek.id,
+            'jmeno':            vysledek.jmeno,
+            'casZahajeni':      datum(vysledek.casZahajeni),
+            'casUkonceni':      datum(vysledek.casUkonceni),
+            'limit':            vysledek.limit,
+            'cas':              cas,
+            'pokus':            vysledek.pokus,
+            'boduVysledek':     vysledek.boduVysledek,
+            'boduMax':          vysledek.boduMax,
+            'procent':          procent,
+            'hodnoceni':        vysledek.hodnoceni,
             'student': {
-                'id': vysledek.student.id,
-                'login': vysledek.student.login,
-                'prijmeni': vysledek.student.prijmeni,
-                'trida': trida
+                'id':               vysledek.student.id,
+                'login':            vysledek.student.login,
+                'prijmeni':         vysledek.student.prijmeni,
+                'trida':            trida
             }
         }
 

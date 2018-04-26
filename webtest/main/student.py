@@ -79,6 +79,7 @@ class Student:
             test = test.id,
             jmeno = test.jmeno,
             limit = test.limit,
+            pokus = pokusu,
             casZahajeni = ted(),
         )
 
@@ -145,6 +146,7 @@ class Student:
         test = {
             'id':       vTestu.id,
             'do':       "limit",
+            'jmeno':    vTestu.jmeno,
             'limit':    seznam(test.limit)[0],
             'otazky':   seznamOtazek
         }

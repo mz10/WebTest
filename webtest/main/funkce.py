@@ -34,22 +34,24 @@ def pswd_check(pswd, encript):
 
 formatCasu = "%d.%m.%Y %H:%M:%S"
 
-def prihlasit(klic1, klic2=""):
+def prihlasit(klic1, klic2="", klic3=""):
     def decorator(function):
         @functools.wraps(function)
         def wrapper(*args, **kwargs):
-            if "typ" in session and (session["typ"] == klic1 or session["typ"] == klic2):
+            if "typ" in session and (session["typ"] == klic1 or \
+                    session["typ"] == klic2 or session["typ"] == klic3):
                 return function(*args, **kwargs)
             else:
                 return "neprihlasen"
         return wrapper
     return decorator
 
-def prihlasitWS(klic1, klic2=""):
+def prihlasitWS(klic1, klic2="", klic3=""):
     def decorator(function):
         @functools.wraps(function)
         def wrapper(*args, **kwargs):           
-            if "typ" in session and (session["typ"] == klic1 or session["typ"] == klic2):
+            if "typ" in session and (session["typ"] == klic1 or \
+                    session["typ"] == klic2 or session["typ"] == klic3):
                 return function(*args, **kwargs)
             else:
                 return wsJSON({"chyba":"neprihlasen"})
@@ -196,6 +198,9 @@ def prumer(cisla):
         soucet += float(c)
     return str(float(soucet/len(cisla)))
 
+
+
+
 def rovnice(zadani):
     strana2 = "0"
     if len(zadani) == 2:
@@ -210,6 +215,27 @@ def rovnice(zadani):
     else:
         return vysledek[0]
 
+# velikosti jednotek
+velikosti = {
+                "y": -24,                
+                "z": -21,
+                "a": -18,    
+                "f": -15,
+                "p": -12,
+                "n":  -9,
+                "µ":  -6,
+                "m":  -3,
+                "":   0,
+                "k":   3,
+                "M":   6,
+                "G":   9,
+                "T":  12,
+                "P":  15,
+                "E":  18,
+                "Z":  21,
+                "Y":  24,
+}
+
 # prevede cislo na nejakou jednotku - napr mV, MB, A, ...
 def jednotka(cislo,typ, mista = -1):  
     cislo = float(cislo)
@@ -217,20 +243,6 @@ def jednotka(cislo,typ, mista = -1):
     except: mista = 0
     typ = typ.replace("u","µ")
 
-    velikosti = {
-                 "a": -15,
-                 "f": -12,
-                 "n":  -9,
-                 "µ":  -6,
-                 "m":  -3,
-                  "":   0,
-                 "k":   3,
-                 "M":   6,
-                 "G":   9,
-                 "T":  12,
-                 "P":  15,
-                 "E":  18,                                  
-    }
     mocnina = 0
     velikost = "" 
     
@@ -243,11 +255,13 @@ def jednotka(cislo,typ, mista = -1):
         if velikost in velikosti:
             mocnina = velikosti[velikost] 
     
+    # desetinne cislo
     if cislo > -1 and cislo < 1:
         while cislo > -1 and cislo < 1:
             cislo = cislo*1000    
             mocnina -= 3        
     
+    # velke cislo nad 1000
     if cislo <= -1000 or cislo >= 1000:
         while cislo <= -1000 or cislo >= 1000:
             cislo = cislo/1000    
@@ -277,21 +291,6 @@ def jednotka2(text, mista = -1):
     
     if len(parametry) >= 2: typ = parametry[1]   
     if len(typ) >=1: velikost = typ[0]
-    
-    velikosti = {
-                 "a": -15,
-                 "f": -12,
-                 "n":  -9,
-                 "µ":  -6,
-                 "m":  -3,
-                  "":   0,
-                 "k":   3,
-                 "M":   6,
-                 "G":   9,
-                 "T":  12,
-                 "P":  15,
-                 "E":  18,                                  
-    }
     
     if velikost in velikosti:
         mocnina = velikosti[velikost] 

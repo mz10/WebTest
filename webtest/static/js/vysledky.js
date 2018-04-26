@@ -35,6 +35,8 @@ function vysledkyTabulka(idTestu) {
             <th>Jméno</th>\
             <th>Zahájeno</th>\
             <th>Ukončeno</th>\
+            <th>Limit</th>\
+            <th>Čas</th>\
             <th>Pokus</th>\
             <th>Bodů</th>\
             <th>%</th>\
@@ -62,6 +64,8 @@ function vysledkyTabulka(idTestu) {
                 <td>${v.jmeno}</th>\
                 <td>${v.casZahajeni}</th>\
                 <td>${v.casUkonceni}</th>\
+                <td>${v.limit}</th>\
+                <td>${v.cas}</th>\
                 <td>${v.pokus}</th>\
                 <td>${v.boduVysledek}</th>\
                 <td>${v.procent.zaokrouhlit(2)}</th>\
@@ -120,7 +124,12 @@ function vysledkyZobraz(id) {
             });
     
             $.each(otazky.zadaniOtevrena, function(i, od) {
-                text += zobrazOdpoved(od,"odOtevrena");
+                text += `<span class='odOtevrena'>${otazky.zadaniOtevrena}</span>`;
+                text += `<span class='odSipka'>→</span>`;
+                if(otazky.oznaceneSpatne)
+                    text += `<span class="odSpatne">${otazky.oznaceneSpatne}</span>`; 
+                if (otazky.oznaceneDobre)
+                    text += `<span class="odDobre">${otazky.oznaceneDobre}</span>`; 
             });
     
             function zobrazOdpoved(odpoved,typ) {

@@ -231,12 +231,8 @@ class Otazka:
 
         return "Uzavřená otázka byla upravena. " + str(idOtazky)
 
-
-    #############################################
-
-    def ucitel(login):
-        # Zobrazí všechny otázky jednoho zadávajícího učitele
-        otazky = select((o.id, o.ucitel.login, o.ucitel.jmeno, o.jmeno,
-                        o.obecneZadani) for o in DbOtazka
-                        if o.ucitel.login == login)
-        return render_template('otazky.html', otazky=otazky)
+    # vytvoří náhled zadani v editoru
+    def nahled(J):
+        Zadani.promenne = {}
+        zadani = Zadani.vytvorZadani(J["zadani"])
+        return json({'zadani': zadani["html"]})
