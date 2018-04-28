@@ -115,7 +115,9 @@ class Vysledky:
             return json({'vysledky': []})
 
         for vysledek in vysledky:
-            tId = vysledek.test.id
+            if vysledek.test:
+                tId = vysledek.test.id
+            else: continue
             
             if not tId in seznam:
                 seznam[tId] = {
