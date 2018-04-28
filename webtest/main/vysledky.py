@@ -29,7 +29,7 @@ class Vysledky:
             procent = 100*vysledek.boduVysledek/vysledek.boduMax
 
         trida = "-"
-        if vysledek.student.trida:
+        if vysledek.student and vysledek.student.trida:
             trida = str(vysledek.student.trida.poradi) + vysledek.student.trida.nazev
 
         cas = "-"
