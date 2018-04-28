@@ -207,6 +207,7 @@ function tabulkaHlavicka(sloupce) {
 
 function wsUdalosti() {
     websocket();
+    if(!ws) return;
 
     ws.on('connect', function() {
         ws && ws.emit("prihlasit",false);

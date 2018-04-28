@@ -322,14 +322,14 @@ class Uzivatel:
     def zmenaHesla(J):    
         if uzivatel("student"):
             student = get(s for s in DbStudent if s.login == uzJmeno())
-            if not check_password_hash(J["soucasne"], student.hash):
+            if not check_password_hash(student.hash, J["soucasne"]):
                 a = 5/0
                 return "Špatné heslo!"
 
             student.hash = generate_password_hash(J["nove"])
             return "Heslo bylo změněno"
         elif uzivatel("ucitel") or uzivatel("admin"):
-            if not check_password_hash(J["soucasne"], ucitel.hash):
+            if not check_password_hash(ucitel.hash, J["soucasne"]):
                 a = 5/0
                 return "Špatné heslo!"
 

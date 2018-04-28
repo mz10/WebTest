@@ -111,6 +111,9 @@ class Vysledky:
         vysledky = select(t for t in DbVysledekTestu)
         seznam = defaultdict(dict)
 
+        if not vysledky:
+            return json({'vysledky': []})
+
         for vysledek in vysledky:
             tId = vysledek.test.id
             
