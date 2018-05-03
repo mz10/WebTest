@@ -9,19 +9,6 @@ from .funkce import (json, uzivatel, uzJmeno)
 from .tridy import Trida
 
 class Ostatni:
-    def novaTabulka():
-        db = psycopg2.connect(**pripojit)
-        sql = db.cursor()
-        db.autocommit = True
-
-        sql.execute("CREATE TABLE IF NOT EXISTS \
-            tabTest (neco VARCHAR(50), cisla INTEGER);")
-
-        vlozit = "INSERT INTO tabTest VALUES ('test', 20);"
-        sql.execute(vlozit)
-
-        return "vytvoreno"
-
     def uklidDb():
         db = psycopg2.connect(**pripojit)
         sql = db.cursor()

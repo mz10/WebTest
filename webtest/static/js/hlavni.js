@@ -93,30 +93,39 @@ function uploadNahled() {
         return false;
     }
 
-    var reader = new FileReader();       
-    var souborTxt = reader.readAsText(soubor);    
-    
-    //precist obsah souboru
-    reader.onload = function(e2) {
-        var obsah = e2.target.result;
-        $("#upravaJSON").val(e2.target.result);
-        $("#upravaJSON").removeClass();
-        $("#upOdeslat").removeClass(); 
 
-        if(pripona == ".csv") {
+    if(pripona == ".csv") {
+        var reader = new FileReader();         
+        reader.readAsText(soubor, 'windows-1250');    
+        reader.onload = function(e2) {
+            cl("csv");
+            $("#upravaJSON").val(e2.target.result);  
+            $("#upravaJSON").removeClass();          
             $("#upKontrola").text("CSV soubor");
+            $("#upOdeslat").removeClass();
             $("#upOdeslat").addClass("csv"); 
             $("#upCh").removeClass("skryty");
-            return;
-        }
+            return;  
+        } 
+    }  
+    else {
+        var reader = new FileReader();         
+        reader.readAsText(soubor, "utf-8");    
+        reader.onload = function(e2) {           
+            obsah = e2.target.result;
+            $("#upravaJSON").val(obsah);
+            $("#upravaJSON").removeClass();
+            $("#upOdeslat").removeClass(); 
+            cl("jsn");
 
-        try {
-            $.parseJSON(obsah);
-            $("#upKontrola").text("JSON je v pořádku.");
-        } catch(chyba) {
-            $("#upKontrola").text(chyba);
-            $("#upOdeslat").addClass("skryty"); 
-        }
+            try {
+                $.parseJSON(obsah);
+                $("#upKontrola").text("JSON je v pořádku.");
+            } catch(chyba) {
+                $("#upKontrola").text(chyba);
+                $("#upOdeslat").addClass("skryty"); 
+            }
+        }        
     }    
 }
 
@@ -136,7 +145,7 @@ function uploadOdeslat(e) {
     postJSON(soubor, odpovedJSON);
 }
 
-function prihlasit(e) {
+function prihlasit() {
     var json = {
         login: $("#login").val(),
         heslo: $("#heslo").val(),
@@ -155,6 +164,7 @@ function prihlasit(e) {
     function prihlaseno(o) {
         wsUdalosti();
         $("#prihlaseni").hide();
+        $("#heslo").val("");
         text = `<span id="typUzivatele">${o.prihlasen}</span>: <a id="odhlasit">${o.uzivatel}</a><br>`;
         text += 'Přihlášených: <span id="prihlasenych">0</span>';
         $("#prihlaseno").html(text);
@@ -166,7 +176,6 @@ function prihlasit(e) {
             $("#menuStudent").show();
         $(stranka).html("");
     }
-
 }
 
 function odhlasit() {

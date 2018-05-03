@@ -29,9 +29,8 @@ $(document).on("click", "#ttVybrat", testyVymenOtazky);
 $(document).on("click", stranka + " > .otazka", function(e) {
     if(e.target.localName == "button") return false;
     if(e.target.localName == "textarea") return false;
-    prejit("OtazkyUpravit");
     var idOtazky = e.currentTarget.attributes.cislo.value;
-    otazkyUprav(idOtazky);
+    prejit("Otazky/" + idOtazky);
 });
 
 //kliknout na dostupne otazky
@@ -48,9 +47,8 @@ $(document).on("click", "#ttZvolene > .otazka", function(e) {
 $(document).on("click", ".test.ucitel", function(e) {
     if(e.target.localName == "button") return false;
     if(e.target.localName == "input") return false;
-    prejit("TestyUpravit");
-    var idTestu = e.currentTarget.attributes.cislo.value;    
-    testyUprava("uprav",idTestu);
+    var idTestu = e.currentTarget.attributes.cislo.value; 
+    prejit("Testy/" + idTestu);
 }); 
 
 //kliknout na test student
@@ -100,12 +98,23 @@ $(document).on("click", ".otTlacitka .tlSmazat", function(e) {
     otazkySmazat(idOtazky);
 });
 
-//smazat test
-$(document).on("click", ".ttTlacitka .tlSmazat", function(e) {
-    var idTestu =  e.target.parentElement.parentElement.attributes.cislo.value;
-    testySmazat(idTestu);
+//zobrazit vygenerovany test
+$(document).on("click", ".otTlacitka .tlSmazat", function(e) {
+    var idOtazky =  e.target.parentElement.parentElement.attributes.cislo.value;
+    otazkySmazat(idOtazky);
 });
 
+//zobrazit vygenerovany test - ucitel
+$(document).on("click", ".ttTlacitka .tlZobrazit", function(e) {
+    var idTestu =  e.target.parentElement.parentElement.attributes.cislo.value;
+    prejit("TestyVyzkouset/" + idTestu)
+});
+
+//zobrazit vygenerovany test - nové zadání
+$(document).on("click", "#vygenerovat", function(e) {
+    var idTestu = $(this).val();
+    testyVyzkouset(idTestu,true);
+});
 
 //vygenerovat nove zadani u otazky
 $(document).on("click", ".otTlacitka .tlKostka", otazkyKostka);
@@ -240,6 +249,11 @@ $(document).on("click", "#odeslatTest", testyVyhodnotit);
 
 //prihlaseni
 $(document).on("click", "#prihlasit", prihlasit);
+
+//prihlaseni - enter
+$(document).on("keyup", "#heslo", function(e) {
+    if (e.keyCode == 13) prihlasit();
+});
 
 $(document).on("click", "#odhlasit", odhlasit);
 

@@ -32,6 +32,36 @@ def pswd_check(pswd, encript):
 """
 ############################################################################
 
+
+class Zaznamy:
+    def pridat(typ,student):
+        DbAkce(
+            cas = ted(),
+            typAkce = typ,
+            student = get(s.id for s in DbStudent if s.login == student)
+        )
+
+    def seznamAkci():
+        akce = select(a for a in DbAkce)
+        seznam = []
+
+        for a in akce:            
+            trida = None
+
+            if a.student.trida:
+                tridy = get(t for t in DbTridy if t.id is a.student.trida.id)         
+                trida = str(tridy.poradi) + tridy.nazev
+
+            seznam.append({
+                "cas":      datum(a.cas),
+                "akce":     a.typAkce,
+                "login":    a.student.login,
+                "prijmeni": a.student.prijmeni,
+                "trida":    trida
+            })            
+
+        return json({"akce": seznam})
+
 formatCasu = "%d.%m.%Y %H:%M:%S"
 
 def prihlasit(klic1, klic2="", klic3=""):
@@ -304,11 +334,3 @@ def jednotka2(text, mista = -1):
         cislo = platneMista(cislo,mista)        
         
     return str(cislo)
-
-class Zaznamy:
-    def pridat(typ,student):
-        DbAkce(
-            cas = ted(),
-            typAkce = typ,
-            student = get(s.id for s in DbStudent if s.login == student)
-        )

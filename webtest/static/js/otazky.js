@@ -17,6 +17,7 @@
                 ' + tlacitka + '\
                 <span class="otId">' + o.id + '. </span>\
                 <span class="otNazev">' + o.jmeno + '</span>\
+                <input class="otPocet" value="1" type="text">\
                 <span class="otZadani">' + o.zadaniHTML.replace("\n","<br>") + '</span>\
                 <div class="otOdpovedi"></div>\
             </div>';

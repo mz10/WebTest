@@ -1,6 +1,7 @@
 from flask import (Flask, render_template, Markup, request, redirect, session, flash, Markup, url_for, Response)
 from werkzeug.security import generate_password_hash, check_password_hash
 from pony.orm import (sql_debug, get, select, db_session)
+from ldap3 import Server, Connection, ALL, NTLM
 from werkzeug.routing import BaseConverter
 from flask_socketio import disconnect
 from datetime import datetime as dt
@@ -13,7 +14,6 @@ import functools
 import psycopg2
 import operator
 import random
-import ldap3
 import time
 import sys
 import os
@@ -41,7 +41,6 @@ class Uzivatel:
 
         if prihlasen:
             login = uzJmeno()
-
         else:
             login = J["login"]
             heslo = J["heslo"]
@@ -57,27 +56,37 @@ class Uzivatel:
 
         if student:
             uzivatel = "student"
-            if not prihlasen:               
-                #if uzivatel.ldap(login,""):
-                #Student.vlozitStudenta(login, "-", "-")  
+            if not prihlasen and check_password_hash(student.hash, heslo):              
                 session['jmeno'] = login
                 session['typ'] = "student"
-            Zaznamy.pridat("prihlaseni", login)
+                prihlasen = True
         elif ucitel and ucitel.hash:
             uzivatel = "učitel"
             if ucitel.admin:
                 uzivatel = "admin"
-                if not prihlasen:    
+                if not prihlasen and check_password_hash(ucitel.hash, heslo):
                     session['jmeno'] = login
-                    session['typ'] = "admin"   
+                    session['typ'] = "admin" 
+                    prihlasen = True
             else:
                 uzivatel = "učitel"
-                if not prihlasen: 
+                if not prihlasen and check_password_hash(ucitel.hash, heslo):
                     session['jmeno'] = login
-                    session['typ'] = "ucitel"   
-        else:  # špatně
+                    session['typ'] = "ucitel"  
+                    prihlasen = True 
+        elif Uzivatel.ldap(login,heslo):
+            Student.vlozitStudenta(login,heslo)
+            session['jmeno'] = login
+            session['typ'] = "student"
+            uzivatel = "student"
+            prihlasen = True
+        
+        if not prihlasen:
             info = "Špatné jméno nebo heslo"
+            uzivatel = "nikdo"
             Uzivatel.poslatZaznam("ŠH: " + login)
+        elif student:
+            Zaznamy.pridat("prihlaseni", login)          
 
         vysledek = {
             "prihlasen": uzivatel, 
@@ -90,6 +99,8 @@ class Uzivatel:
         return json(vysledek)
 
     def odhlasit():
+        if uzivatel("student"):
+            Zaznamy.pridat("odhlaseni", uzJmeno())
         if "jmeno" in session:
             session.pop('jmeno', None)
         if "typ" in session:
@@ -108,7 +119,6 @@ class Uzivatel:
             jmeno = student.prijmeni
             login = student.login
             typ = "student"
-            Zaznamy.pridat("prihlaseni",uzJmeno())
 
             if student.trida:
                 tridy = get(t for t in DbTridy if t.id is student.trida.id)         
@@ -283,7 +293,7 @@ class Uzivatel:
             login = jmeno,
             jmeno = jmeno,
             prijmeni = jmeno,
-            hash = "1111",
+            hash = generate_password_hash("1111"),
             admin = True
         )
 
@@ -323,14 +333,13 @@ class Uzivatel:
         if uzivatel("student"):
             student = get(s for s in DbStudent if s.login == uzJmeno())
             if not check_password_hash(student.hash, J["soucasne"]):
-                a = 5/0
                 return "Špatné heslo!"
 
             student.hash = generate_password_hash(J["nove"])
             return "Heslo bylo změněno"
         elif uzivatel("ucitel") or uzivatel("admin"):
+            ucitel = get(s for s in DbUcitel if s.login == uzJmeno())
             if not check_password_hash(ucitel.hash, J["soucasne"]):
-                a = 5/0
                 return "Špatné heslo!"
 
             ucitel.hash = generate_password_hash(J["nove"])
@@ -339,6 +348,8 @@ class Uzivatel:
         return "Chyba - uživatel není přihlášen!"
 
     def ldap(login, heslo):
+        #return True
+
         server = Server("172.16.0.104", get_info=ALL)
         conn = Connection(
             server,
@@ -349,9 +360,7 @@ class Uzivatel:
         try:
             if conn.bind():
                 return True
-            else:
-                return False
         except:
             return False
 
-        return True
+        return False

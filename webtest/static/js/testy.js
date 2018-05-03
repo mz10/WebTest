@@ -29,7 +29,8 @@
         jmeno:      ph('#ttNazev'),
         od:         ph('#ttOd'),
         do:         ph('#ttDo'),
-        hodnoceni:  null,
+        typHodnoceni:  ph("#hodnoceniTyp option:selected")*1,
+        hodnoceni:  zjistitHodnoceni(),
         pokusu:     ph("#ttPokusu") || 1,       
         limit:      ph("#ttLimit") || "5",
         skryty:     $("#ttSkryt")[0].checked,  
@@ -93,8 +94,13 @@ function testyStudentZobraz(json) {
     $(stranka).html(text);
 }
 
-function testyVyzkouset(idTestu) {
-    $.getJSON("./json/student/testy/" + idTestu, zpracujJSON).fail(chybaIframe);
+function testyVyzkouset(idTestu,ucitel) {
+    var adresa = "./json/student/testy/";
+
+    if(ucitel)
+        adresa = "./json/testy/vyzkouset/";
+
+    $.getJSON(adresa + idTestu, zpracujJSON).fail(chybaIframe);
     text = "";
     //vymazat vsechny odpocty
     smazIntervaly();
@@ -110,13 +116,21 @@ function testyVyzkouset(idTestu) {
         text += "<h1>" + test.jmeno + "</h1>";
         text += "<div id='odpocet'> </div>";
         $.each(test.otazky, zpracujOtazky);
-        text += '<button id="odeslatTest" value="' + test.id + '">Odeslat</button>';
-        $(stranka).html(text);
+        
         mathjax();
         //5 sekund jako rezerva
         limit = (test.limit*60)-5;
 
-        var interval = odpocet("#odpocet",limit, konecTestu);
+        var interval = null;
+
+        if(!ucitel) {
+            text += '<button id="odeslatTest" value="' + test.id + '">Odeslat</button>';
+            interval = odpocet("#odpocet",limit, konecTestu);
+        }
+        else
+            text = `<button id='vygenerovat' value='${idTestu}'>Vygenerovat</button>` + text;
+
+        $(stranka).html(text);  
     }
 
     function konecTestu() {
@@ -149,8 +163,8 @@ function testyUprava(akce,idTestu) {
 
     $(stranka).load("./vzory/testy/", nacteno);
 
-    function nacteno() { 
-        nastavZnamky(1);  
+    function nacteno() {
+        nastavZnamky("rovnomerne",0);  
         $.getJSON("./json/testy/", zpracujJSON).fail(chybaIframe);
         
         $.getJSON("./json/tridy/", function(json) {     
@@ -182,17 +196,18 @@ function testyUprava(akce,idTestu) {
     }
 
     function zpracujTest(i, t) {
-        if(t.id==idTestu) {
-            
+        if(t.id==idTestu) {            
             pr('#ttNazev').val(t.jmeno);
             pr('#ttId').text(t.id); 
             pr('#ttOd').val(t.od);
             pr('#ttDo').val(t.do); 
             pr('#ttPokusu').val(t.pokusu); 
             pr('#ttLimit').val(t.limit); 
-            pr('#ttOmezeni').val(t.omezit);            
+            pr('#ttOmezeni').val(t.omezit); 
+            pr('#hodnoceniTyp').val(t.typHodnoceni);           
             pr('#ttSkryt')[0].checked = t.skryty;
             pr('#ttVyber')[0].checked = t.nahodny;
+            nastavZnamky(null,null,t.hodnoceni);
             seznamOtazek = t.otazky;
             $.each(t.tridy, zobrazTridy);
             return;           
@@ -207,33 +222,40 @@ function testyUprava(akce,idTestu) {
             var dostupne = $("#ttDostupne")[0].childNodes;
             var zvolene = $("#ttZvolene")[0].childNodes;
 
-            $.each(dostupne, zobrazOtazky); 
-            $.each(zvolene, skryjOtazky); 
+            $.each(dostupne, dostupneOtazky); 
+            $.each(zvolene, zvoleneOtazky); 
         
         }).fail(chybaIframe);
     }
-
-    function zobrazOtazky(i, otazka) {
-        if (jeVSeznamu(otazka.attributes.cislo.value))
-            otazka.style.display = "none";
-    }
-
-    function skryjOtazky(i, otazka) {
-        if (!jeVSeznamu(otazka.attributes.cislo.value))      
-            otazka.style.display = "none";
-    }
     
-    function jeVSeznamu(id) {
-        var vysledek = false;
-        $.each(seznamOtazek, function(i, idO) {
-            if(id==idO) {
-                vysledek = true;
-                return false;
+    function dostupneOtazky(i, otazka) {
+        var id = otazka.attributes.cislo.value;
+
+        $.each(seznamOtazek, function(i, o) {
+            if(id==o[0])
+                otazka.style.display = "none";
+        });   
+    }
+
+    function zvoleneOtazky(i, otazka) {
+        var id = otazka.attributes.cislo.value;
+        var hledat = true;
+        var info = [];
+
+        //hleda otazky ktere jsou v testu
+        $.each(seznamOtazek, function(y, o) {
+            if(id==o[0]) {
+                info = o;
+                hledat = false;
+                return;
             }
         });
-        return vysledek;
+
+        if(!hledat) //priradi k otazce pocet opakovani
+            $(otazka.children[3]).val(info[1]); 
+        else
+            otazka.style.display = "none";
     }
-    
     
     var option = "";
     
@@ -279,8 +301,10 @@ function testyVyberOtazky() {
     var cislaOtazek = [];
     var vybrane = $("#ttZvolene .otazka:visible");
     
-    $.each(vybrane, function(i, v) {
-        cislaOtazek[i] = v.attributes.cislo.value*1;
+    $.each(vybrane, function(i, otazka) {
+        var pocet = otazka.children[3].value*1;
+        var id = otazka.attributes.cislo.value*1;
+        cislaOtazek.push([id, pocet]);
     });
     
     return cislaOtazek;

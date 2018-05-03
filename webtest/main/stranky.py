@@ -53,10 +53,7 @@ def uklidDb(): return Ostatni.uklidDb()
 
 @main.route('/db/')
 @prihlasit('admin')
-def db(): return render_template('db.html') 
-
-@main.route('/vytvor/')
-def NovaTabulka1(): return Ostatni.novaTabulka()
+def db(): return render_template('db.html')
     
 @main.route('/prihlasit/', methods=["GET", "POST"])
 @db_session
@@ -67,6 +64,7 @@ def login2(): return Uzivatel.prihlasit()
 def ucet2(): return Uzivatel.ucet()
 
 @main.route('/odhlasit/', methods=['GET', 'POST'])
+@db_session
 def logout(): return Uzivatel.odhlasit()
 
 @main.route('/otazky/ucitel/<login>', methods=['GET'])
@@ -98,21 +96,6 @@ def pridat_test(): return Testy.pridat()
 @db_session
 def uprav_test(id_test): return Testy.uprav(id_test)
 
-@main.route('/student/testy/', methods=['GET', 'POST'])
-@prihlasit('student')
-@db_session
-def student_testy(): return Student.testy()
-
-@main.route('/student/testy/<id>', methods=['GET', 'POST'])
-@prihlasit('student')
-@db_session
-def student_zobrazit(id): return Student.zobrazit(id)
-
-@main.route('/student/vysledky/')
-@prihlasit('student')
-@db_session
-def student_vysledek(): return Student.vysledky()
-
 @main.route('/csv/slovnik/', methods=['GET', 'POST'])
 @prihlasit('ucitel','admin')
 @db_session
@@ -139,6 +122,11 @@ def upload1(): return render_template('upload.html')
 def ucet1(): return render_template('ucet.html') 
 
 ################JSON#################
+@main.route('/json/akce/', methods=['GET', 'POST'])
+@prihlasit('ucitel','admin')
+@db_session
+def akce(): return Zaznamy.seznamAkci()
+
 @main.route('/json/slovnik/', methods=['GET', 'POST'])
 @prihlasit('ucitel','admin')
 @db_session
@@ -157,12 +145,17 @@ def testyS(): return Testy.zobrazStudent()
 @main.route('/json/student/testy/<id>', methods=['GET', 'POST'])
 @prihlasit('student','ucitel','admin')
 @db_session
-def testy3(id): return Student.vyplnitTest(id)
+def testyU(id): return Student.vyplnitTest(id)
 
 @main.route('/json/testy/<id>', methods=['GET', 'POST'])
 @prihlasit('ucitel','admin')
 @db_session
 def testy2(id): return Testy.zobrazTest(id)
+
+@main.route('/json/testy/vyzkouset/<id>', methods=['GET', 'POST'])
+@prihlasit('ucitel','admin')
+@db_session
+def testy3(id): return Ucitel.ukazatTest(id)
 
 @main.route('/json/otazky/', methods=['GET', 'POST'])
 @prihlasit('ucitel','admin')

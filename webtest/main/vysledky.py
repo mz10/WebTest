@@ -45,7 +45,7 @@ class Vysledky:
             if sekundy < 10: sekundy = "0" + str(sekundy)
 
             if hodiny > 0: cas = str(hodiny) + ":" + minuty + ":" + sekundy
-            else:          cas = str(minuty) + ":" + str(sekundy)
+            else:          cas = str(minuty) + ":" + str(sekundy)  
 
         info = {
             'id':               vysledek.id,
@@ -57,8 +57,8 @@ class Vysledky:
             'pokus':            vysledek.pokus,
             'boduVysledek':     vysledek.boduVysledek,
             'boduMax':          vysledek.boduMax,
-            'procent':          procent,
-            'hodnoceni':        vysledek.hodnoceni,
+            'procent':          procent,          
+            'znamka':           vysledek.znamka,        
             'student': {
                 'id':               vysledek.student.id,
                 'login':            vysledek.student.login,
@@ -68,7 +68,7 @@ class Vysledky:
         }
 
         return info
-
+  
     def test(id):       
         vysledky = select(v for v in DbVysledekTestu if v.test.id is id)
         seznam = []

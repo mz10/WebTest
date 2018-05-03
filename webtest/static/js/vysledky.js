@@ -40,7 +40,7 @@ function vysledkyTabulka(idTestu) {
             <th>Pokus</th>\
             <th>Bodů</th>\
             <th>%</th>\
-            <th>Hodnocení</th>\
+            <th>Známka</th>\
             <th>Student</th>\
             <th>Třída</th>\
             <th></th>\
@@ -69,7 +69,7 @@ function vysledkyTabulka(idTestu) {
                 <td>${v.pokus}</th>\
                 <td>${v.boduVysledek}</th>\
                 <td>${v.procent.zaokrouhlit(2)}</th>\
-                <td>${v.hodnoceni}</th>\
+                <td>${v.znamka}</th>\
                 <td>${v.student.prijmeni}</th>\
                 <td>${v.student.trida}</th>\  
                 <td>${tlacitko}</th>\      
@@ -79,73 +79,76 @@ function vysledkyTabulka(idTestu) {
 }
 
 function vysledkyZobraz(id) { 
-        $.getJSON("./student/vyhodnotit/" + id, zpracujJSON).fail(chybaIframe);
-        text = "";
-    
-        function zpracujJSON(json) {
-            if(!json.test) {
-                hlaska(json.odpoved,4);
-                return;
-            }
+    $.getJSON("./student/vyhodnotit/" + id, zpracujJSON).fail(chybaIframe);
+    text = "";
 
-
-            var test = json.test;
-            var otazky = json.test.otazky;
-    
-            text += "<h1>Hodnocení testu</h1>";
-            text += "Maximální počet bodů: " + test.boduMax + "<br>";
-            text += "Výsledný počet bodů: " + test.boduTest + "<br>";
-            text += "Výsledek: " + test.procent.zaokrouhlit(2) + " %<br>";
-    
-            $.each(otazky, zpracujOtazky);
-    
-            $(stranka).html(text);
-            mathjax();
+    function zpracujJSON(json) {
+        if(!json.test) {
+            hlaska(json.odpoved,4);
+            return;
         }
+
+
+        var test = json.test;
+        var otazky = json.test.otazky;
+        var hodnoceni = test.hodnoceni;
+
+        text += "<h1>Hodnocení testu</h1>";
+        text += "Maximální počet bodů: " + test.boduMax + "<br>";
+        text += "Výsledný počet bodů: " + test.boduTest + "<br>";
+        text += "Výsledek: " + test.procent.zaokrouhlit(2) + " %<br>";
+        text += "Známka: " + test.znamka + "<br>";
+        text += "Hodnocení: " + hodnoceni + "<br>";
+
+        $.each(otazky, zpracujOtazky);
+
+        $(stranka).html(text);
+        mathjax();
+    }
     
-        function zpracujOtazky(i, otazky) {
-            var typ = "odSpatne";
-            if(otazky.hodnoceni == otazky.bodu)
-                typ = "odDobre";
-            
-            text += `<h2 class='${typ}'>Otázka: ${otazky.jmeno}
-                (${otazky.hodnoceni} / ${otazky.bodu})</h2>`;
-            
-            text += `<h3> ${otazky.zadani} </h3>`;
-    
-            var oznaceno = "";
-    
-            $.each(otazky.zadaniDobre, function(i, od) {
-                text += zobrazOdpoved(od,"odDobre");
-            });
-    
-            $.each(otazky.zadaniSpatne, function(i, od) {
-                text += zobrazOdpoved(od,"odSpatne");
-            });
-    
-            $.each(otazky.zadaniOtevrena, function(i, od) {
-                text += `<span class='odOtevrena'>${otazky.zadaniOtevrena}</span>`;
-                text += `<span class='odSipka'>→</span>`;
-                if(otazky.oznaceneSpatne)
-                    text += `<span class="odSpatne">${otazky.oznaceneSpatne}</span>`; 
-                if (otazky.oznaceneDobre)
-                    text += `<span class="odDobre">${otazky.oznaceneDobre}</span>`; 
-            });
-    
-            function zobrazOdpoved(odpoved,typ) {
-                if (oznacit(odpoved,typ)) oznaceno = "oznaceno";
-                else oznaceno = "";
-                return `<div class='${typ} ${oznaceno}'>${odpoved}</div>`;
-            }
-    
-            function oznacit(odpoved,typ) {
-                if (typ == "odDobre" && isInArray(odpoved,otazky.oznaceneDobre))
-                    return true;
-                if (typ == "odSpatne" && isInArray(odpoved,otazky.oznaceneSpatne)) 
-                    return true;
-                if (typ == "odOtevrena" && isInArray(odpoved,otazky.oznaceneOtevrena)) 
-                    return true;
-                return false;
-            }
+    function zpracujOtazky(i, otazky) {
+        var typ = "odSpatne";
+        if(otazky.hodnoceni == otazky.bodu)
+            typ = "odDobre";
+        
+        text += `<h2 class='${typ}'>Otázka: ${otazky.jmeno}
+            (${otazky.hodnoceni} / ${otazky.bodu})</h2>`;
+        
+        text += otazky.zadani + "<br>";
+
+        var oznaceno = "";
+
+        $.each(otazky.zadaniDobre, function(i, od) {
+            text += zobrazOdpoved(od,"odDobre");
+        });
+
+        $.each(otazky.zadaniSpatne, function(i, od) {
+            text += zobrazOdpoved(od,"odSpatne");
+        });
+
+        $.each(otazky.zadaniOtevrena, function(i, od) {
+            text += `<span class='odOtevrena'>${otazky.zadaniOtevrena}</span>`;
+            text += `<span class='odSipka'>→</span>`;
+            if(otazky.oznaceneSpatne)
+                text += `<span class="odSpatne">${otazky.oznaceneSpatne}</span>`; 
+            if (otazky.oznaceneDobre)
+                text += `<span class="odDobre">${otazky.oznaceneDobre}</span>`; 
+        });
+
+        function zobrazOdpoved(odpoved,typ) {
+            if (oznacit(odpoved,typ)) oznaceno = "oznaceno";
+            else oznaceno = "";
+            return `<div class='${typ} ${oznaceno}'>${odpoved}</div>`;
+        }
+
+        function oznacit(odpoved,typ) {
+            if (typ == "odDobre" && isInArray(odpoved,otazky.oznaceneDobre))
+                return true;
+            if (typ == "odSpatne" && isInArray(odpoved,otazky.oznaceneSpatne)) 
+                return true;
+            if (typ == "odOtevrena" && isInArray(odpoved,otazky.oznaceneOtevrena)) 
+                return true;
+            return false;
         }
     }
+}

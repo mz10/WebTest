@@ -1,12 +1,3 @@
-# -*- coding: utf8 -*-
-# Soubor:  wtdb.py
-# Datum:   22.02.2015 18:42
-# Autor:   Marek Nožka, nozka <@t> spseol <d.t> cz
-# Autor:   Marek Nožka, marek <@t> tlapicka <d.t> net
-# Licence: GNU/GPL
-# Úloha:   Knihovna s definicí databáze:
-#          https://editor.ponyorm.com/user/tlapicka/WebTest
-############################################################################
 from datetime import datetime
 from pony.orm import (Database, PrimaryKey, Required, Optional, Set, sql_debug)
 from .spojeni import pripojit
@@ -32,7 +23,9 @@ class DbVysledekTestu(db.Entity):
     pokus = Optional(int)
     boduVysledek = Optional(float, column='bVysledek', default=0)
     boduMax = Optional(float, column='bMax', default=0)
+    typHodnoceni = Optional(int, column='tHodnoceni', default=0)
     hodnoceni = Optional(str)
+    znamka = Optional(str)
     test = Optional('DbTest')
     otazky = Set('DbVyslednaOtazka')
     student = Optional('DbStudent')
@@ -51,10 +44,11 @@ class DbTest(db.Entity):
     maxOtazek = Optional(int, column='mOtazek')
     nahodny = Optional(bool, default=False)
     skryty = Optional(bool, default=False)
+    typHodnoceni = Optional(int, column='tHodnoceni', default=0)
     hodnoceni = Optional(str)
     vysledkyTestu = Set(DbVysledekTestu)
-    ucitel = Required('DbUcitel')
     otazky = Set('DbOtazkaTestu')
+    ucitel = Required('DbUcitel')
     tridy = Set('DbTridyTestu')
 
 
@@ -126,13 +120,6 @@ class DbTridy(db.Entity):
     tridyTestu = Set('DbTridyTestu')
 
 
-class DbZnamky(db.Entity):
-    _table_ = 'Znamky'
-    id = PrimaryKey(int, column='idZnamky', auto=True)
-    nazev = Required(str, 128)
-    hodnoceni = Required(str, 128)
-
-
 class DbOdpoved(db.Entity):
     _table_ = 'Odpoved'
     id = PrimaryKey(int, column='idOdpoved', auto=True)
@@ -168,7 +155,7 @@ class DbOtazkaTestu(db.Entity):
     _table_ = 'OtazkaTestu'
     id = PrimaryKey(int, column='idOTestu', auto=True)
     poradi = Optional(int)
-    pocet = Optional(int)
+    pocet = Optional(int, default=1)
     test = Required(DbTest)
     otazka = Required(DbOtazka)
 

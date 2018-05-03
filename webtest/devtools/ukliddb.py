@@ -1,3 +1,7 @@
+# Author:  mz10
+# Licence: GNU/GPL 
+# Task:    smazání celé databáze
+############################################################
 import psycopg2
  
 udaje = {

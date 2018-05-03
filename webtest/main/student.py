@@ -1,12 +1,12 @@
 from flask import (Flask, render_template, Markup, request, redirect, session, flash, Markup, url_for, Response)
-from werkzeug.routing import BaseConverter
-from markdown import markdown
+from werkzeug.security import generate_password_hash, check_password_hash
 from pony.orm import (sql_debug, get, select, db_session)
+from werkzeug.routing import BaseConverter
 from datetime import datetime as dt
 from .db import *
+import functools
 import time
 import os
-import functools
 import cgi
 import re
 
@@ -76,65 +76,68 @@ class Student:
 
         vTestu = DbVysledekTestu(
             student = get(s.id for s in DbStudent if s.login == uzJmeno()),
-            test = test.id,
-            jmeno = test.jmeno,
-            limit = test.limit,
-            pokus = pokusu,
-            casZahajeni = ted(),
+            test =          test.id,
+            jmeno =         test.jmeno,
+            limit =         test.limit,
+            typHodnoceni =  test.typHodnoceni,
+            hodnoceni =     test.hodnoceni,            
+            pokus =         pokusu,
+            casZahajeni =   ted(),
         )
 
-        cislaOtazek = select(o.otazka for o in DbOtazkaTestu if o.test.id is id)
+        otTestu = select(o for o in DbOtazkaTestu if o.test.id is id)
 
         seznamOtazek = [] 
         
-        for cislo in cislaOtazek: 
-            seznamOdpovedi = []
-            idOtazky = cislo.id   
-            otazka = DbOtazka[idOtazky]
-            zadani = Zadani.vytvorZadani(otazka.obecneZadani)
-            odpovedi = Odpovedi(idOtazky, zadani["promenne"])
+        for otT in otTestu: 
+            for i in range(0,otT.pocet):
+                seznamOdpovedi = []
+                idOtazky = otT.otazka.id 
+                otazka = DbOtazka[idOtazky]
+                zadani = Zadani.vytvorZadani(otazka.obecneZadani)
+                odpovedi = Odpovedi(idOtazky, zadani["promenne"])
 
-            # odstrani komentar z otazky
-            pZadani = re.compile(r"\/\*\*(.*?)\*\*\/?",re.DOTALL).sub("",otazka.obecneZadani)
+                # odstrani komentar z otazky
+                pZadani = re.compile(r"\/\*\*(.*?)\*\*\/?",re.DOTALL).sub("",otazka.obecneZadani)
 
-            vOtazka = DbVyslednaOtazka(
-                jmeno = otazka.jmeno,
-                puvodniZadani = pZadani,
-                konkretniZadani = zadani["html"],
-                vysledekTestu = vTestu.id,
-                puvodniOtazka = idOtazky,
-                zaokrouhlit = otazka.zaokrouhlit,
-                tolerance = otazka.tolerance,
-                bodu = otazka.bodu,
-                hodnotit = otazka.hodnotit
-            )
-
-            for (odpoved, typ) in odpovedi.vypocitatVsechny():
-                if typ == "O":
-                    seznamOdpovedi.append("_OTEVRENA_")
-                else:
-                    seznamOdpovedi.append(odpoved)
-
-                #if typ == "S": continue;
-                
-                DbVyslednaOdpoved(
-                    ocekavanaOdpoved = odpoved,
-                    typ = typ,
+                vOtazka = DbVyslednaOtazka(
+                    jmeno = otazka.jmeno,
+                    puvodniZadani = pZadani,
+                    konkretniZadani = zadani["html"],
                     vysledekTestu = vTestu.id,
-                    vyslednaOtazka = vOtazka.id
+                    puvodniOtazka = idOtazky,
+                    zaokrouhlit = otazka.zaokrouhlit,
+                    tolerance = otazka.tolerance,
+                    bodu = otazka.bodu,
+                    hodnotit = otazka.hodnotit
                 )
-        
-            random.shuffle(seznamOdpovedi)            
-             
-            seznamOtazek.append({
-                'id':           vOtazka.id,
-                'jmeno':        otazka.jmeno,
-                'zadani':       zadani["html"],
-                'zaokrouhlit':  otazka.zaokrouhlit,
-                'tolerance':    otazka.tolerance,
-                'spravnych':    len(odpovedi.tridit("D")),
-                'odpovedi':     seznamOdpovedi
-            })
+
+                for (odpoved, typ) in odpovedi.vypocitatVsechny():
+                    if typ == "O":
+                        seznamOdpovedi.append("_OTEVRENA_")
+                    else:
+                        seznamOdpovedi.append(odpoved)
+
+                    #if typ == "S": continue;
+                    
+                    DbVyslednaOdpoved(
+                        ocekavanaOdpoved = odpoved,
+                        typ = typ,
+                        vysledekTestu = vTestu.id,
+                        vyslednaOtazka = vOtazka.id
+                    )
+            
+                random.shuffle(seznamOdpovedi)            
+                
+                seznamOtazek.append({
+                    'id':           vOtazka.id,
+                    'jmeno':        otazka.jmeno,
+                    'zadani':       zadani["html"],
+                    'zaokrouhlit':  otazka.zaokrouhlit,
+                    'tolerance':    otazka.tolerance,
+                    'spravnych':    len(odpovedi.tridit("D")),
+                    'odpovedi':     seznamOdpovedi
+                })
 
         if test.nahodny:
             random.shuffle(seznamOtazek)
@@ -144,11 +147,13 @@ class Student:
             seznamOtazek = seznamOtazek[:test.maxOtazek]
 
         test = {
-            'id':       vTestu.id,
-            'do':       "limit",
-            'jmeno':    vTestu.jmeno,
-            'limit':    seznam(test.limit)[0],
-            'otazky':   seznamOtazek
+            'id':           vTestu.id,
+            'do':           "limit",
+            'jmeno':        vTestu.jmeno,
+            'typHodnoceni': vTestu.typHodnoceni,
+            'hodnoceni':    vTestu.hodnoceni,
+            'limit':        seznam(test.limit)[0],
+            'otazky':       seznamOtazek
         }
 
         return json({"test": test})
@@ -243,8 +248,6 @@ class Student:
             
             vysledek[oId][typ].append(ocOdpoved)
             
-            #a=5/0
-
             # prida info o otazce
             otazka = get(o for o in DbVyslednaOtazka if o.id == oId)
             vysledek[oId].update({
@@ -349,6 +352,13 @@ class Student:
         procent = 100
         if boduMax != 0: procent = 100*boduTest/boduMax
 
+        if vTestu.znamka == "":
+            vTestu.znamka = Student.oznamkovat(
+            vTestu.typHodnoceni,
+            vTestu.hodnoceni,
+            procent
+        )
+
         jsTest = {
             "id":       vTestu.id,
             "student":  vTestu.student.login,
@@ -356,7 +366,9 @@ class Student:
             "do":       datum(vTestu.casUkonceni),
             "boduMax":  boduMax,
             "boduTest": boduTest,
-            "procent":  procent,          
+            "procent":  procent,  
+            "znamka":   vTestu.znamka,   
+            "hodnoceni":vTestu.hodnoceni.replace(";-1","").replace(";"," - "),    
             "otazky":   vysledek,
         }
 
@@ -390,10 +402,33 @@ class Student:
             'boduVysledek': str(test.boduVysledek),
             'boduMax':      str(test.boduMax),
             'student':      test.student.login,
+            'typHodnoceni': test.typHodnoceni,
+            'hodnoceni':    test.hodnoceni,
             'otazky':       seznamOtazek,
         }
 
         return json({"test": jsTest})
+
+    def oznamkovat(typHodnoceni,hodnoceni,procent):
+        znamky = [
+            ["1","2","3","4","5"],
+            ["1","1-","2","2-","3","3-","4","4-","5"],
+            ["1","2","3","4"],
+            ["A","B","C","D","E","F"],                      
+        ]
+
+        hodnoceni = hodnoceni.replace(";-1","").split(";")
+
+        znamka = 0
+        for bod in hodnoceni:
+            bod = int(bod)
+            if procent >= bod: 
+                break
+            znamka += 1
+
+        return znamky[typHodnoceni][znamka]
+
+
 
     def nahrat(J):
         text = J["data"].split("\n")
@@ -403,9 +438,9 @@ class Student:
         ucitele = select(s.login for s in DbUcitel)
         loginy = seznam(studenti) + seznam(ucitele)
 
-        for radek in text:
-            bunka = radek.split(";")                   
-            if len(bunka) < 5: continue           
+        for radek in text:          
+            bunka = radek.replace("\t",";").split(";")                   
+            if len(bunka) < 6: continue           
             prerusit = False
 
             # kontrola jestli login uz existuje:
@@ -421,11 +456,17 @@ class Student:
             if bunka[3].isdigit():
                 trida = get(t.id for t in DbTridy if t.poradi == bunka[3] and t.nazev == bunka[4])
 
+            hash = bunka[5]
+
+            if not hash.startswith("pbkdf2:"):
+                hash = generate_password_hash(hash)
+                
             DbStudent(
                 login = bunka[0],
                 jmeno = bunka[1],
                 prijmeni = bunka[2],         
-                trida = trida
+                trida = trida,
+                hash = hash
             ) 
 
         return "CSV soubor se seznamem studentů byl úspěšně nahrán"
@@ -439,7 +480,7 @@ class Student:
             trida = "-;-"
             if s.trida:
                 trida = str(s.trida.poradi) + ";" + s.trida.nazev
-            csv += s.login + ";" + s.jmeno + ";" + s.prijmeni + ";" + trida + "\r\n"
+            csv += s.login + ";" + s.jmeno + ";" + s.prijmeni + ";" + trida + ";" + s.hash + "\r\n"
 
         r = Response(response=csv,status=200,mimetype="text/plain")
         r.headers["Content-Disposition"] = 'attachment; filename="studenti.csv"'
@@ -449,23 +490,29 @@ class Student:
         if J["tabulka"] != "Student" or not uzivatel("admin"):
             return "Nemáš oprávnění měnit obsah této tabulky!!!"
         
-        trida = J["bunky"][3]   
+        trida = J["bunky"][4]   
         if trida == "null": trida = None
         else: trida = int(trida)
 
         # zkontroluje, jestli uz v tabulkach neni stejny login
         login = J["bunky"][0]
         ucitel = get(s.id for s in DbUcitel if s.login == login)
-        student = get(s.id for s in DbStudent if s.login == login)
+        student = get(s for s in DbStudent if s.login == login)
 
         if J["id"] == "":
             if (student or ucitel):
                 return "Tento login už existuje!"
-                
+            
+            # nove heslo:
+            heslo = J["bunky"][3]
+            if heslo != "." or heslo != "":
+                heslo = generate_password_hash(heslo)
+
             DbStudent(
                 login = J["bunky"][0],
                 jmeno =  J["bunky"][1],
                 prijmeni = J["bunky"][2],
+                hash = heslo,
                 trida = trida
             )
 
@@ -487,24 +534,34 @@ class Student:
             dbStudent.delete()
             return "Student byl smazán"
 
-        elif J["akce"] == "zmenit":
+        elif J["akce"] == "zmenit":            
+            # nove heslo:
+
+            hash = dbStudent.hash
+            heslo = J["bunky"][3]
+            if heslo != "." or heslo != "":
+                hash = generate_password_hash(heslo)
+
             dbStudent.login = login
             dbStudent.jmeno = J["bunky"][1]
             dbStudent.prijmeni = J["bunky"][2]
+            dbStudent.hash = hash
+            
             if J["bunky"][3] != "null":
                 dbStudent.trida = trida
 
             return "Student byl změněn."
 
-        def vlozitStudenta(login, jmeno, prijmeni):
-            student = get(s.id for s in DbStudent if s.login == login)
-            if student: return
+    def vlozitStudenta(login, heslo):
+        student = get(s.id for s in DbStudent if s.login == login)
+        if student: return
 
-            J = {}
-            J["bunky"][0] = login,
-            J["bunky"][1] = jmeno,
-            J["bunky"][2] = prijmeni,
-            J["bunky"][3] = ""  
+        DbStudent(
+            login = login,
+            jmeno = "?",
+            prijmeni = "?",
+            hash = generate_password_hash(heslo)
+        )
 
-            return Student.zmenObsah(J)
+        return True
                         

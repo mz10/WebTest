@@ -25,16 +25,25 @@ function zmenHash() {
         case "Hodnoceni":        vysledkyTabulka("");          break;
         case "VysledkyZobrazit": vysledkyZobraz(promenna);     break;   
         case "Ucet":             ucetInfo();                   break;
+        case "Akce":             akceZobrazTabulku();          break;
         case "Nahrat":
             $(stranka).load("./vzory/upload/"); 
             break;           
         case "Testy":
+            if(promenna) {
+                testyUprava("uprav",promenna);
+                break;
+            }
+
             $.getJSON("./json/testy/", testyZobraz).fail(chybaIframe);
             break;
         case "Testy2":
             $.getJSON("./json/student/testy/", testyStudentZobraz).fail(chybaIframe);   
-            break;         
-        case "Zaznamy":
+            break;  
+        case "TestyVyzkouset":
+            if(promenna) testyVyzkouset(promenna,true) 
+            break;
+        case "Aktivita":
             $(stranka).html("");
             $("#log").show(); 
             break;
@@ -49,6 +58,11 @@ function zmenHash() {
             }, 3000);        
             break;
         case "Otazky": 
+            if(promenna) {
+                otazkyUprav(promenna);
+                break;
+            }
+
             $.getJSON("./json/otazky/", function(json) {
                 otazkyZobraz("#stranka",json.otazky);	
             }).fail(chybaIframe);

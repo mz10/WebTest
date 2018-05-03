@@ -30,7 +30,7 @@ class Testy:
             seznamOtazek = []
 
             for o in select(o for o in DbOtazkaTestu if o.test.id is test.id):
-                seznamOtazek.append(o.otazka.id)
+                seznamOtazek.append([o.otazka.id, o.pocet])
 
             seznam.append(
                 Testy.testInfo(test,seznamOtazek)
@@ -92,6 +92,7 @@ class Testy:
                 'id':           otazka.id,
                 'jmeno':        otazka.jmeno,
                 'zadani':       zadani["html"],
+                'pocet':        o.pocet,
                 'spravnych':    len(odpovedi.tridit("D")),
                 'odpovedi':     seznamOdpovedi
             })
@@ -103,18 +104,20 @@ class Testy:
 
     def testInfo(test,otazky):
         return {
-            'id':       test.id,
-            'jmeno':    test.jmeno,
-            'od':       test.zobrazenoOd.strftime(formatCasu),
-            'do':       test.zobrazenoDo.strftime(formatCasu),
-            'limit':    test.limit,
-            'pokusu':   test.pokusu,
-            'skryty':   test.skryty,
-            'nahodny':  test.nahodny,
-            'omezit':   test.maxOtazek,
-            'autor':    test.ucitel.login,
-            'otazky':   otazky,
-            'tridy':    Testy.seznamTrid(test.id)
+            'id':           test.id,
+            'jmeno':        test.jmeno,
+            'od':           test.zobrazenoOd.strftime(formatCasu),
+            'do':           test.zobrazenoDo.strftime(formatCasu),
+            'limit':        test.limit,
+            'pokusu':       test.pokusu,
+            'skryty':       test.skryty,
+            'nahodny':      test.nahodny,
+            'omezit':       test.maxOtazek,
+            'autor':        test.ucitel.login,
+            'typHodnoceni': test.typHodnoceni,
+            'hodnoceni':    test.hodnoceni,
+            'otazky':       otazky,
+            'tridy':        Testy.seznamTrid(test.id)
         }
 
     def pridat(J,hromadne=False):
@@ -150,6 +153,8 @@ class Testy:
         test.skryty = J["skryty"] 
         test.nahodny = J["nahodny"]
         test.maxOtazek = int(J["omezit"])
+        test.typHodnoceni = int(J["typHodnoceni"])
+        test.hodnoceni = J["hodnoceni"]
 
         #smaz puvodni otazky a tridy z testu
         select(o for o in DbOtazkaTestu if o.test.id is idTestu).delete()
@@ -160,18 +165,18 @@ class Testy:
         if hromadne:
             for otazka in J['otazky']:
                 DbOtazkaTestu(
-                    poradi = 0, 
+                    pocet = otazka["pocet"],
                     test = test.id,
                     otazka = get(o.id for o in DbOtazka if o.jmeno == otazka["jmeno"])
                 )
 
-   
+        # priradit otazky k testu a jejich pocet
         else:
-            for idOtazky in J['otazky']:
+            for otazka in J['otazky']:
                 DbOtazkaTestu(
-                    poradi = 0, 
+                    pocet = otazka[1], 
                     test = test.id,
-                    otazka = get(o for o in DbOtazka if o.id == idOtazky)
+                    otazka = get(o for o in DbOtazka if o.id == otazka[0])
                 )
 
         for idTridy in J['tridy']:
@@ -198,15 +203,12 @@ class Testy:
         return seznam
 
     def export():
-        """
         if uzivatel("admin"):
             testy = select(o for o in DbTest)
         elif uzivatel("ucitel"):
             testy = select(o for o in DbTest if o.ucitel.login == uzJmeno())
         else:
             return "!!!"
-
-        """
 
         testy = select(o for o in DbTest)
 
@@ -226,7 +228,8 @@ class Testy:
                     'bodu':         otazka.bodu,
                     'tolerance':    otazka.tolerance,
                     'zaokrouhlit':  otazka.zaokrouhlit,   
-                    'hodnotit':     otazka.hodnotit,             
+                    'hodnotit':     otazka.hodnotit, 
+                    'pocet':        o.pocet,            
                     'zadani':       otazka.obecneZadani,
                     'spravne':      odpovedi.tridit("D"),  
                     'spatne':       odpovedi.tridit("S"), 
@@ -245,7 +248,6 @@ class Testy:
 
         return jsonStahnout(seznam,"testy.txt")
         #return json(seznam)
-
 
     def pridatVsechny(J):
         for test in J["testy"]:

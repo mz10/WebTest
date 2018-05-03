@@ -538,40 +538,72 @@ table {
   font-size: 16px;
   text-align:center;
   cursor: e-resize; 
+  transition: 1s;
 }
 
 .znamka:active{
   background-color: black;
 }
 
-#jednicka{
+#zn1{
   z-index: 11;
   background-color: green;
   color: white;
 }
 
-#dvojka{
+#zn1{
   z-index: 12;
   background-color: yellow;
+  color: black;
 }
 
-#trojka{
+#zn2{
   z-index: 13;
+  background-color: orange;
+  color: black;
+}
+
+#zn3{
+  z-index: 14;
+  background-color: red;
+  color: white;
+}		
+
+#zn4{
+  z-index: 15;
+  background-color: rgb(200, 45, 134);
+  color: white;
+}
+
+#zn5{
+  z-index: 16;
+  background-color: rgb(123, 52, 154);
+  color: white;
+}
+
+#zn6{
+  z-index: 17;
   background-color: blue;
   color: white;
 }
 
-#ctverka{
-  z-index: 14;
-  background-color: purple;
+#zn7{
+  z-index: 18;
+  background-color: cyan;
   color: white;
 }		
 
-#petka{
-  z-index: 15;
-  background-color: cyan;
+#zn8{
+  z-index: 19;
+  background-color: rgb(68, 33, 10);
+  color: white;
 }
 
+#zn9{
+  z-index: 20;
+  background-color: black;
+  color: white;
+}
 
 .otTlacitka, .ttTlacitka {
   float: right;
@@ -721,4 +753,17 @@ input.seda {
 
 .editor-toolbar.fullscreen {
   width: auto !important;
+}
+
+
+/* pocet otazek u testu */
+.otPocet {
+  float: right;
+  width: 20px;
+  margin-right: 20px;
+  display: none;
+}
+
+#ttZvolene > .otazka > .otPocet {
+	display: block;
 }
