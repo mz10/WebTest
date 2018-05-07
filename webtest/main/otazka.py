@@ -172,7 +172,7 @@ class Otazka:
 
     def pridat(J):
         if get(o.id for o in DbOtazka if o.jmeno == J["jmeno"]):
-            return "Tato otázka s tímto jménem už existuje."
+            return "existuje"
         
         nahodneJmeno = "_" + str(nahodne(1000,10000))
 
@@ -214,7 +214,7 @@ class Otazka:
         if get(o.id for o in DbOtazka if o.jmeno == J["jmeno"]):
             jmeno = otazka.jmeno
 
-        otazka.jmeno = jmeno
+        otazka.jmeno = cgi.escape(jmeno)
         otazka.bodu = J['bodu']
         otazka.obecneZadani = zadani
         otazka.hodnotit = J['hodnotit']

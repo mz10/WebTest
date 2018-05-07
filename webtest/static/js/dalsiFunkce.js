@@ -35,7 +35,7 @@ function zmenHash() {
                 break;
             }
 
-            $.getJSON("./json/testy/", testyZobraz).fail(chybaIframe);
+            testyZobraz();
             break;
         case "Testy2":
             $.getJSON("./json/student/testy/", testyStudentZobraz).fail(chybaIframe);   
@@ -62,10 +62,7 @@ function zmenHash() {
                 otazkyUprav(promenna);
                 break;
             }
-
-            $.getJSON("./json/otazky/", function(json) {
-                otazkyZobraz("#stranka",json.otazky);	
-            }).fail(chybaIframe);
+            otazkyZobraz(stranka);	
             break;
     }
 }
@@ -77,7 +74,7 @@ function prihlasitUzivatele() {
     if(typ.text() == "učitel")
         $("#menuUcitel").show();
     if(typ.text() == "admin")
-        $("#menuUcitel").show();                    
+        $("#menuAdmin").show();                    
     else if(typ.text() == "student")
         $("#menuStudent").show();
 
@@ -101,20 +98,22 @@ function prejit(adresa) {
 }
 
 function menuNahore() {
-    var menu = $('nav');
-    var pozice = menu.offset().top;				
+    var menu = $('nav:visible');
+    if (menu.length == 0) return;
 
-    $(window).scroll(function() {
-        var fix = $(this).scrollTop() > pozice ? true : false;	
+    var pozice = menu.offset().top;
+
+    $(window).scroll(function(e) {
+        var fix = ($(this).scrollTop() > pozice) ? true : false;	
         menu.toggleClass("menu", fix);
-        $('body').toggleClass("body-menu", fix);			
+        $('body').toggleClass("body-menu", fix);		
     });
 
 }
 
 function nahodneLogo() {
     for(i=0;i<7;i++) {
-        var nahodneC = Nahodne(5,60);
+        var nahodneC = nahodne(5,72);
         $(".bar" + i).css("height",nahodneC);
     }
 }
@@ -201,12 +200,16 @@ function odpocet(prvek,cas, konec) {
 
 function tabulkaRadek(pocet,sloupce) {
     var vysledek = "";
+
     $.each(sloupce, function(i, sloupec) {
         //1. a posledni bunka se neda upravovat
         if(i == 0 || i >= pocet)
             vysledek += "<td>" + sloupec + "</td>";
-        else
-            vysledek += "<td><input type'text' class='tabInput' value='" + sloupec + "'></td>";
+        else {
+            var vel = sloupec.length < 3 ? 3 : sloupec.length;
+            if(!vel) vel = 3;
+            vysledek += `<td><input type'text' size="${vel}" class='tabInput' value='${sloupec}'></td>`;
+        }
     });
     return "<tr>" + vysledek + "</tr>";
 }

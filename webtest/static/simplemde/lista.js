@@ -5,18 +5,25 @@ function editor(el) {
         var cm = editor.codemirror;
         var tabulka = "| | | |\n|-|-|-|\n| | | |\n| | | |";
         cm.replaceSelection(tabulka);
+        cm.focus();
     }
 
     function vlozZnaky(editor, znakPred, znakPo) {
         var cm = editor.codemirror;
+		var start = cm.getCursor("start");
+        var konec = cm.getCursor("end");
         var vybranyText = znakPred + cm.getSelection() + znakPo;
         cm.replaceSelection(vybranyText);
+        start.ch -= 1;
+		cm.setSelection(start, konec);
+		cm.focus();
     }
 
     function vlozZnak(editor,text) {
         var cm = editor.codemirror;
         var vybranyText = text + cm.getSelection();
         cm.replaceSelection(vybranyText);
+        cm.focus();
     }
 
     Simplemde = new SimpleMDE({  
@@ -146,77 +153,77 @@ function editor(el) {
             className: "fa fa-minus",
             title: "Vodorovný oddělovač"
         },
-        "|",
         {
             name: "guide",
             action: "https://simplemde.com/markdown-guide",
             className: "fa fa-question-circle",
             title: "Nápověda",
-        }, 
+        },
+        "|", 
         {
             name: "zavorky",
             action: function(editor) {vlozZnaky(editor,"[", "]")},
-            className: "fa zavorky",
+            className: "fa znak zavorky",
             title: "Vložit závorky",
         },  
         {
             name: "zavorkySl",
             action: function(editor) {vlozZnaky(editor,"{", "}")},
-            className: "fa zavorkySl",
+            className: "fa znak zavorkySl",
             title: "Vložit závorky",
         },
         {
             name: "dolar",
             action: function(editor) {vlozZnak(editor,"$")},
-            className: "fa dolar",
+            className: "fa znak dolar",
             title: "Vložit proměnnou",
         },               
         {
             name: "alfa",
             action: function(editor) {vlozZnak(editor,"α")},
-            className: "fa alfa",
+            className: "fa znak alfa",
             title: "Znak alfa",
         }, 
         {
             name: "beta",
             action: function(editor) {vlozZnak(editor,"β")},
-            className: "fa beta",
+            className: "fa znak beta",
             title: "Znak beta",
         }, 
         {
             name: "gama",
             action: function(editor) {vlozZnak(editor,"γ")},
-            className: "fa gama",
+            className: "fa znak gama",
             title: "Znak gama",
         }, 
         {
             name: "pi",
             action: function(editor) {vlozZnak(editor,"π")},
-            className: "fa pi",
+            className: "fa znak pi",
             title: "Znak pí",
         }, 
         {
             name: "mi",
             action: function(editor) {vlozZnak(editor,"µ")},
-            className: "fa mi",
+            className: "fa znak mi",
             title: "Znak mí",
         },
         {
             name: "omega",
             action: function(editor) {vlozZnak(editor,"Ω")},
-            className: "fa omega",
+            className: "fa znak omega",
             title: "Znak omega",
         },
         {
             name: "sipka",
             action: function(editor) {vlozZnak(editor,"→")},
-            className: "fa sipka",
+            className: "fa znak sipka",
             title: "Vložit šipku",
         },
         {
             name: "nerovnost",
             action: function(editor) {vlozZnak(editor,"≠")},
-            className: "fa nerovnost",
+            className: "fa znak nerovnost",
             title: "Znak nerovnost",
         },
     ],

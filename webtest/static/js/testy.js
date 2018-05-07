@@ -40,20 +40,41 @@
         tridy:      tridy
     };
 
-    postJSON(json, odpovedJSON);
+    postJSON(json, odpoved);
+
+    function odpoved(o) {
+        if(o.status != 500) {
+            hlaska(o.odpoved,5);
+            testyZobraz();
+        }
+        else chybaIframe(o);
+    }
 }
 
-function testyZobraz(json) {
+function testyZobraz() {
+    $.getJSON("./json/testy/", zpracujJSON).fail(chybaIframe);
+
     var text = "";
 
     var tlacitka =  
         '<span class="ttTlacitka">\
             <button class="tlZobrazit">Zobrazit</button>\
             <button class="tlSmazat">Smazat</button>\
-            <button class="tlVyzkouset">Vyzkoušet</button>\
         </span>';
 
-    $.each(json.testy, function(i, t) {
+    function zpracujJSON(json) {
+        $.each(json.testy, foreach);
+        
+        text = 
+            '<h1>Testy</h1>\
+            <div class="ttPridat">Přidat</div>\
+            ' + text + '\
+            <div class="ttPridat">Přidat</div>';
+
+        $(stranka).html(text);
+    }
+
+    function foreach(i, t) {
         text +=     
             '<div class="test ucitel" cislo="' + t.id + '">\
                 ' + tlacitka + '\
@@ -63,17 +84,10 @@ function testyZobraz(json) {
                 <span class="ttAutor">' + t.autor + '</span>\
                 <span class="ttOd">' + t.od + '</span>\
                 <span class="ttDo">' + t.do + '</span>\
-                <span class="ttLimit">Čas: ' + t.limit + ' min</span>\
+                <span class="ttLimit">' + t.limit + ' min</span>\
+                <span class="ttPokusu">' + t.pokusu + 'P</span>\
             </div>';
-    });
-    
-    text = 
-    '<h1>Testy</h1>\
-    <div class="ttPridat">Přidat</div>\
-    ' + text + '\
-    <div class="ttPridat">Přidat</div>';
-
-    $(stranka).html(text);
+    };
 }
 
 function testyStudentZobraz(json) {
@@ -87,7 +101,9 @@ function testyStudentZobraz(json) {
                 <span class="ttAutor">' + t.autor + '</span>\
                 <span class="ttOd">' + t.od + '</span>\
                 <span class="ttDo">' + t.do + '</span>\
+                <span class="ttPokusu">Pokusů: ' + t.pokusu + '</span>\
                 <span class="ttLimit">Čas: ' + t.limit + ' min</span>\
+                <span class="ttPokusu">Pokusů: ' + t.pokusu + '</span>\
             </div>';
     });
 
@@ -145,16 +161,18 @@ function testyVyzkouset(idTestu,ucitel) {
 
             if(odpoved == "_OTEVRENA_")
                 odpoved = '<input type="text" class="odpovedOt">';
-            else
-                odpoved = "<li class='odpoved' >" + odpoved + "</li>";
+            else if (o.spravnych > 1)
+                odpoved = '<li class="odpoved"><span class="ctverec"></span>' + odpoved + '</li>';
+            else if (o.spravnych <= 1)
+                odpoved = '<li class="odpoved"><span class="kolecko"></span>' + odpoved + '</li>';
 
             odpovedi += odpoved;      
         });  
         
         text +=
-            "<h2 cislo='" + o.id + "'>" + o.jmeno + "</h1>\
-            <div class='zadani'>" + o.zadani + "</div>\
-            <ol type='a' class='odpovedi' vyber=" + o.spravnych + " otazka='" + o.id + "'>" + odpovedi + "</ol>";
+            `<h2 cislo='${o.id}'>${o.jmeno}</h1>\
+            <div class='zadani'>${o.zadani}</div>\
+            <ol class='odpovedi' vyber=${o.spravnych} otazka='${o.id}'>${odpovedi}</ol>`;
     }
 }
 
@@ -215,17 +233,12 @@ function testyUprava(akce,idTestu) {
     }
 
     function nactiOtazky() {
-        $.getJSON("./json/otazky/", function(json) {
-            otazkyZobraz("#ttDostupne",json.otazky);
-            otazkyZobraz("#ttZvolene",json.otazky);	   
-            
-            var dostupne = $("#ttDostupne")[0].childNodes;
-            var zvolene = $("#ttZvolene")[0].childNodes;
-
+        otazkyZobraz(null,function(otazky){
+            var dostupne = pr("#ttDostupne").html(otazky)[0].children;
+            var zvolene = pr("#ttZvolene").html(otazky)[0].children;
             $.each(dostupne, dostupneOtazky); 
-            $.each(zvolene, zvoleneOtazky); 
-        
-        }).fail(chybaIframe);
+            $.each(zvolene, zvoleneOtazky);
+        });
     }
     
     function dostupneOtazky(i, otazka) {
@@ -288,10 +301,11 @@ function testySmazat(idTestu) {
         postJSON(json, odpoved);
     }
 
+    
     function odpoved(o) {
         if(o.status != 500) {
-            hlaska(o.odpoved,5);
-            $.getJSON("./json/testy/", testyZobraz)
+            hlaska(o.odpoved,2);
+            testyZobraz();
         }
         else chybaIframe(o);
     }
@@ -302,7 +316,7 @@ function testyVyberOtazky() {
     var vybrane = $("#ttZvolene .otazka:visible");
     
     $.each(vybrane, function(i, otazka) {
-        var pocet = otazka.children[3].value*1;
+        var pocet = $(otazka).children(".otPocet")[0].value;
         var id = otazka.attributes.cislo.value*1;
         cislaOtazek.push([id, pocet]);
     });

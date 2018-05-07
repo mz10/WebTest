@@ -73,7 +73,9 @@ class Student:
 
         if uzivatel("student"):
             Zaznamy.pridat("vyplneni",uzJmeno())
-
+            from .uzivatel import Uzivatel
+            Uzivatel.poslatZaznam("vyplneni")
+            
         vTestu = DbVysledekTestu(
             student = get(s.id for s in DbStudent if s.login == uzJmeno()),
             test =          test.id,
@@ -81,7 +83,7 @@ class Student:
             limit =         test.limit,
             typHodnoceni =  test.typHodnoceni,
             hodnoceni =     test.hodnoceni,            
-            pokus =         pokusu,
+            pokus =         pokusu+1,
             casZahajeni =   ted(),
         )
 
@@ -90,7 +92,11 @@ class Student:
         seznamOtazek = [] 
         
         for otT in otTestu: 
-            for i in range(0,otT.pocet):
+            opakovat = 1
+            if otT.pocet:
+                opakovat = otT.pocet
+                
+            for i in range(0,opakovat):
                 seznamOdpovedi = []
                 idOtazky = otT.otazka.id 
                 otazka = DbOtazka[idOtazky]
@@ -166,7 +172,10 @@ class Student:
             return "Tento výsledek testu neexistuje!"
 
         Zaznamy.pridat("vyplneno",uzJmeno())      
-        
+        from .uzivatel import Uzivatel
+        Uzivatel.poslatZaznam("vyplneno")
+
+
         vTestu = DbVysledekTestu[idTestu]
         vTestu.casUkonceni = ted()
 
@@ -366,7 +375,8 @@ class Student:
             "do":       datum(vTestu.casUkonceni),
             "boduMax":  boduMax,
             "boduTest": boduTest,
-            "procent":  procent,  
+            "procent":  procent,
+            "pokus":    vTestu.pokus, 
             "znamka":   vTestu.znamka,   
             "hodnoceni":vTestu.hodnoceni.replace(";-1","").replace(";"," - "),    
             "otazky":   vysledek,
@@ -414,21 +424,26 @@ class Student:
             ["1","2","3","4","5"],
             ["1","1-","2","2-","3","3-","4","4-","5"],
             ["1","2","3","4"],
-            ["A","B","C","D","E","F"],                      
+            ["A","B","C","D","E","F"], 
+            ["Úspěšný","Neúspěšný"],                    
         ]
 
         hodnoceni = hodnoceni.replace(";-1","").split(";")
 
+        hodnoceni = [int(x) for x in hodnoceni]
+        hodnoceni.sort()
+        hodnoceni.reverse()
+
         znamka = 0
         for bod in hodnoceni:
-            bod = int(bod)
             if procent >= bod: 
                 break
             znamka += 1
 
-        return znamky[typHodnoceni][znamka]
-
-
+        if len(znamky[typHodnoceni]) <= znamka:
+            return "6 !!!"
+        else:
+            return znamky[typHodnoceni][znamka]
 
     def nahrat(J):
         text = J["data"].split("\n")
@@ -539,7 +554,8 @@ class Student:
 
             hash = dbStudent.hash
             heslo = J["bunky"][3]
-            if heslo != "." or heslo != "":
+
+            if heslo != "." and heslo != "":
                 hash = generate_password_hash(heslo)
 
             dbStudent.login = login

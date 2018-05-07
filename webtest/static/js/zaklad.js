@@ -61,14 +61,14 @@ function wsJSON(json, odpoved, udalost) {
 }
 
 
-function odpovedJSON(o) { 
+function odpovedJSON(o) {
     cl("Přijatá odpověď:");
     cl(o);
     
     if(o.status == 400)
         hlaska(o.responseText);    
     else if(o.status != 500) {
-        hlaska(o.odpoved || o.chyba,8);
+        hlaska(o.odpoved || o.chyba,3);
     }
     else chybaIframe(o);
 } 
@@ -221,7 +221,7 @@ function hlaskaIframe(html) {
     }
 }
 
-function Nahodne(zacatek,konec) {
+function nahodne(zacatek,konec) {
     return Math.floor((Math.random() * konec) + zacatek);
 }
 

@@ -58,14 +58,17 @@
     <input type="text" id="ttLimit" placeholder="Čas na test (min)">
     <input type="text" id="ttOmezeni" placeholder="Omezit počet otázek"><br>
     <br>    
-    <button id="ttOdeslat">Odeslat</button>
-    <button id="ttVybrat">Vybrat otázky</button>    
-    <button id="ttSmazat">Smazat</button>
-    <button id="ttSkrytZadani">Zobrazit zadání</button>
 
     <h4>Otázky:</h4> 
-    <h6>Zvolené:</h3>
-    <div id="ttZvolene"></div>       
-    <h6>Dostupné:</h3>
-    <div id="ttDostupne"></div>
+    <span class="ttLista">
+        <button id="ttOdeslat">Odeslat</button>
+        <button id="ttVybrat">Vyměnit otázky</button>    
+        <button id="ttSkrytZadani">Zobrazit zadání</button>            
+    </span>    
+    <div id="ttMrizka">
+        <span id="ttnZvolene" class="popis">Zvolené:</span>
+        <div id="ttZvolene"></div>       
+        <span id="ttnDostupne" class="popis">Dostupné:</span>
+        <div id="ttDostupne"></div>
+    </div>
 </div>

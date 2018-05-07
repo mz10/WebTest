@@ -1,9 +1,19 @@
-/*
-@import url(reset.css);
-
-@import url(http://fonts.googleapis.com/css?family=Bree+Serif&subset=latin,latin-ext);
-@import url(http://fonts.googleapis.com/css?family=Lora:400,400italic,700,700italic&subset=latin,latin-ext);
-*/
+/* latin-ext */
+@font-face {
+  font-family: 'Bree Serif';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Bree Serif Regular'), local('BreeSerif-Regular'), url(https://fonts.gstatic.com/s/breeserif/v7/4UaHrEJCrhhnVA3DgluA96Tp56N1.woff2) format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Bree Serif';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Bree Serif Regular'), local('BreeSerif-Regular'), url(https://fonts.gstatic.com/s/breeserif/v7/4UaHrEJCrhhnVA3DgluA96rp5w.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
 
 body {
   width: 100%;
@@ -11,7 +21,8 @@ body {
 }
   
 html, body{
-  overflow: auto !important;  
+  overflow: auto !important; 
+  /*cursor: url(sipka.svg) 2 2, auto;*/
 }
 
   body:before, body:after {
@@ -42,16 +53,19 @@ body {
   overflow: auto; 
 }
 
-#html, body {
-  font-family: "Lora", Georgia, "Times New Roman", "DejaVu Serif", serif;
+html, body {
   font-size: 14pt;
   border: #DD5500 solid 3px;
   border-radius: 15px;
   padding: 1ex 1em; 
 }
+
+html, body, input, select, button {
+  font-family: "Bree serif", "Lora", "Open Sans", "Calibri", "Arial";
+}
+
   
   #body {
-    font-family: "Bree serif", Georgia, "Times New Roman", "DejaVu Serif", serif;
     border-bottom: solid #DD5500 2px;
     padding-bottom: 1ex;
     margin-bottom: 1em; 
@@ -65,7 +79,6 @@ body {
   h1 {
     font-size: 250%;
     font-weight: bold;
-    padding: 0px; 
   }
 
   img {
@@ -85,11 +98,11 @@ body {
   a {
     display: inline-block;
     padding: 5px 7px 2px;
-    text-decoration: overline; 
+    //text-decoration: overline; 
   }
 
   li:hover a {
-    text-decoration: underline; 
+    //text-decoration: underline; 
   }
 
 /* prichytavat menu nahore */
@@ -110,11 +123,13 @@ body {
 
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: "Bree serif", Georgia, "Times New Roman", "DejaVu Serif", serif;
   font-weight: bold;
   color: #DD5500;
-  margin-top: 1em;
-  margin-bottom: 1ex;  
+  /*! margin-top: 1em; */
+  /*! margin-bottom: 1ex; */  
+  padding: 0px;
+  margin: 0px;  
+  margin-top: 20px;
 }
 
   h1 {
@@ -130,8 +145,26 @@ h1, h2, h3, h4, h5, h6 {
   }
   
   nav {
-    //text-align: center;
+    background: linear-gradient(to bottom, rgb(255, 250, 142) 0%, rgb(209, 97, 3) 100%) !important;
+    border-radius: 50px;
+    box-shadow: inset 2px 2px 2px #d5af76;
+    margin: 0 auto;
   }
+
+  nav a {
+    padding: 0px 3px;
+    /* margin: 0 aut; */
+    color: #683616;
+  }
+
+  nav.menu {
+    border-radius: 0% 0% 20% 20% !important;
+    border: none;
+    /* box-shadow: inset 0px -3px 3px #da6e44 !important; */
+    margin: 0 auto;
+    float: center;
+  }
+
 
   ul {
     /*margin: 0.5ex 0px 0.5ex 40px; */
@@ -148,7 +181,6 @@ h1, h2, h3, h4, h5, h6 {
   }
 
 footer {
-  font-family: "Bree serif", Georgia, "Times New Roman", "DejaVu Serif", serif;
   font-size: 77%;
   text-align: right;
   border-top: solid #DD5500 1px;
@@ -182,9 +214,11 @@ body .vysledek_True{
   float: right;
   text-align: right; }
   #prihlaseno a {
-    text-decoration: overline; }
+    //text-decoration: overline; 
+  }
   #prihlaseno a:hover {
-    text-decoration: underline; }
+    //text-decoration: underline; 
+  }
 
 .pridat_otazku td {
   padding-right: 1ex;
@@ -279,18 +313,34 @@ p.dobre {
   margin-bottom: 2em; }
 
 .logo2 {
-  font-size: 0;
-  width:85px;
-  display: inline-block;
+  position: relative;
+  left: 50px;
+  top: 10px;
+  font-size: 0px;
 }
+
+.logo3 {
+	font-size: 50px;
+	position: relative;
+	left: 20px;
+  top: 9px;
+  transition: all 2.5s; 
+}
+
+.logo3:hover {
+  transform: rotate(-15deg);
+  transition: all 2.0s
+}
+
 
  .bar, .bar0, .bar1, .bar2, .bar3, .bar4, .bar5, .bar6 {
   background-color: #DD5500;
-  width: 10px;
+  width: 12px;
   padding: 0px;
   display: inline-block;  
   margin-right: 1px;
   transition: 3s;
+  border-radius: 8px;
   }
 
 .bar0 {height: 22px; }
@@ -315,8 +365,9 @@ p.dobre {
   width: 10em; 
 }
 
-#kalendar1, #kalendar2 {
-  position: absolute; 
+#kalendar1 {
+  position: absolute;
+  z-index: 110;
 }
   
   #kalendar1 table {
@@ -333,8 +384,12 @@ p.dobre {
     border-bottom: 1px solid brown; 
   }
   
+  #kalendar1 table th, #kalendar1 table td, {
+    border: none;
+  }
+
   #kalendar1 th, #kalendar1 td {
-    font-size: 12px;
+    font-size: 16px;
     text-align: center;
     padding: 2px 3px 2px 2px; 
   }
@@ -361,27 +416,33 @@ p.dobre {
     background-color: red; 
   }
   
-    #kalendar1 td {
+  #kalendar1 td {
     cursor: pointer; 
   }
   
-    #kalendar1 #content {
+  #kalendar1 #content {
     padding-bottom: 120px; 
   }
   
-    #kalendar1 #main {
+  #kalendar1 #main {
     position: relative;
     z-index: 1; 
   }
   
-    #kalendar1 input.ukazka {
+  #kalendar1 input.ukazka {
     float: right;
     margin-right: 20px; 
   }
 
   .logo {
-    width: 150px;
-    height: 150px;
+    width: 125px;
+    height: 125px;
+    transition: all 5s;
+  }
+  
+  .logo:hover {
+      transform: rotate(2520deg);
+      transition: all 2s;
   }
 
 table {
@@ -398,7 +459,7 @@ table {
 
   th,td {
   border: 2px solid orange;
-  padding: 0 10px 0 10px;
+  padding: 0 5px 0 5px;
   }
 
   tr {
@@ -477,12 +538,12 @@ table {
   
 
 .otazka, .test, .vysledek {
-	padding: 5px;
-	border: 2px solid orange;
+  padding: 0 10px;
 	background:orange;
 	margin: 5px 0px;
-  border-radius: 10px;
+  border-radius: 20px;
   cursor: pointer;
+  box-shadow: inset 2px 10px 8px #ffe7c4;
 }
 
   .otNazev, .ttNazev {
@@ -518,28 +579,31 @@ table {
 /*************lista - hodnoceni **********************/
 
 #znamky {
-  background-color: #DD5500;
-  width: 500px;
-  height: 10px;			
-  display:block;
-  padding: 0px;
-  margin: 0px;
-  position: relative;
+	width: 750px;
+	height: 10px;
+	display: block;
+	padding: 0px;
+	margin: 0px;
+	position: relative;
+  border-radius: 10px;
+  background: linear-gradient(to bottom, rgb(255, 216, 158) 0%, rgb(209, 97, 3) 100%);
 }
 
 .znamka {
-  width: 25px;
-  height: 20px;			
-  display: block;
-  padding: 0px;
-  margin: 0px;
-  position: absolute;
-  top:-5px;
-  font-size: 16px;
-  text-align:center;
-  cursor: e-resize; 
-  transition: 1s;
+	width: 25px;
+	height: 25px;
+	display: block;
+	padding: 0px;
+	margin: 0px;
+	position: absolute;
+	top: -7px;
+	font-size: 16px;
+	text-align: center;
+	cursor: e-resize;
+	transition: 1s;
+	border-radius: 100%;
 }
+
 
 .znamka:active{
   background-color: black;
@@ -590,7 +654,7 @@ table {
 #zn7{
   z-index: 18;
   background-color: cyan;
-  color: white;
+  color: black;
 }		
 
 #zn8{
@@ -610,7 +674,7 @@ table {
   display: none;
 }
 
-.ttAutor, .ttOd, .ttDo {
+.ttAutor, .ttOd, .ttDo, .ttLimit, .ttPokusu {
   padding-right: 10px; 
 }
 
@@ -637,7 +701,7 @@ ol.odpovedi {
 
 li.odpoved {
   display: list-item;
-  list-style: pismena;
+  list-style: none;
   margin-left: 30px;  
 }
 
@@ -707,9 +771,21 @@ input.seda {
 }
 
 .tabDb input {
-	width: 30px;
+	border: none;
+	font-size: 18px;
+	margin: 0px;
+  padding: 0px;  
 }
 
+.tabInput:hover, .tabInput:focus {
+  color: brown;
+  transition: 0.5s;
+}
+
+.tbTridy {
+	border: none;
+	font-size: 16px;
+}
 
 #uzivatele, #log, #ucet {
   display: none;
@@ -732,6 +808,7 @@ input.seda {
 
 #menuUcitel, #menuStudent, #menuAdmin {
   display: none;
+  z-index: 150;
 }
 
 .fa.zavorky::after    { content: "[]"; }
@@ -766,4 +843,199 @@ input.seda {
 
 #ttZvolene > .otazka > .otPocet {
 	display: block;
+}
+
+.inputLista input {
+	width: 250px;
+	border-radius: 20% 0%;
+}
+
+/********** SIMPLE MDE ************/
+
+
+.editor-toolbar {
+	border-top-left-radius: 16px !important;
+  border-top-right-radius: 16px !important;
+  border: none !important;
+  background: linear-gradient(to bottom, rgb(245, 245, 245) 0%, rgb(161, 161, 161) 100%) !important;
+	box-shadow: inset 1px 1px 1px #d5d5d5;
+}
+
+.editor-toolbar a {
+	width: 10px !important;
+  height: 20px !important;
+  color: #08233e !important
+}
+
+.editor-toolbar::after, .editor-toolbar::before {
+	margin: 0px !important;
+}
+
+
+.CodeMirror {
+	border-bottom-left-radius: 16px !important;
+  border-bottom-right-radius: 16px !important;
+}
+
+.editor-toolbar i.separator {
+	border-left: 1px solid #6f6f6f !important;
+	border-right: 1px solid #fffafa !important;
+}
+
+.fa.znak {
+	font-weight: bold;
+	font-size: 22px;
+}
+
+.editor-toolbar.fullscreen {
+	width: 100% !important;
+}
+
+#otMrizka {
+  display: grid;
+}
+
+#ttMrizka {
+  display: grid;
+  grid-gap: .3em;
+  grid-template-columns: 50% 50%;
+}
+
+#otBodu {
+  grid-column: 4;
+  grid-row: 1;
+}
+#vlozitOtazky {
+  grid-column: 5;
+  grid-row: 2 / 50;
+}
+#otnJmeno {
+  grid-row: 1;
+  grid-column: 1;
+}
+#otJmeno {
+  grid-row: 1;
+  grid-column: 2;
+  /*! grid-template-rows: 1fr; */
+  grid-gap: 50px;
+}
+#otnBodu {
+  grid-row: 1;
+  grid-column: 3;
+  float: right;
+}
+#otnTolerance {
+  grid-row: 2;
+  grid-column: 3;
+}
+#otTolerance {
+  grid-row: 2;
+  grid-column: 4;
+}
+#otnVyhodnotit {
+  grid-row: 2;
+  grid-column: 1;
+}
+#otnOdpovedi {
+  grid-column: 5;
+  grid-row: 1;
+}
+#otVlozit {
+  grid-column: 4;
+}
+#otVyhodnotit {
+  grid-column: 2;
+  grid-row: 2;
+}
+#otZaokrouhlit {
+  grid-row: 3;
+  grid-column: 2;
+}
+#otSmazat {
+  display: none;
+}
+
+#ttZvolene {
+  grid-column: 1;
+}
+#ttDostupne {
+  grid-column: 2;
+}
+#ttnDostupne {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.kolecko {
+  font-size: 2.5em;
+  display: inline-block;
+  width: 0.4em;
+  height: 0.4em;
+  border: double 0.1em transparent;
+  position: relative;
+  border-radius: 0.35em;
+  background: radial-gradient(ellipse at center, rgb(255, 244, 244) 35%, rgb(99, 99, 99) 55%),radial-gradient(ellipse at center, rgb(249, 169, 5) 50%, rgb(255, 204, 27) 70%);
+  background-origin: border-box;
+  background-clip: content-box, border-box;
+  transition: 0.5s;
+  left: -0.15em;
+	top: 0.12em;
+}
+ 
+.kolecko::before {
+  content: "";
+  display: inline-block;
+  position: absolute;
+  width: 50%;
+  height: 50%;
+  margin: 25%;
+  background: radial-gradient(ellipse at center, rgb(248, 243, 196) 0%, rgb(14, 4, 18) 100%);
+  border-radius: 100%;
+}
+               
+.kolecko:hover::before {
+  content: "";
+  display: inline-block;
+  position: absolute;
+  width: 50%;
+  height: 50%;
+  margin: 25%;
+  background: radial-gradient(ellipse at center, rgb(248, 243, 196) 0%, rgb(14, 4, 18) 100%);
+  border-radius: 100%;
+}
+
+
+.ctverec {
+  font-size: 2.5em;
+  display: inline-block;
+  width: 0.4em;
+  height: 0.4em;
+  border: double 0.1em transparent;
+  position: relative;
+  background: radial-gradient(ellipse at center, rgb(255, 244, 244) 35%, rgb(99, 99, 99) 55%),radial-gradient(ellipse at center, rgb(249, 169, 5) 50%, rgb(255, 204, 27) 70%);
+  background-origin: border-box;
+  background-clip: content-box, border-box;
+  transition: 0.5s;
+  left: -0.15em;
+	top: 0.12em;
+}
+ 
+.ctverec::before {
+  content: "";
+  display: inline-block;
+  position: absolute;
+  width: 50%;
+  height: 50%;
+  margin: 25%;
+  background: radial-gradient(ellipse at center, rgb(248, 243, 196) 0%, rgb(14, 4, 18) 100%);
+}
+               
+.ctverec:hover::before {
+  content: "";
+  display: inline-block;
+  position: absolute;
+  width: 50%;
+  height: 50%;
+  margin: 25%;
+  background: radial-gradient(ellipse at center, rgb(248, 243, 196) 0%, rgb(14, 4, 18) 100%);
 }

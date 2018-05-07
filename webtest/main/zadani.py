@@ -154,14 +154,16 @@ class Zadani:
                 else:       vysledek = nahodneDes(od,do)
                 
                 vysledek = platneMista(vysledek,mista)
-            
+
         except Exception as e:
             promenne[promenna] = 0
             return "[chyba ve výrazu 1]" # + str(e)
             #return str(e)
 
-        promenne[promenna] = str(vysledek)
-        return str(vysledek)
+        vysledek = str(vysledek)
+
+        promenne[promenna] = vysledek
+        return vysledek
 
     def vypocitatPromenne(m):
         promenne = Zadani.promenne
@@ -216,7 +218,7 @@ class Zadani:
                 return spVypocitat(vyraz[1:-1])
             else:
                 return spVypocitat(vyraz)  
-            
+        
             return str(vysledek)
         except Exception as e:
             return "[chyba ve výrazu 3]"  + str(e)

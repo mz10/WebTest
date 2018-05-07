@@ -2,27 +2,30 @@
 
 <div class="UpravitOtazku">
   <h1 id="upravitOtazku">Upravit otázku</h1>
-  <textarea id="otZadani" placeholder="Zadání"></textarea>
-  <h3>Jméno: </h3>
-  <input type="text" id="otJmeno" placeholder="Jméno otázky" value="">
-  <h3>Bodů: </h3>
-  <input type="text" id="otBodu" placeholder="Počet bodů" value="1">
-  <h3>Tolerance %:</h3>
-  <input type="text" id="otTolerance" placeholder="Tolerance" value="0">
-  <h3>Zaokrouhlit:</h3>
-  <input type="text" id="otZaokrouhlit" placeholder="D. místa" value="2">
-  <h3>Vyhodnotit:</h3>
-  <select id="otVyhodnotit">
-    <option selected disabled>Správně je když:</option>
-    <option value="1">1. nebo 2. správně</option>
-    <option value="2">1. a 2. správně</option>
-    <option value="3">1 správně ze 2 -> 1/2 bodů</option>
-  </select>
+  <textarea id="otZadani" placeholder="Zadání"></textarea>  
+  <div id="otMrizka">
 
-  <span id="otId"></span>
+    <span class="popis" id="otnJmeno">Jméno: </span>
+    <input type="text" id="otJmeno" placeholder="Jméno otázky" value="">
+    <span class="popis" id="otnBodu">Bodů: </span>
+    <input type="text" id="otBodu" placeholder="Počet bodů" value="1">
+    <span class="popis" id="otnTolerance">Tolerance %:</span>
+    <input type="text" id="otTolerance" placeholder="Tolerance" value="0">
+    <span class="popis" id="otnZaokrouhlit">Zaokrouhlit:</span>
+    <input type="text" id="otZaokrouhlit" placeholder="D. místa" value="2">
+    <span class="popis" id="otnVyhodnotit">Vyhodnotit:</span>
+    <select id="otVyhodnotit">
+      <option selected disabled>Správně je když:</option>
+      <option value="1">1. nebo 2. správně</option>
+      <option value="2">1. a 2. správně</option>
+      <option value="3">1 správně ze 2 -> 1/2 bodů</option>
+    </select>
 
-  <h3>Odpovědi</h3>
-  <div id="vlozitOtazky"></div>
-  <button id="otVlozit">Odeslat</button>
-  <button id="otSmazat">Smazat</button>  
+    <span id="otId"></span>
+
+    <span class="popis" id="otnOdpovedi">Odpovědi</span>
+    <div id="vlozitOtazky"></div>
+    <button id="otVlozit">Odeslat</button>
+    <button id="otSmazat">Smazat</button>  
+  </div>
 </div>

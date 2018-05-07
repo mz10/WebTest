@@ -1,4 +1,6 @@
-﻿function otazkyZobraz(div, otazky) {
+﻿function otazkyZobraz(div,hotovo) {
+    $.getJSON("./json/otazky/", zpracujJSON).fail(chybaIframe);
+    
     var text = "";
 
     var tlacitka =  
@@ -9,32 +11,37 @@
             <button class="tlZobrazOdpovedi">Odpovědi</button>\
         </span>';
 
-    //onsole.log(otazky);
+    function zpracujJSON(json){
+        $.each(json.otazky, foreach);
 
-    $.each(otazky, function(i, o) {
+        if(div == stranka) {
+            text = 
+                '<h1>Otázky</h1>\
+                <span class="otPridat">Přidat | </span>\
+                <span class="otSmazatVsechny">Smazat všechny | </span>\
+                ' + text + '\
+                <div class="otPridat">Přidat</div>';      
+        }       
+
+        if(div) {
+            $(div).html(text);
+            mathjax();
+        }
+        else return hotovo(text);
+    }
+
+    function foreach(i, o) {
         text += 
             '<div class="otazka" cislo="' + o.id + '">\
                 ' + tlacitka + '\
                 <span class="otId">' + o.id + '. </span>\
                 <span class="otNazev">' + o.jmeno + '</span>\
+                <span class="otBodu">' + o.bodu + 'b</span>\
                 <input class="otPocet" value="1" type="text">\
                 <span class="otZadani">' + o.zadaniHTML.replace("\n","<br>") + '</span>\
                 <div class="otOdpovedi"></div>\
             </div>';
-    });
-
-    if(div == stranka) {
-        text = 
-            '<h1>Otázky</h1>\
-            <span class="otPridat">Přidat | </span>\
-            <span class="otSmazatVsechny">Smazat všechny | </span>\
-            ' + text + '\
-            <div class="otPridat">Přidat</div>';
-        
-    }
-
-    $(div).html(text);
-    mathjax();
+    };
 }
 
 function otazkyUprav(idOtazky) {
@@ -96,9 +103,9 @@ function otazkyKostka(e) {
     var otOdpoved = $(".otazka[cislo=" + idOtazky + "] .otOdpovedi");
     var kod = "";
 
-    $.getJSON("./json/otazky/" + idOtazky, gj).fail(chybaIframe);
+    $.getJSON("./json/otazky/" + idOtazky, zpracujJSON).fail(chybaIframe);
 
-    function gj(json) {
+    function zpracujJSON(json) {
         cl(json.otazka);
         var o = json.otazka;
         
@@ -153,7 +160,15 @@ function otazkySmazat(idOtazky) {
     };
 
     function ano() {
-        postJSON(json, odpovedJSON);
+        postJSON(json, odpoved);
+    }
+
+    function odpoved(o) {
+        if(o.status != 500) {
+            hlaska(o.odpoved,5);
+            otazkyZobraz(stranka);
+        }
+        else chybaIframe(o);
     }
 }
 
@@ -215,7 +230,11 @@ function otazkyOdeslat() {
 
     function odpoved(o) {
         if(o.status != 500) {
-            hlaska(o.odpoved,8); 
+            if(o.odpoved == "existuje") {
+                hlaska("Otázka s tímto jménem už existuje.",1);
+                return;
+            }
+            hlaska(o.odpoved,1); 
             prejit("Otazky");
         }
         else chybaIframe(o);

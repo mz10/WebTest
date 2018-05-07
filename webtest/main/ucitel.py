@@ -75,7 +75,7 @@ class Ucitel:
         elif J["akce"] == "zmenit":
             hash = dbUcitel.hash
             heslo = J["bunky"][3]
-            if heslo != "." or heslo != "":
+            if heslo != "." and heslo != "":
                 hash = generate_password_hash(heslo)
 
             dbUcitel.login = login
@@ -95,7 +95,11 @@ class Ucitel:
         seznamOtazek = [] 
         
         for otT in otTestu: 
-            for i in range(0,otT.pocet):
+            opakovat = 1
+            if otT.pocet:
+                opakovat = otT.pocet
+
+            for i in range(0,opakovat):
                 seznamOdpovedi = []
                 idOtazky = otT.otazka.id 
                 otazka = DbOtazka[idOtazky]

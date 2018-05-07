@@ -24,15 +24,6 @@ from sympy.solvers import solve
 
 init_printing()
 
-"""
-def pswd_check(pswd, encript):
-    i = encript.rfind('$')
-    salt = encript[:i]
-    return encript == crypt(pswd, salt)
-"""
-############################################################################
-
-
 class Zaznamy:
     def pridat(typ,student):
         DbAkce(
@@ -98,10 +89,7 @@ def uzivatel(typ):
 
 def uzJmeno():
     if not "jmeno" in session: return "" 
-    return session["jmeno"]   
-
-def pswd_check(pswd, encript):
-    return True   
+    return session["jmeno"]    
 
 # vytvori nahodne cislo s promenlivou delkou
 def nahodne(a,b):
@@ -110,7 +98,8 @@ def nahodne(a,b):
     delkaDo = abs(cislo).__str__().__len__()
     delka = abs(delkaOd - delkaDo)
     nahodnaDelka = random.randint(0,delka)
-    return str(int(cislo/(10**nahodnaDelka)))
+    cislo = int(cislo/(10**nahodnaDelka))
+    return '{:.10g}'.format(cislo)
 
 # vytvori nahodne desetinne cislo s promenlivou delkou
 def nahodneDes(a,b):
@@ -120,13 +109,13 @@ def nahodneDes(a,b):
     delka = abs(delkaOd - delkaDo)
     nahodnaDelka = random.randint(0,delka)
     cislo = cislo/(10**nahodnaDelka)
-    return str(cislo)
+    return '{:.10g}'.format(cislo)
 
 def zaokrouhlit(cislo,mista):
     cislo = float(cislo)
     try: mista = int(mista)
     except: mista = 0
-    return ('%.10f' % round(cislo,mista)).rstrip('0').rstrip('.')
+    return '{:.{}g}'.format(cislo,mista+1)
 
 # zaokrouhli cislo na pocet platnych mist
 def platneMista(cislo, mista=0):   
@@ -161,7 +150,6 @@ def jsonStahnout(js,jmeno):
 
 def wsJSON(js):
     return _json.dumps(js)
-
 
 def seznam(s):
     vysledek = []
@@ -219,17 +207,21 @@ def tolerance(c1,c2,procent):
 
 def spVypocitat(vyraz):
     #return str(sympy.latex(sympy.N(vyraz)))
-    return str(sympy.N(vyraz))
+    vysledek = str(sympy.N(vyraz))
+    try:
+        vysledek = '{:.10g}'.format(float(sympy.N(vyraz)))
+    except: True
+
+    return vysledek
 
 def prumer(cisla):
     if cisla[0] == "": return 0
     soucet = 0
     for c in cisla:
         soucet += float(c)
-    return str(float(soucet/len(cisla)))
 
-
-
+    cislo = float(soucet/len(cisla))
+    return '{:.10g}'.format(cislo)
 
 def rovnice(zadani):
     strana2 = "0"
@@ -306,10 +298,9 @@ def jednotka(cislo,typ, mista = -1):
     if mista >= 0:
         cislo = platneMista(cislo,mista) 
 
-    #odstrani 0 na konci za teckou
-    cislo = str(cislo).rstrip('0').rstrip('.')   
+    cislo = '{:.10g}'.format(cislo)
         
-    return str(cislo) + " " + velikost + typ
+    return cislo + " " + velikost + typ
 
 # opak k funkci jednotka - prevede zpet na cislo
 def jednotka2(text, mista = -1):
@@ -333,4 +324,4 @@ def jednotka2(text, mista = -1):
     if mista >= 0:
         cislo = platneMista(cislo,mista)        
         
-    return str(cislo)
+    return '{:.10g}'.format(cislo)

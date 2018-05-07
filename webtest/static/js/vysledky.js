@@ -32,7 +32,6 @@ function vysledkyTabulka(idTestu) {
     var tabulka =  
         "<tr>\
             <th>id</th>\
-            <th>Jméno</th>\
             <th>Zahájeno</th>\
             <th>Ukončeno</th>\
             <th>Limit</th>\
@@ -61,7 +60,6 @@ function vysledkyTabulka(idTestu) {
         var obsah =
             `<tr>\
                 <td>${v.id}</th>\
-                <td>${v.jmeno}</th>\
                 <td>${v.casZahajeni}</th>\
                 <td>${v.casUkonceni}</th>\
                 <td>${v.limit}</th>\
@@ -98,6 +96,8 @@ function vysledkyZobraz(id) {
         text += "Výsledný počet bodů: " + test.boduTest + "<br>";
         text += "Výsledek: " + test.procent.zaokrouhlit(2) + " %<br>";
         text += "Známka: " + test.znamka + "<br>";
+        text += "Pokus: " + test.pokus + "<br>";
+        text += "Student: " + test.student + "<br>";        
         text += "Hodnocení: " + hodnoceni + "<br>";
 
         $.each(otazky, zpracujOtazky);

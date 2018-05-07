@@ -19,7 +19,7 @@ import sys
 import os
 import re
 
-from .funkce import (pswd_check, json, wsJSON, ted, Zaznamy, uzivatel, uzJmeno)
+from .funkce import (json, wsJSON, ted, Zaznamy, uzivatel, uzJmeno)
 from .student import Student
 
 studenti = []
@@ -186,12 +186,15 @@ class Uzivatel:
     def poslatZaznam(z):
         if uzivatel('ucitel') or uzivatel('admin'):
             return
-        
+
         student = {}
 
         for s in studenti:
-            if s["sid"] == request.sid:
-                student = s
+            if s["login"] == uzJmeno():
+                student = s          
+
+        if len(student) == 0:
+            return
 
         if z == "s": z = "skryto"
         elif z == "z": z = "zobrazeno"

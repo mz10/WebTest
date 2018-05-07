@@ -17,7 +17,7 @@ import sys
 import re
 
 from collections import defaultdict
-from .funkce import (pswd_check, json, wsJSON, ted, Zaznamy, datum, uzivatel, uzJmeno)
+from .funkce import (json, wsJSON, ted, Zaznamy, datum, uzivatel, uzJmeno)
 
 class Vysledky:
     def zobrazVysledek(id,vysledek):

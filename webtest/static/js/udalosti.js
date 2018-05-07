@@ -98,10 +98,10 @@ $(document).on("click", ".otTlacitka .tlSmazat", function(e) {
     otazkySmazat(idOtazky);
 });
 
-//zobrazit vygenerovany test
-$(document).on("click", ".otTlacitka .tlSmazat", function(e) {
-    var idOtazky =  e.target.parentElement.parentElement.attributes.cislo.value;
-    otazkySmazat(idOtazky);
+//smazat test
+$(document).on("click", ".ttTlacitka .tlSmazat", function(e) {
+    var idTestu =  e.target.parentElement.parentElement.attributes.cislo.value;
+    testySmazat(idTestu);
 });
 
 //zobrazit vygenerovany test - ucitel
@@ -163,13 +163,6 @@ $(document).on("click", ".otPridat", function(e) {
 
 $(document).on("click", ".otSmazatVsechny", function(e) {
     otazkySmazatVsechny(e);
-});
-
-//vyzkouset test
-$(document).on("click", ".ttTlacitka .tlVyzkouset", function(e) {
-    prejit("TestyVyzkouset");   
-    var idTestu = e.target.parentElement.parentElement.attributes.cislo.value;
-    testyVyzkouset(idTestu);
 });
 
 //input - pridat spatnou otazku
@@ -334,3 +327,13 @@ $(document).on("click", ".vsZobrazit", function(e) {
 
 
 $(document).on("click", "#ucZmenitHeslo", ucetHeslo); 
+
+
+$(document).on("keyup", "input", function(e) {
+    var max = $(this.attributes.max).val();
+    if(!max) max = 20;
+    var delka = this.value.length;    
+    if (delka >= max) return;
+    this.style.width = this.value.length + 2 + "ch";
+});
+

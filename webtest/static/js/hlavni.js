@@ -174,6 +174,8 @@ function prihlasit() {
             $("#menuAdmin").show();
         else if(o.prihlasen == "student")
             $("#menuStudent").show();
+
+        menuNahore();
         $(stranka).html("");
     }
 }
