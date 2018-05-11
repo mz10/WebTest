@@ -175,7 +175,6 @@ class Student:
         from .uzivatel import Uzivatel
         Uzivatel.poslatZaznam("vyplneno")
 
-
         vTestu = DbVysledekTestu[idTestu]
         vTestu.casUkonceni = ted()
 
@@ -201,6 +200,10 @@ class Student:
         return "Test byl odeslán"                  
 
     def vysledekTestu(id):
+        try: int(id)
+        except:
+            return ""
+
         vId = get(v.id for v in DbVysledekTestu if v.id is id)
 
         if not vId:

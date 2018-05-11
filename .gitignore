@@ -67,3 +67,4 @@ webtest/main/spojeni.py
 webtest/devtools/ukliddb.py
 *.js0
 webtest/main/spojeni.py
+webtest/static/styles0.css

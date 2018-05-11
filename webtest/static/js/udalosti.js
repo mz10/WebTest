@@ -230,12 +230,34 @@ $(document).on("click", ".odpoved", function(e) {
         $.each(odpovedi, odznacitOdpoved);
 
     function odznacitOdpoved(i, odpoved){
-        $(this).removeClass("oznacena");      
+        var odznacit = this.children[0];
+        $(odznacit).removeClass("oznaceno");
     } 
 
-    $(this).toggleClass("oznacena");
+    //$(this).toggleClass("oznacena");
+    var oznacit = this.children[0];
+    $(oznacit).toggleClass("oznaceno");
 });
 
+/*
+$(document).on("mouseover", ".odpoved", function(e) {
+    var vyber = e.currentTarget.parentElement.attributes.vyber.value;
+    var odpovedi = e.currentTarget.parentElement.children;
+
+    //vyber pouze 1 otazky
+    if(vyber == 1)
+        $.each(odpovedi, odznacitOdpoved);
+
+    function odznacitOdpoved(i, odpoved){
+        var odznacit = this.children[0];
+        $(odznacit).removeClass("oznaceno");
+    } 
+
+    //$(this).toggleClass("oznacena");
+    var oznacit = this.children[0];
+    $(oznacit).toggleClass("oznaceno");
+});
+*/
 
 //vyhodnotit test - student
 $(document).on("click", "#odeslatTest", testyVyhodnotit);

@@ -17,15 +17,17 @@
         if(div == stranka) {
             text = 
                 '<h1>Otázky</h1>\
-                <span class="otPridat">Přidat | </span>\
-                <span class="otSmazatVsechny">Smazat všechny | </span>\
-                ' + text + '\
-                <div class="otPridat">Přidat</div>';      
+                <div class="otNabidka">\
+                    <span class="otPridat">Přidat</span>\
+                    <span class="otSmazatVsechny">Smazat všechny</span>\
+                </div>\
+                ' + text;      
         }       
 
         if(div) {
             $(div).html(text);
             mathjax();
+            menuNahore();
         }
         else return hotovo(text);
     }

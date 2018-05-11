@@ -67,11 +67,13 @@ function testyZobraz() {
         
         text = 
             '<h1>Testy</h1>\
-            <div class="ttPridat">Přidat</div>\
-            ' + text + '\
-            <div class="ttPridat">Přidat</div>';
+            <div class="otNabidka">\
+                <span class="ttPridat">Přidat</span>\
+            </div>\
+            ' + text;
 
         $(stranka).html(text);
+        menuNahore();
     }
 
     function foreach(i, t) {
@@ -103,7 +105,6 @@ function testyStudentZobraz(json) {
                 <span class="ttDo">' + t.do + '</span>\
                 <span class="ttPokusu">Pokusů: ' + t.pokusu + '</span>\
                 <span class="ttLimit">Čas: ' + t.limit + ' min</span>\
-                <span class="ttPokusu">Pokusů: ' + t.pokusu + '</span>\
             </div>';
     });
 
@@ -146,13 +147,18 @@ function testyVyzkouset(idTestu,ucitel) {
         else
             text = `<button id='vygenerovat' value='${idTestu}'>Vygenerovat</button>` + text;
 
-        $(stranka).html(text);  
+
+        var html = text + "<span class='mrizka vyzkouset'>" + otazky + "</span>";
+
+        $(stranka).html(html);
     }
 
     function konecTestu() {
         pr("#odpocet").text("Čas vypršel!!!");
         testyVyhodnotit();
     }
+
+    var otazky = "";
 
     function zpracujOtazky(i, o) {
         odpovedi = "";
@@ -169,10 +175,12 @@ function testyVyzkouset(idTestu,ucitel) {
             odpovedi += odpoved;      
         });  
         
-        text +=
-            `<h2 cislo='${o.id}'>${o.jmeno}</h1>\
-            <div class='zadani'>${o.zadani}</div>\
-            <ol class='odpovedi' vyber=${o.spravnych} otazka='${o.id}'>${odpovedi}</ol>`;
+        otazky +=
+            `<span class='otTestu'>\
+                <h2 cislo='${o.id}'>${o.jmeno}</h2>\
+                <div class='zadani'>${o.zadani}</div>\
+                <ol class='odpovedi' vyber=${o.spravnych} otazka='${o.id}'>${odpovedi}</ol>\
+            </span>`;
     }
 }
 
@@ -264,8 +272,10 @@ function testyUprava(akce,idTestu) {
             }
         });
 
+        cl(otazka);
+
         if(!hledat) //priradi k otazce pocet opakovani
-            $(otazka.children[3]).val(info[1]); 
+            $(otazka).children(".otPocet").val(info[1]);
         else
             otazka.style.display = "none";
     }
@@ -345,16 +355,23 @@ function testyVyhodnotit(e) {
     smazIntervaly(); //smaze odpocet zbyvajiciho testu
     var seznamOdpovedi = [];
 
-    $.each($(".odpoved.oznacena"), foreach);  
-    $.each($(".odpovedOt"), foreach);
+    $.each($("span.oznaceno"), oznacene);  
+    $.each($(".odpovedOt"), otevrene);
     var idTestu = ph("#odeslatTest");
 
-    function foreach(i,o) {
-        var text = $(o).text() || $(o).val();
-        var idOtazky = o.parentElement.attributes.otazka.value;        
-        seznamOdpovedi.push([idOtazky,text]); 
+    function oznacene(i,o) {
+        cl(o);
+        var text = $(o.parentElement).text();
+        var idOtazky = o.parentElement.parentElement.attributes.otazka.value;        
+        seznamOdpovedi.push([idOtazky*1,text]); 
     }
     
+    function otevrene(i,o) {
+        var text = $(o).val();
+        var idOtazky = o.parentElement.attributes.otazka.value;        
+        seznamOdpovedi.push([idOtazky*1,text]); 
+    }
+
     var json = {
         akce:'vyhodnotit', 
         co:'test',
@@ -362,7 +379,8 @@ function testyVyhodnotit(e) {
         odpovedi: seznamOdpovedi
     };
 
-    postJSON(json, odpoved, "./json/post/student/");
+    if(idTestu)
+        postJSON(json, odpoved, "./json/post/student/");
 
     function odpoved(o) {
         vysledkyZobraz(idTestu);

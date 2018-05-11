@@ -100,13 +100,23 @@ function prejit(adresa) {
 function menuNahore() {
     var menu = $('nav:visible');
     if (menu.length == 0) return;
-
-    var pozice = menu.offset().top;
+    var poziceMenu = menu.offset().top;
+    var poziceNabidka = 0;
+    var nabidka = $('.otNabidka');
+    
+    if(nabidka.length != 0)
+        poziceNabidka = menu.offset().top;
 
     $(window).scroll(function(e) {
-        var fix = ($(this).scrollTop() > pozice) ? true : false;	
+        //menu
+        var fix = ($(this).scrollTop() > poziceMenu) ? true : false;	
         menu.toggleClass("menu", fix);
-        $('body').toggleClass("body-menu", fix);		
+        
+        //nabídka
+        if(nabidka.length == 0) return;
+        fix = ($(this).scrollTop() > poziceNabidka) ? true : false;	
+        nabidka.toggleClass("nahore", fix);   
+
     });
 
 }

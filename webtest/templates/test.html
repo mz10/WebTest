@@ -1,16 +1,40 @@
 <div class="UpravitTest">
     <h1 id="upravitTest">Upravit test</h1>
-    <h4>Název testu:</h4>	
-    <input type="text" id="ttNazev" placeholder="Název">	
-    <span id="ttId"></span>
-    <br>
-    <h4>Platnost:</h4>
-    <input type="text" id="ttOd" placeholder='od'>
-    <img src="./static/kalendar.png" input="ttOd" class="kalendar">
-    <input type="text" id="ttDo" placeholder='do'>
-    <img src="./static/kalendar.png" input="ttDo" class="kalendar">    
+    <span class="ttMrizkaUpravit">
+        <span class="popis" id="ttnNazev">Název testu</span>   	
+        <input type="text" id="ttNazev" placeholder="Název">	
+        <span id="ttId"></span>
+        <span class="popis" id="ttnPlatnost">Platnost:</span>   
+        <input type="text" id="ttOd" placeholder='od'>
+        <img src="./static/kalendar.png" input="ttOd" class="kalendar">
+        <input type="text" id="ttDo" placeholder='do'>
+        <img src="./static/kalendar.png" input="ttDo" class="kalendar">    
+        <span class="popis" id="ttnPokusu">Pokusů:</span>
+        <input type="text" id="ttPokusu">
+        <span class="popis" id="ttnLimit">Limit:</span>
+        <input type="text" id="ttLimit" placeholder="min">
+        <span class="popis" id="ttnMax">Max otázek:</span>    
+        <input type="text" id="ttOmezeni">
+        <span class="popis" id="ttnSkryt">Skrýt
+            <input type="checkbox" id="ttSkryt">
+        </span>
+        <span class="popis" id="ttnVyber">Náhodný výběr
+                <input type="checkbox" id="ttVyber">
+        </span>
+    </span>
 
-    <h4>Hodnocení:</h4>
+    <span class="popis" id="ttnTridy">Třídy:</span>
+    <div class="inputLista">
+        <select class="ttTridy">
+            <option value="0">Všechny třídy</option>	
+        </select>
+        <span class="inputTlacitka">
+            <span class="inputPridat">+</span>
+            <span class="inputSmazat">x</span>
+        </span>
+    </div>
+
+    <div class="popis" id="ttnHodnoceni">Hodnocení:</div>
     <select id="hodnoceniTyp">
         <option value="0">12345</option>
         <option value="1">1 1- ... 4- 5</option>
@@ -18,7 +42,6 @@
         <option value="3">ABCDEF</option>	
         <option value="4">Procenta</option>		
     </select>
-
     <select id="hodnoceni">
         <option value="rovnomerne">Rovnoměrně</option>
         <option value="mirne">Mírné</option>
@@ -26,8 +49,6 @@
         <option value="prisne">Přísné</option>
         <option value="nejtezsi">Nejtěžší</option>	
     </select>   
-    <br>
-    <br>
     <span id="znamky">	
         <span class="znamka" id="zn1">0</span> 
         <span class="znamka" id="zn2">0</span>
@@ -40,24 +61,6 @@
         <span class="znamka" id="zn9">0</span>
     </span>
 
-    <h4>Třídy:</h4>  
-    <div class="inputLista">
-        <select class="ttTridy">
-            <option value="0">Všechny třídy</option>	
-        </select>
-        <span class="inputTlacitka">
-            <span class="inputPridat">+</span>
-            <span class="inputSmazat">x</span>
-        </span>
-    </div>
-    <br><br>
-    <input type="checkbox" id="ttSkryt">Skrýt test<br>
-    <input type="checkbox" id="ttVyber">Náhodný výběr<br><br>
-    
-    <input type="text" id="ttPokusu" placeholder="Počet pokusů">
-    <input type="text" id="ttLimit" placeholder="Čas na test (min)">
-    <input type="text" id="ttOmezeni" placeholder="Omezit počet otázek"><br>
-    <br>    
 
     <h4>Otázky:</h4> 
     <span class="ttLista">
