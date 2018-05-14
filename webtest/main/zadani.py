@@ -184,7 +184,7 @@ class Zadani:
         
         #pridat vysledek do seznamu promennych
         promenne[promenna] = vysledek
-        return vysledek.rstrip('0').rstrip('.')
+        return vysledek
 
     def vyhodnotitFunkce(m):
         promenne = Zadani.promenne
@@ -233,7 +233,7 @@ class Zadani:
          
         # zkontrolovat jestli se vyraz zmenil
         if vyraz == m.group(1): return m.group(0)
-        else: return vyraz.rstrip('0').rstrip('.')
+        else: return vyraz
 
     def odpovediPromenne(m):
         promenne = Zadani.promenne       
@@ -250,7 +250,6 @@ class Zadani:
         try: vyraz = spVypocitat(vyraz)
         except: True
 
-        vyraz = vyraz.rstrip('0').rstrip('.')
         return "[" + str(vyraz) + "]"
 
     def odpovediSlPromenne(m):

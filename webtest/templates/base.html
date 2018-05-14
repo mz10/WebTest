@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <link rel="stylesheet" href="./static/styl.css?v=7">
+  <link rel="stylesheet" href="./static/styl.css?v=8">
   <link rel="shortcut icon" href="./static/favico.svg" />
   <script type="text/javascript" async src="http://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_CHTML"></script>
   <script src="./static/js/jquery-3.2.1.min.js"></script>
@@ -30,7 +30,7 @@
       {% endif %}   
     </span>
 
-    <a href="./"><img class="logo" src="./static/logo4.svg"></a>
+    <a href="./"><img class="logo" src="./static/logo.svg"></a>
     <a href="./" class="logo3">WebTest</a>
     <span class="logo2">
       <span class="bar0"></span>
@@ -50,6 +50,10 @@
     <li><a href="#!Testy2">Testy</a></li>	
     <li><a href="#!Ucet">Účet</a></li>    
   </ul>
+  <span id="menuInfo">
+    <span id="odeslatTest">Odeslat test</span>    
+    <span id="odpocet"></span>
+  </span>
 </nav>
 <nav role="navigation" id="menuUcitel">
   <ul>
@@ -113,8 +117,8 @@
 {% block footer %}
   <footer>
     <p>Powered by: 
-    <a href="https://github.com/spseol/WebTest">WebTest</a> 
-    (<a href="http://python.org">Python</a>, 
+    <a href="https://github.com/spseol/WebTest">WebTest</a>
+    (<a href="http://python.org">Python</a>,
     <a href="http://flask.pocoo.org/">Flask</a>)
     </p>
   </footer>

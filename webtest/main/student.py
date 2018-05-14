@@ -158,7 +158,7 @@ class Student:
             'jmeno':        vTestu.jmeno,
             'typHodnoceni': vTestu.typHodnoceni,
             'hodnoceni':    vTestu.hodnoceni,
-            'limit':        seznam(test.limit)[0],
+            'limit':        test.limit,
             'otazky':       seznamOtazek
         }
 

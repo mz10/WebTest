@@ -11,6 +11,7 @@ function zmenHash() {
 
     $("#log").hide();
     $("#uzivatele").hide();
+    $("#menuInfo").hide();
 
     switch (hash) {  
         case "TestyVytvorit":    testyUprava("pridat");        break;
@@ -105,7 +106,7 @@ function menuNahore() {
     var nabidka = $('.otNabidka');
     
     if(nabidka.length != 0)
-        poziceNabidka = menu.offset().top;
+        poziceNabidka = nabidka.offset().top-80;
 
     $(window).scroll(function(e) {
         //menu

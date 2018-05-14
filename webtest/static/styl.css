@@ -80,6 +80,7 @@ html, body, input, select, button {
   h1 {
     font-size: 250%;
     font-weight: bold;
+    margin-bottom: 0.2em;
   }
 
   img {
@@ -99,7 +100,11 @@ html, body, input, select, button {
   a {
     display: inline-block;
     padding: 5px 7px 2px;
-    //text-decoration: overline; 
+  }
+
+  a:hover {
+    text-decoration: underline;
+    transition: 
   }
 
   li:hover a {
@@ -115,6 +120,7 @@ html, body, input, select, button {
   width: 100%;
   height: 38px;
   border-bottom: 2px solid orange;
+  box-shadow: 0px 0px 5px 1px black;
 }
 
 /* oprava menu aby telo stranky nepreskakovalo */
@@ -150,27 +156,45 @@ h1, h2, h3, h4, h5, h6 {
     border-radius: 50px;
     box-shadow: inset 2px 2px 2px #d5af76;
     margin: 0 auto;
+    padding: 5px 10px;
+    text-align: center;   
   }
 
   nav a {
     padding: 0px 3px;
     /* margin: 0 aut; */
     color: #683616;
+    transition: 0.5s;
   }
 
+  nav a:hover {
+    text-decoration: none;
+  }
+
+
+  nav a.oznaceno, nav a:hover {
+    color: white;
+    text-shadow: 1px 2px 2px rgb(0, 0, 0);
+  }
+
+  nav ul, nav li {
+    padding: 0;
+    margin: 0;
+  }
+  
+  nav li {
+    padding: 0 0.2em;
+  }
+  
   nav.menu {
     border-radius: 0% 0% 20% 20% !important;
     border: none;
-    /* box-shadow: inset 0px -3px 3px #da6e44 !important; */
-    margin: 0 auto;
     float: center;
+    height: auto;
   }
 
-
   ul {
-    /*margin: 0.5ex 0px 0.5ex 40px; */
     margin:0;
-
   }
     
   ul li {
@@ -330,7 +354,8 @@ p.dobre {
 
 .logo3:hover {
   transform: rotate(-15deg);
-  transition: all 2.0s
+  transition: all 2.0s;
+	text-decoration: none;
 }
 
 
@@ -468,31 +493,52 @@ table {
   }
 
   th {
-  text-align:left;
-  background:linear-gradient(white,orange); 
-  color:brown;border:transparent;
-  height:22px;
-  vertical-align:center;
+    text-align: left;
+    background: orange;
+    color: #723b0d;
+    border: transparent;
+    height: 22px;
+    vertical-align: center;
+    box-shadow: inset 0px 12px 10px 0px rgba(255, 255, 255, 0.87);
+  }
+
+  .radekAkce {
+    width: 5em;
   }
 
 
 
 .dialog {
-  position: fixed; 
-  width: 200px; 
-  height: 50px; 
-  padding: 1em; 
-  background: rgba(255, 115, 0, 0.822);
-  color: #fff; 
+  position: fixed;
+  width: 200px;
+  height: 50px;
+  padding: 1.5em;
+  background: linear-gradient(to bottom, rgb(251, 250, 240) 0%, rgb(237, 228, 36) 30%, rgb(255, 154, 2) 60%, rgb(209, 97, 3) 100%);
+  color: #fff;
   font-size: 18px;
-  display: none; 
-  top: 0; 
-  left: 0; 
-  bottom: 0; 
-  right: 0; 
+  display: none;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
   margin: auto;
   z-index: 200;
-  border-radius: 10%;
+  border-radius: 57% 43%;
+  box-shadow: 0px 0px 10px 10px #000000b3;
+  text-shadow: 2px 2px 3px black, -2px 2px 3px black;
+  display: block;
+}
+
+.obal{
+	position: fixed;
+	z-index: 1000;
+	padding-top: 100px;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	overflow: auto;
+	background-color: rgba(0,0,0,0.4);
 }
 
 #hlaska {
@@ -545,6 +591,12 @@ table {
   border-radius: 20px;
   cursor: pointer;
   box-shadow: inset 2px 10px 8px #ffe7c4;
+  transition: 0.5s;
+}
+
+.otazka:hover, .test:hover, .vysledek:hover {
+	box-shadow: inset 2px 5px 4px #56555580;
+  transition: 0.5s;
 }
 
   .otNazev, .ttNazev {
@@ -604,12 +656,12 @@ table {
 	text-align: center;
 	cursor: e-resize;
 	transition: 1s;
-	border-radius: 100%;
+  border-radius: 100%;
+  box-shadow: inset 0px -7px 8px 2px #00000080;
 }
 
-
-.znamka:active{
-  background-color: black;
+.znamka:hover, .znamka:active {
+  box-shadow: inset 0px 3px 8px 2px #26262680;
 }
 
 #zn1{
@@ -796,14 +848,27 @@ input.seda {
   display: none;
 }
 
-.odSpatne.oznaceno, .odDobre.oznaceno {
-  color: white;
-  display: table;
-  padding-right: 5px;
+.otTestu h2 {
+	text-shadow: 3px 1px 6px rgba(0, 0, 0, 0.38);
 }
 
+.odSpatne.oznaceno, .odDobre.oznaceno {
+  display: table;
+	border-radius: 8em;
+  margin-top: 0.1em;
+  color: white;
+  font-weight: normal;
+  box-shadow: 0px 0px 3px 1px #0009;
+}
+
+div.odDobre, div.odSpatne {
+  padding: 0em 0.5em 0.05em 0.5em;
+  font-weight: bold;
+}
+
+
 .odSpatne.oznaceno {
-  background: red;
+	background: red;
 }
 
 .odDobre.oznaceno {
@@ -814,6 +879,15 @@ input.seda {
 #menuUcitel, #menuStudent, #menuAdmin {
   display: none;
   z-index: 150;
+}
+
+#menuStudent {
+	text-align: left;
+	padding: 5px 20px;
+}
+
+#menuStudent.menu {
+	padding: 5px 80px;
 }
 
 .fa.zavorky::after    { content: "[]"; }
@@ -920,6 +994,15 @@ input.seda {
 
 #otMrizka {
   display: grid;
+  grid-template-columns: 8em 11em 8em 4em;
+}
+
+#otMrizka .popis, #vlozitOtazky {
+	margin-left: 1em;
+}
+
+#otId {
+	display: none;
 }
 
 #ttMrizka {
@@ -1151,13 +1234,72 @@ input.seda {
 	position: fixed;
 	right: 0vw;
 	margin-right: 2em;
-	top: 2.5em;
+	top: 3em;
 }
 
 .otNabidka span {
-	background: linear-gradient(to bottom, rgb(255, 250, 142) 0%, rgb(209, 97, 3) 100%) !important;
-	border-radius: 50px;
+  border-radius: 50px;
 	box-shadow: inset 2px 2px 2px #d5af76;
 	margin: 0 auto;
 	padding: 5px 10px;
+	border: none;
+	background: orange;
+  box-shadow: inset 0px -9px 8px 2px #0006, inset 0px 10px 18px 0px #fff;
+  transition: 0.5s;
+}
+
+.otNabidka span:hover {
+	box-shadow: inset 0px -9px 8px 2px #fffc, inset 0px 10px 18px 0px #0006;
+	transition: 0.5s;
+}
+
+.otNabidka.nahore span {
+  box-shadow: 0px 0px 20px 3px #000000b3, 
+              inset 0px -9px 8px 2px #0006, 
+              inset 0px 10px 18px 0px #fff;
+}
+
+.otNabidka.nahore span:hover {
+  box-shadow: 0px 0px 20px 3px #000000b3, 
+              inset 0px -9px 8px 2px #fffc, 
+              inset 0px 10px 18px 0px #0006;
+}
+
+.otNabidka.dolu {
+	top: 1.5em;
+}
+
+.otNabidka.dolu.nahore {
+	top: 3em;
+}
+
+
+#odeslatTest {
+	box-shadow: 0px 0px 15px 1px #00000080;
+	border-radius: 20px;
+  padding: 00px 10px;
+  transition: 0.5s;
+}
+
+#odeslatTest:hover {
+	box-shadow: 0px 0px 15px 1px #00000080, inset 0px 0px 15px 1px #242323e6;
+}
+
+#odpocet {
+	position: relative;
+	width: 3.5em;
+	display: inline-block;
+	text-align: right;
+}
+
+#menuStudent.menu #menuInfo {
+	position: relative;
+	left: -10em;
+}
+
+#menuInfo {
+	float: right;
+	position: relative;
+	right: 2em;
+	display: none;
 }

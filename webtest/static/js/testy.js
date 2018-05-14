@@ -131,26 +131,33 @@ function testyVyzkouset(idTestu,ucitel) {
         var test = json.test;
 
         text += "<h1>" + test.jmeno + "</h1>";
-        text += "<div id='odpocet'> </div>";
         $.each(test.otazky, zpracujOtazky);
         
         mathjax();
+        
         //5 sekund jako rezerva
         limit = (test.limit*60)-5;
 
         var interval = null;
 
         if(!ucitel) {
-            text += '<button id="odeslatTest" value="' + test.id + '">Odeslat</button>';
+            $("#odeslatTest").attr("cislo",test.id);
+            $("#odeslatTest").show();
             interval = odpocet("#odpocet",limit, konecTestu);
         }
-        else
-            text = `<button id='vygenerovat' value='${idTestu}'>Vygenerovat</button>` + text;
-
+        else {
+            text +=
+                `<div class="otNabidka">
+                    <span id='vygenerovat' cislo='${idTestu}'>Vygenerovat</span>
+                </div>`;            
+        }
 
         var html = text + "<span class='mrizka vyzkouset'>" + otazky + "</span>";
 
         $(stranka).html(html);
+        $("#menuInfo").show();
+        menuNahore();
+        mathjax();
     }
 
     function konecTestu() {
@@ -166,7 +173,7 @@ function testyVyzkouset(idTestu,ucitel) {
         $.each(o.odpovedi, function(y, odpoved){
 
             if(odpoved == "_OTEVRENA_")
-                odpoved = '<input type="text" class="odpovedOt">';
+                odpoved = '<input type="text" class="odpovedOt" placeholder="Odpověď">';
             else if (o.spravnych > 1)
                 odpoved = '<li class="odpoved"><span class="ctverec"></span>' + odpoved + '</li>';
             else if (o.spravnych <= 1)
@@ -197,6 +204,7 @@ function testyUprava(akce,idTestu) {
             $.each(json.tridy, nactiTridy);
             $(".ttTridy").append(option);
         }).fail(chybaIframe);
+        menuNahore();
     }
 
     var seznamOtazek = [];
@@ -218,7 +226,6 @@ function testyUprava(akce,idTestu) {
         pr('#ttSmazat').hide();
         pr('#ttOd').val(datum);
         pr('#ttDo').val(dalsiRok); 
-
     }
 
     function zpracujTest(i, t) {
@@ -246,6 +253,7 @@ function testyUprava(akce,idTestu) {
             var zvolene = pr("#ttZvolene").html(otazky)[0].children;
             $.each(dostupne, dostupneOtazky); 
             $.each(zvolene, zvoleneOtazky);
+            mathjax();
         });
     }
     
@@ -272,11 +280,9 @@ function testyUprava(akce,idTestu) {
             }
         });
 
-        cl(otazka);
-
         if(!hledat) //priradi k otazce pocet opakovani
             $(otazka).children(".otPocet").val(info[1]);
-        else
+        else //pokud otazka neni zvolena, skryje ji
             otazka.style.display = "none";
     }
     
@@ -287,7 +293,8 @@ function testyUprava(akce,idTestu) {
     }
 
     function zobrazTridy(i,t) {
-        var prvek = $(".inputLista:first").clone().insertAfter(".inputLista:first");      
+        // klonuje vyber trid
+        var prvek =  $(".inputLista:first").clone().insertAfter(".inputLista:first");      
         var zaklad = '<option value="0">Všechny třídy</option>';
         var option = '<option value=' + t.id + '>' + t.jmeno + '</option>';
 
@@ -357,10 +364,9 @@ function testyVyhodnotit(e) {
 
     $.each($("span.oznaceno"), oznacene);  
     $.each($(".odpovedOt"), otevrene);
-    var idTestu = ph("#odeslatTest");
+    var idTestu = $("#odeslatTest")[0].attributes.cislo.value;
 
     function oznacene(i,o) {
-        cl(o);
         var text = $(o.parentElement).text();
         var idOtazky = o.parentElement.parentElement.attributes.otazka.value;        
         seznamOdpovedi.push([idOtazky*1,text]); 

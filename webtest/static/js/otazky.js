@@ -95,8 +95,17 @@ function otazkySmazatVsechny(e) {
     };
 
     function ano() {
-        postJSON(json, odpovedJSON);
+        postJSON(json, odpoved);
     }
+
+    function odpoved(o) {
+        if(o.status != 500) {
+            hlaska(o.odpoved,2);
+            otazkyZobraz(stranka);
+        }
+        else chybaIframe(o);
+    }
+
 }
 
 function otazkyKostka(e) {
@@ -108,7 +117,6 @@ function otazkyKostka(e) {
     $.getJSON("./json/otazky/" + idOtazky, zpracujJSON).fail(chybaIframe);
 
     function zpracujJSON(json) {
-        cl(json.otazka);
         var o = json.otazka;
         
         var zadani = o.zadaniHTML;
@@ -167,7 +175,7 @@ function otazkySmazat(idOtazky) {
 
     function odpoved(o) {
         if(o.status != 500) {
-            hlaska(o.odpoved,5);
+            hlaska(o.odpoved,2);
             otazkyZobraz(stranka);
         }
         else chybaIframe(o);
@@ -226,8 +234,6 @@ function otazkyOdeslat() {
         otevrena: seznamOtevrena
     };
 
-    cl(json);
-
     postJSON(json, odpoved);
 
     function odpoved(o) {
@@ -249,8 +255,6 @@ function otazkyVlozit(e) {
     var inputy = e.currentTarget.parentElement.parentElement.children;
     var posledni = e.currentTarget.parentElement.parentElement.lastElementChild;
     var prvni = inputy[0].children[0];
-
-    cl(e.currentTarget);
 
     //pokud neni input prazdny, oznac jako spatnou
     if(input.className == "seda" && hodnota.length >= 1)

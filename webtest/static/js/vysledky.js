@@ -50,7 +50,6 @@ function vysledkyTabulka(idTestu) {
     };
 
     function zobrazitStudent(i, v) {
-        cl(v);
         $.each(v, function(y, s) {
             tabulka += tab(s);
         });
@@ -76,7 +75,11 @@ function vysledkyTabulka(idTestu) {
     }
 }
 
-function vysledkyZobraz(id) { 
+function vysledkyZobraz(id) {
+    $("#odeslatTest").hide();
+    $("#odpocet").text("");
+    $("#menuInfo").hide();
+
     $.getJSON("./student/vyhodnotit/" + id, zpracujJSON).fail(chybaIframe);
     var vysledek = "";
     var text = "";
@@ -119,7 +122,7 @@ function vysledkyZobraz(id) {
             otazkyHTML += `<h2 class='${typ}'>Otázka: ${otazky.jmeno}
             (${otazky.hodnoceni} / ${otazky.bodu})</h2>`;
         
-            otazkyHTML += otazky.zadani + "<br>";
+            otazkyHTML += otazky.zadani;
 
         var oznaceno = "";
 

@@ -204,7 +204,6 @@ function tabulkaZmenitZaznam(e) {
         bunky: seznamBunek
     }
 
-    cl(json);
     postJSON(json, odpovedJSON);
     if (tabNazev == "Tridy")
         tridyZobraz();

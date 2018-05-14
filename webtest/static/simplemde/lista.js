@@ -14,8 +14,9 @@ function editor(el) {
         var konec = cm.getCursor("end");
         var vybranyText = znakPred + cm.getSelection() + znakPo;
         cm.replaceSelection(vybranyText);
-        start.ch -= 1;
-		cm.setSelection(start, konec);
+        
+        //start.ch -= 1;
+		//cm.setSelection(start, konec);
 		cm.focus();
     }
 

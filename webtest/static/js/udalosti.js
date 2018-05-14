@@ -112,7 +112,7 @@ $(document).on("click", ".ttTlacitka .tlZobrazit", function(e) {
 
 //zobrazit vygenerovany test - nové zadání
 $(document).on("click", "#vygenerovat", function(e) {
-    var idTestu = $(this).val();
+    var idTestu = this.attributes.cislo.value;
     testyVyzkouset(idTestu,true);
 });
 
@@ -146,7 +146,6 @@ $(document).on("click", ".otTlacitka .tlZadani", function(e) {
 
 $(document).on("click", "#ttPokusu", function(e) {
     var skrk = $("#ttSkryt")[0].checked;
-    cl(skrk);
 });
 
 //přidat nový test
@@ -351,7 +350,7 @@ $(document).on("click", ".vsZobrazit", function(e) {
 $(document).on("click", "#ucZmenitHeslo", ucetHeslo); 
 
 
-$(document).on("keyup", "input", function(e) {
+$(document).on("keyup", ".tabInput", function(e) {
     var max = $(this.attributes.max).val();
     if(!max) max = 20;
     var delka = this.value.length;    
@@ -359,3 +358,14 @@ $(document).on("keyup", "input", function(e) {
     this.style.width = this.value.length + 2 + "ch";
 });
 
+$(document).on("click", "nav ul li a", function(e) {
+    var menu = this.parentElement.parentElement.children;  
+    $.each(menu, odznacit);
+
+    function odznacit(i, polozka){
+        var odznacit = this.children[0];
+        $(polozka.firstChild).removeClass("oznaceno");
+    } 
+
+    $(this).toggleClass("oznaceno");
+});

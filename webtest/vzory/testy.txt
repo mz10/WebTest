@@ -1,0 +1,124 @@
+{
+ "akce": "nahrat",
+ "co": "test",
+ "testy": [
+  {
+   "autor": "admin",
+   "do": "07.05.2019 00:00",
+   "hodnoceni": "85;-1;70;-1;50;-1;25;-1;0",
+   "id": 4,
+   "jmeno": "Příklady",
+   "limit": "2",
+   "nahodny": true,
+   "od": "07.05.2018 22:00",
+   "omezit": 0,
+   "otazky": [
+    {
+     "bodu": 2.0,
+     "hodnotit": 1,
+     "id": 39,
+     "jmeno": "odpor",
+     "otevrena": [],
+     "pocet": 3,
+     "spatne": [],
+     "spravne": [
+      "[Jednotka($R,Oh)]"
+     ],
+     "tolerance": 5.0,
+     "zadani": "/**\n[$napeti =  Jednotka([$n1,0,230000] ,mV,0)]\n[$proud = Jednotka([$p1,1,2000] ,mA,0)]\n\npřevede jednotku na číslo:\n[$U = Jednotka2($napeti)]\n[$I = Jednotka2($proud)]\n\nvypočítá odpor:\n[$R = $U/$I]\n**/\n\nJaký je odpor, když při napětí [$napeti] prochází proud [$proud] ?",
+     "zaokrouhlit": 2
+    },
+    {
+     "bodu": 1.0,
+     "hodnotit": 1,
+     "id": 42,
+     "jmeno": "Nabíjení C",
+     "otevrena": [
+      "[$v]"
+     ],
+     "pocet": 1,
+     "spatne": [],
+     "spravne": [],
+     "tolerance": 1.0,
+     "zadani": "/**\n[$Cj=Jednotka([$p1,0,1000000000],pF,2)]]\n[$Cn=Jednotka2($Cj)]\n[$Rj=Jednotka([$p2,0,1000000],Oh,2)]]\n[$Rn=Jednotka2($Rj)]\n[$Uj=Jednotka([$p3,0,50],V,2)]]\n[$Un=Jednotka2($Uj)]\n[$ck=$Rn*$Cn]\n[$ko,0,6,2]\n[$t1=$ko*$ck]\n[$t2=pmista($t1,2)]\n[$v=$Un*(1-exp(-$t2/$ck))]\n**/\n\nCj = [$Cj]\nCn = [$Cn]\nRj = [$Rj]\nRn = [$Rn]\nUj = [$Uj]\nUn = [$Un]\nck = [$ck]\nko = [$ko]\nt1 = [$t1]\nt2 = [$t2]\n\nVypočítejte napětí U(t) v čase t = [$t2] s na kondenzátoru C = [$Cj],\nkterý se nabíjí přes rezistor R = [$Rj] ze zdroje napětí U0  = [$Uj].\nu(t) = [pmista($v,4)] V",
+     "zaokrouhlit": 4
+    },
+    {
+     "bodu": 0.0,
+     "hodnotit": 1,
+     "id": 44,
+     "jmeno": "Náhodný výsledek",
+     "otevrena": [
+      "[$odpor]"
+     ],
+     "pocet": 3,
+     "spatne": [],
+     "spravne": [],
+     "tolerance": 5.0,
+     "zadani": "/**\n[$napeti =  Jednotka([$n1,0,230000] ,mV,3)]\n[$odpor = Jednotka([$o1,1,20] ,O,3)]\n\npřevede jednotku na číslo:\n[$U = Jednotka2($napeti)]\n[$R = Jednotka2($odpor)]\n\nvypočítá proud (x) z odporu - dosazením do rovnice:\n[$I = R($R,$U/x)]\n[$proud = Jednotka($I,mA,0)]\n\n\n**/\n\nOdpor je náhodné číslo mezi 1 a 20\nJaký je odpor, když při napětí [$napeti] prochází proud [$proud]?",
+     "zaokrouhlit": 2
+    },
+    {
+     "bodu": 5.0,
+     "hodnotit": 1,
+     "id": 45,
+     "jmeno": "2 správně",
+     "otevrena": [],
+     "pocet": 2,
+     "spatne": [
+      "[$b-20] + [$a+5]",
+      "[$b+10] + [$a+2]"
+     ],
+     "spravne": [
+      "[$vysledek-$a] + [$a]",
+      "[$vysledek - 20] + 20"
+     ],
+     "tolerance": 0.0,
+     "zadani": "/**\n[$a,20,100]\n[$b,40,60]\n[$vysledek=$a+$b]\n**/\n\nJaké příklady mají tento výsledek:  [$vysledek] ?",
+     "zaokrouhlit": 2
+    },
+    {
+     "bodu": 2.0,
+     "hodnotit": 1,
+     "id": 47,
+     "jmeno": "Plus 1",
+     "otevrena": [],
+     "pocet": 5,
+     "spatne": [
+      "[$a+$b]"
+     ],
+     "spravne": [
+      "[$a+$b+$c+$d+$e+$f]"
+     ],
+     "tolerance": 0.0,
+     "zadani": "Kolik je [$a,20]  + [$b=$a+1] + [$c=$b+1] + [$d=$c+1] + [$e=$d+1] + [$f=$e+1]",
+     "zaokrouhlit": 2
+    },
+    {
+     "bodu": 1.0,
+     "hodnotit": 1,
+     "id": 48,
+     "jmeno": "anglictina",
+     "otevrena": [],
+     "pocet": 4,
+     "spatne": [
+      "$slovo2.spatne",
+      "$slovo2.spatne",
+      "$slovo2.spatne",
+      "$slovo2.spatne"
+     ],
+     "spravne": [
+      "$slovo2.spravne"
+     ],
+     "tolerance": 0.0,
+     "zadani": "Anglicky slovo: $slovo1.an.vsechno",
+     "zaokrouhlit": 2
+    }
+   ],
+   "pokusu": 3,
+   "skryty": false,
+   "tridy": [],
+   "typHodnoceni": 0
+  }
+ ]
+}

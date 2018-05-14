@@ -1,6 +1,6 @@
 function postJSON(json, odeslano, url) {
-    cl("Odeslaný JSON:");
-    cl(json);  
+    //cl("Odeslaný JSON:");
+    //cl(json);  
     
     if(json && typeof json === "object")
         json = JSON.stringify(json);
@@ -22,8 +22,8 @@ function postJSON(json, odeslano, url) {
 //odesle websocket a pocka na odpoved
 //zobrazi traceback pokud je chyba na serveru
 function wsJSON(json, odpoved, udalost) {
-    cl("JSON k odeslání:");
-    cl(json);
+    //cl("JSON k odeslání:");
+    //cl(json);
     
     if(json && typeof json === "object")
         json = JSON.stringify(json);
@@ -54,16 +54,16 @@ function wsJSON(json, odpoved, udalost) {
             text += t + "<br>";
         }
 
-        cl("Odpověď ze serveru:");
-        cl(prijato);
+        //cl("Odpověď ze serveru:");
+        //cl(prijato);
     });
 
 }
 
 
 function odpovedJSON(o) {
-    cl("Přijatá odpověď:");
-    cl(o);
+    //cl("Přijatá odpověď:");
+    //cl(o);
     
     if(o.status == 400)
         hlaska(o.responseText);    
@@ -129,37 +129,39 @@ function chybaIframe(ch) {
         hlaska("Chyba serveru.",3);
 }
 
-function dialog(zprava, ano, ne) {    
+function dialog(zprava, ano, ne) { 
+    var obal = document.createElement("div");
+    obal.className = "obal";
     var div = document.createElement("div");
     div.className = "dialog";
-    div.style.display = "block";
-    var content = document.createElement("div");
-    content.innerHTML = zprava;
+    var obsah = document.createElement("div");
+    obsah.innerHTML = zprava;
     var potvrdit = document.createElement("button");
     potvrdit.innerHTML = "Ano";
     var zrusit = document.createElement("button");
     zrusit.innerHTML = "Ne";
 
-    div.appendChild(content);
+    div.appendChild(obsah);
     div.appendChild(potvrdit);
-    div.appendChild(zrusit );
-    document.body.appendChild(div);
+    div.appendChild(zrusit);
+    obal.appendChild(div);
+    document.body.appendChild(obal);
 
     potvrdit.onclick = function() {
-        document.body.removeChild(div);
+        document.body.removeChild(obal);
         ano();
     }
 
     document.onkeyup = function(e) {
         if (e.keyCode == 13) {//enter
             document.onkeyup = null;            
-            document.body.removeChild(div);
+            document.body.removeChild(obal);
             ano();
         }
     }
 
     zrusit.onclick = function() {
-        document.body.removeChild(div);
+        document.body.removeChild(obal);
         ne();
     };
 }

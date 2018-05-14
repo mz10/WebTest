@@ -98,7 +98,7 @@ function uploadNahled() {
         var reader = new FileReader();         
         reader.readAsText(soubor, 'windows-1250');    
         reader.onload = function(e2) {
-            cl("csv");
+
             $("#upravaJSON").val(e2.target.result);  
             $("#upravaJSON").removeClass();          
             $("#upKontrola").text("CSV soubor");
@@ -116,7 +116,6 @@ function uploadNahled() {
             $("#upravaJSON").val(obsah);
             $("#upravaJSON").removeClass();
             $("#upOdeslat").removeClass(); 
-            cl("jsn");
 
             try {
                 $.parseJSON(obsah);
@@ -141,7 +140,6 @@ function uploadOdeslat(e) {
         }
     }
 
-    cl(soubor);
     postJSON(soubor, odpovedJSON);
 }
 
@@ -151,7 +149,7 @@ function prihlasit() {
         heslo: $("#heslo").val(),
     };
 
-    console.log(json);
+    //cl(json);
     postJSON(json, odpoved, "./prihlasit/");
 
     function odpoved(o) {
