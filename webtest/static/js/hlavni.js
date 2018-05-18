@@ -48,13 +48,13 @@ function zobrazitKalendar(umisteni) {
 function slovnikZobraz() {
     slovnikZobrazTabulku(function(tabulka) {
         var nadpis = "<h1>Slovník</h1>";
-        $(stranka).html(nadpis + tabulka);
+        $(stranka).zmenHtml(nadpis + tabulka);
     });
 }
 
 
 function slovnik() {
-    $(stranka).load("./static/slovnik.html");
+    $(stranka).nacti("./static/slovnik.html");
 } 
 
 
@@ -77,7 +77,7 @@ function slovnikOdeslat() {
 function tridyZobraz() {
     tridyZobrazTabulku(function(tabulka) {
         var nadpis = "<h1>Třídy</h1>";
-        $(stranka).html(nadpis + tabulka);
+        $(stranka).zmenHtml(nadpis + tabulka);
     });
 }
 
@@ -174,7 +174,7 @@ function prihlasit() {
             $("#menuStudent").show();
 
         menuNahore();
-        $(stranka).html("");
+        $(stranka).zmenHtml("");
     }
 }
 
@@ -204,7 +204,7 @@ function zobrazitPrihlaseni() {
     $("#prihlaseno").html("");
     $("#log").html("");
     $("#uzivatele").html("");
-    $(stranka).html("");
+    $(stranka).zmenHtml("");
 }
 
 function pridatZaznam(json) {
@@ -279,7 +279,7 @@ function zobrazPrihlasene(json) {
 /*********účet ***************/
 
 function ucetInfo() {
-    $(stranka).html($("#ucet").html());
+    $(stranka).zmenHtml($("#ucet").html());
 
     $.getJSON("./ucet/", odpoved).fail(chybaIframe);
     

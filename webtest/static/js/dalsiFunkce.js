@@ -13,7 +13,7 @@ function zmenHash() {
     $("#uzivatele").hide();
     $("#menuInfo").hide();
 
-    switch (hash) {  
+    switch (hash) { 
         case "TestyVytvorit":    testyUprava("pridat");        break;
         case "OtazkyPridat":     otazkyPridat();               break;
         case "Slovnik":          slovnikZobraz();              break;
@@ -28,7 +28,7 @@ function zmenHash() {
         case "Ucet":             ucetInfo();                   break;
         case "Akce":             akceZobrazTabulku();          break;
         case "Nahrat":
-            $(stranka).load("./vzory/upload/"); 
+            $(stranka).nacti("./vzory/upload/"); 
             break;           
         case "Testy":
             if(promenna) {
@@ -45,17 +45,17 @@ function zmenHash() {
             if(promenna) testyVyzkouset(promenna,true) 
             break;
         case "Aktivita":
-            $(stranka).html("");
+            $(stranka).zmenHtml("");
             $("#log").show(); 
             break;
         case "Prihlaseni":
-            $(stranka).html("");
+            $(stranka).zmenHtml("");
             $("#uzivatele").show();
             break;
         case "DB":        
-            $(stranka).load("./tabulky/");
+            $(stranka).nacti("./tabulky/");
             intervalDb = setInterval(function() {
-                $(stranka).load("./tabulky/");
+                $(stranka).nacti("./tabulky/");
             }, 3000);        
             break;
         case "Otazky": 
@@ -266,4 +266,44 @@ function wsUdalosti() {
         }); 
 
     });
+}
+
+$.fn.zmenHtml = function(html) {
+    var objekt = this;
+    objekt.css("transform","scale(0.0)"); 
+    objekt.css("opacity",0); 
+    setTimeout(function() {
+        objekt.html(html);
+        animace(objekt);
+    }, 500);    
+};
+
+$.fn.nacti = function(adresa, nacteno) {
+    var objekt = this;
+    this.load(adresa, function() {
+        objekt.css("transform","scale(0.0)"); 
+        objekt.css("opacity",0); 
+        setTimeout(function() {
+            if(nacteno) nacteno();
+            animace(objekt);
+        }, 500); 
+    });
+};
+
+//animace prvku
+function animace(div) {
+    div = div[0];
+    var vyska = 0;
+
+    $.each(div.children, secti);
+    
+    //secte vysku vsech podradnych prvku    
+    function secti(i, prvek){
+        vyska += prvek.clientHeight;
+    }
+
+    //$(div).css("height",vyska+150);
+    
+    $(div).css("transform","scale(1.0)"); 
+    $(div).css("opacity",1); 
 }

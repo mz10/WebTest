@@ -41,7 +41,7 @@ function studentZobrazTabulku(nacteno) {
 function studentZobraz() {
     studentZobrazTabulku(function(tabulka) {
         var nadpis = "<h1>Studenti</h1>";
-        $(stranka).html(nadpis + tabulka);
+        $(stranka).zmenHtml(nadpis + tabulka);
     
         var option = "";
 
@@ -89,7 +89,7 @@ function uciteleZobrazTabulku() {
         else
             $.each(json.ucitele, zobrazTabulkuUc);
         var nadpis = "<h1>Učitelé</h1>";
-        $(stranka).html(nadpis + "<table class='tabDb' nazev='Ucitel'>" + tabulka + "</table>");
+        $(stranka).zmenHtml(nadpis + "<table class='tabDb' nazev='Ucitel'>" + tabulka + "</table>");
     }
 
     function zobrazTabulku(i, t) {
@@ -158,7 +158,7 @@ function akceZobrazTabulku() {
         $.each(json.akce, zobrazTabulku);
         var nadpis = "<h1>Seznam akcí</h1>";
         var tab = "<table class='tabDb' nazev='Akce'>" + tabulka + "</table>";
-        $(stranka).html(nadpis + tab);
+        $(stranka).zmenHtml(nadpis + tab);
     }
 
     function zobrazTabulku(i, t) {

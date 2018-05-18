@@ -1,7 +1,7 @@
 function vysledkyZobrazSeznam() {
     $.getJSON("./json/vysledky/seznam/", function(json) {     
         $.each(json.vysledky, zobrazit);
-        $(stranka).html(text);
+        $(stranka).zmenHtml(text);
     }).fail(chybaIframe);
 
     var text = "<h1>Výsledky</h1>";
@@ -24,7 +24,7 @@ function vysledkyTabulka(idTestu) {
         else
             $.each(json.vysledky, zobrazitStudent);
         
-        $(stranka).html(`<h1>Výsledky</h1><table>${tabulka}</table>`);
+        $(stranka).zmenHtml(`<h1>Výsledky</h1><table>${tabulka}</table>`);
     }).fail(chybaIframe);
 
     var tlacitko = "<button class='vsZobrazit'>Zobrazit</button>";
@@ -108,7 +108,7 @@ function vysledkyZobraz(id) {
 
         text = vysledek + "<span class='mrizka vyzkouset'>" + text + "</span>";
 
-        $(stranka).html(text);
+        $(stranka).zmenHtml(text);
         mathjax();
     }
 

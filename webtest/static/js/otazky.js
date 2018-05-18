@@ -25,7 +25,7 @@
         }       
 
         if(div) {
-            $(div).html(text);
+            $(div).zmenHtml(text);
             mathjax();
             menuNahore();
         }
@@ -47,7 +47,7 @@
 }
 
 function otazkyUprav(idOtazky) {
-    $(stranka).load("./vzory/otazky/", nacteno);
+    $(stranka).nacti("./vzory/otazky/", nacteno);
 
     function nacteno() {
         $.getJSON("./json/otazky/" + idOtazky, function(otazka) {     
@@ -152,7 +152,7 @@ function otazkyZobrazOdpovedi(e) {
 }
 
 function otazkyPridat() {
-    $(stranka).load("./vzory/otazky/",function() {
+    $(stranka).nacti("./vzory/otazky/",function() {
         pr('h1#upravitOtazku').text("Přidat otázku"); 
         pr('#otSmazat').css("display","none");
         vlozitOdpoved("otevrena","");

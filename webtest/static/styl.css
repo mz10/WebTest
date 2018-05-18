@@ -1303,3 +1303,9 @@ div.odDobre, div.odSpatne {
 	right: 2em;
 	display: none;
 }
+
+#stranka {
+  display: block;
+  transition: 0.5s;
+  overflow: hidden;
+}

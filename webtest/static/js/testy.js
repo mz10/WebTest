@@ -72,7 +72,7 @@ function testyZobraz() {
             </div>\
             ' + text;
 
-        $(stranka).html(text);
+        $(stranka).zmenHtml(text);
         menuNahore();
     }
 
@@ -108,7 +108,7 @@ function testyStudentZobraz(json) {
             </div>';
     });
 
-    $(stranka).html(text);
+    $(stranka).zmenHtml(text);
 }
 
 function testyVyzkouset(idTestu,ucitel) {
@@ -154,7 +154,7 @@ function testyVyzkouset(idTestu,ucitel) {
 
         var html = text + "<span class='mrizka vyzkouset'>" + otazky + "</span>";
 
-        $(stranka).html(html);
+        $(stranka).zmenHtml(html);
         $("#menuInfo").show();
         menuNahore();
         mathjax();
@@ -194,7 +194,7 @@ function testyVyzkouset(idTestu,ucitel) {
 function testyUprava(akce,idTestu) {
     //kód je asynchroní!
 
-    $(stranka).load("./vzory/testy/", nacteno);
+    $(stranka).nacti("./vzory/testy/", nacteno);
 
     function nacteno() {
         nastavZnamky("rovnomerne",0);  
