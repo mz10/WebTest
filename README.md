@@ -1,69 +1,68 @@
-WebTest
+ï»¿WebTest
 =========
 
-WebTest je webové rozhraní pro testy a domácí úkoly ákù. Tento projekt se
-zamìøuje hlavnì na (elektro-)technické úlohy. Tento projekt nabízí:
+WebTest je webovÃ© rozhranÃ­ pro testy a domÃ¡cÃ­ Ãºkoly Å¾Ã¡kÅ¯. Tento projekt se
+zamÄ›Å™uje hlavnÄ› na (elektro-)technickÃ© Ãºlohy. Tento projekt nabÃ­zÃ­:
 
-* Zápis úloh pomocí jazyka [Markdown](https://cs.wikipedia.org/wiki/Markdown).
-* Vkládání matematickıch vzorcù 
+* ZÃ¡pis Ãºloh pomocÃ­ jazyka [Markdown](https://cs.wikipedia.org/wiki/Markdown).
+* VklÃ¡dÃ¡nÃ­ matematickÃ½ch vzorcÅ¯ 
   ala [LaTeX](https://cs.wikipedia.org/wiki/LaTeX)
-  mocí knihovny [MathJax](https://cs.wikipedia.org/wiki/MathJax).
-* Monost vloit do zadání náhodné èíslo a oèekávanı vısledek
+  mocÃ­ knihovny [MathJax](https://cs.wikipedia.org/wiki/MathJax).
+* MoÅ¾nost vloÅ¾it do zadÃ¡nÃ­ nÃ¡hodnÃ© ÄÃ­slo a oÄekÃ¡vanÃ½ vÃ½sledek
   zapsat jako vzorec. 
 
 
-Promìnné
+PromÄ›nnÃ©
 --------
-Do editoru jdou zadávat promìnné, které mùeme pouít v odpovìdi jako vzorec. Promìnná musí zaèínat znakem $.
-V odpovìdi mùe bıt vıraz a mùou se pouít promìnné definované v zadání. Vıraz musí bıt mezi [] :
+Do editoru jdou zadÃ¡vat promÄ›nnÃ©, kterÃ© mÅ¯Å¾eme pouÅ¾Ã­t v odpovÄ›di jako vzorec. PromÄ›nnÃ¡ musÃ­ zaÄÃ­nat znakem $.
+V odpovÄ›di mÅ¯Å¾e bÃ½t vÃ½raz a mÅ¯Å¾ou se pouÅ¾Ã­t promÄ›nnÃ© definovanÃ© v zadÃ¡nÃ­. VÃ½raz musÃ­ bÃ½t mezi [] :
 
 [$a+$b+5]
 
-Jdou také pouít funkce Min, Max a Prumer a funkce z knihovny Sympy:
+Jdou takÃ© pouÅ¾Ã­t funkce Min, Max a Prumer a funkce z knihovny Sympy:
 [Prumer($a,$b,$c)]
 
 
-Pøíklad zápisu úlohy
+PÅ™Ã­klad zÃ¡pisu Ãºlohy
 --------------------
 Kolik je [a,20] + [b,-5,100] - [c=$b*2] ?
 
-Jako správnou odpovìï uvedeme napø:
+Jako sprÃ¡vnou odpovÄ›Ä uvedeme napÅ™:
 [$a + $b - $c]
 
-Náhodná èísla
+NÃ¡hodnÃ¡ ÄÃ­sla
 ---------------
-* [a,20] 		  èíslo od 0 do 20
-* [b,-20]		  záporné èíslo od -20 do 0
-* [c,5,100]	  èíslo od 5 do 100
-* [d,2000,5000,2]	desetinné èíslo od 20 do 30, zaokrouhlené na 2  platná místa – napø. 2500
-* [e=$a+5]    	do promìnné e se pøiøadí promìnná a + 5
+* [a,20] 		  ÄÃ­slo od 0 do 20
+* [b,-20]		  zÃ¡pornÃ© ÄÃ­slo od -20 do 0
+* [c,5,100]	  ÄÃ­slo od 5 do 100
+* [d,2000,5000,2]	desetinnÃ© ÄÃ­slo od 20 do 30, zaokrouhlenÃ© na 2  platnÃ¡ mÃ­sta â€“ napÅ™. 2500
+* [e=$a+5]    	do promÄ›nnÃ© e se pÅ™iÅ™adÃ­ promÄ›nnÃ¡ a + 5
 
-Závislosti
+ZÃ¡vislosti
 -----------
 
 * [Flask](http://flask.pocoo.org/) --- Python web framework.
 * [Python-Markdown](http://pythonhosted.org/Markdown/) --- Python implementace pro
   [Markdown](http://daringfireball.net/projects/markdown/) Johnyho Grubera.
 * [psycopg](http://initd.org/psycopg/) --- 
-  [PostgreSQL](http://www.postgresql.org/) adaptér pro [Python](https://www.python.org/).
+  [PostgreSQL](http://www.postgresql.org/) adaptÃ©r pro [Python](https://www.python.org/).
 * [Pony](http://ponyorm.com/) ---
-  [ORM](http://cs.wikipedia.org/wiki/Objektovì_relaèní_mapování) pro [Python](https://www.python.org/).
-* [Sympy](http://www.sympy.org/cs/) --- kalkulaèka pro Python - poèítá vırazy
+  [ORM](http://cs.wikipedia.org/wiki/ObjektovÄ›_relaÄnÃ­_mapovÃ¡nÃ­) pro [Python](https://www.python.org/).
+* [Sympy](http://www.sympy.org/cs/) --- kalkulaÄka pro Python - poÄÃ­tÃ¡ vÃ½razy
 * [SimpleMDE](https://simplemde.com/) --- editor v JS pro Markdown
     
 
-Databáze
+DatabÃ¡ze
 --------
 
-* [ERD]() databáze: <https://editor.ponyorm.com/user/mz10/webtest/>
-* Definice databázovıch tabulek je v modulu `db.py`.
+* [ERD]() databÃ¡ze: <https://editor.ponyorm.com/user/mz10/webtest>
+* Definice databÃ¡zovÃ½ch tabulek je v modulu `db.py`.
 
-### Pøihlášení do databáze
+### PÅ™ihlÃ¡Å¡enÃ­ do databÃ¡ze
 
-Pøihlášení se dìje pomocí modulu `spojeni.py`. Soubor mùe vypadat takto:
+PÅ™ihlÃ¡Å¡enÃ­ se dÄ›je pomocÃ­ modulu `spojeni.py`. Soubor mÅ¯Å¾e vypadat takto:
 
-    # -*- coding: utf8 -*-
-    "Pøihlašovací údaje k databázi."
+    "PÅ™ihlaÅ¡ovacÃ­ Ãºdaje k databÃ¡zi."
     DB = {
         "host": "localhost",
         "user": "webtest",
@@ -71,18 +70,18 @@ Pøihlášení se dìje pomocí modulu `spojeni.py`. Soubor mùe vypadat takto:
         "password": "mojetajneheslo"
     }
 
-V adresáøi `devtools/` je nìkolik pomocnıch skriptù, které mají usnadnit vıvoj
-a práci s lokální databází.
+V adresÃ¡Å™i `devtools/` je nÄ›kolik pomocnÃ½ch skriptÅ¯, kterÃ© majÃ­ usnadnit vÃ½voj
+a prÃ¡ci s lokÃ¡lnÃ­ databÃ¡zÃ­.
 
-* `autoMakeF5.zsh`: pøi zmìnì souborù automaticky odesílá 
-   do prohlíeèe stisk F5.
-* `create-psql.usr.db`: vytvoøí v PostgreSQL uivatele a zaloí mu 
-   databázi.
-* `drop-psql.usr.db`: zruší v PostgreSQL uivatele a všechny jeho 
-   databáze.
-* `db-insert_dev_data.py`: vloí do vıvojové databáze poèáteèní data.
-* `db-drop_create_insert.zsh`: vıvojovou databázi zruší, znovu vytvoøí
-   a vloí do ní poèáteèní data.
-* `devserver.zsh`: spustí vıvojovı server.
+* `autoMakeF5.zsh`: pÅ™i zmÄ›nÄ› souborÅ¯ automaticky odesÃ­lÃ¡ 
+   do prohlÃ­Å¾eÄe stisk F5.
+* `create-psql.usr.db`: vytvoÅ™Ã­ v PostgreSQL uÅ¾ivatele a zaloÅ¾Ã­ mu 
+   databÃ¡zi.
+* `drop-psql.usr.db`: zruÅ¡Ã­ v PostgreSQL uÅ¾ivatele a vÅ¡echny jeho 
+   databÃ¡ze.
+* `db-insert_dev_data.py`: vloÅ¾Ã­ do vÃ½vojovÃ© databÃ¡ze poÄÃ¡teÄnÃ­ data.
+* `db-drop_create_insert.zsh`: vÃ½vojovou databÃ¡zi zruÅ¡Ã­, znovu vytvoÅ™Ã­
+   a vloÅ¾Ã­ do nÃ­ poÄÃ¡teÄnÃ­ data.
+* `devserver.zsh`: spustÃ­ vÃ½vojovÃ½ server.
 
 
