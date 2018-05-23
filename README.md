@@ -89,7 +89,7 @@ Závislosti
 
 Databáze
 --------
-* [ERD]() databáze: <https://editor.ponyorm.com/user/mz10/webtest/>
+* [ERD]() databáze: <https://editor.ponyorm.com/user/mz10/webtest>
 * Definice databázových tabulek je v modulu `db.py`.
 
 ### Přihlášení do databáze
