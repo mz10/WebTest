@@ -137,8 +137,7 @@ $(document).on("click", ".otTlacitka .tlZadani", function(e) {
         zadaniJakoHTML = !zadaniJakoHTML;
         $(".otazka[cislo=" + idOtazky + "] .otZadani").html(zadani);
         
-        if(!zadaniJakoHTML)
-            mathjax();
+        if(!zadaniJakoHTML) mathjax();
     });
 });
 

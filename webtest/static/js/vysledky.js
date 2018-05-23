@@ -108,8 +108,9 @@ function vysledkyZobraz(id) {
 
         text = vysledek + "<span class='mrizka vyzkouset'>" + text + "</span>";
 
-        $(stranka).zmenHtml(text);
-        mathjax();
+        $(stranka).zmenHtml(text, function() {
+            mathjax();    
+        });        
     }
 
     function zpracujOtazky(i, otazky) {

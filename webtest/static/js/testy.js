@@ -133,8 +133,6 @@ function testyVyzkouset(idTestu,ucitel) {
         text += "<h1>" + test.jmeno + "</h1>";
         $.each(test.otazky, zpracujOtazky);
         
-        mathjax();
-        
         //5 sekund jako rezerva
         limit = (test.limit*60)-5;
 
@@ -154,10 +152,11 @@ function testyVyzkouset(idTestu,ucitel) {
 
         var html = text + "<span class='mrizka vyzkouset'>" + otazky + "</span>";
 
-        $(stranka).zmenHtml(html);
-        $("#menuInfo").show();
-        menuNahore();
-        mathjax();
+        $(stranka).zmenHtml(html, function() {
+            $("#menuInfo").show();
+            menuNahore();
+            mathjax();             
+        });  
     }
 
     function konecTestu() {

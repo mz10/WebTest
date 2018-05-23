@@ -25,9 +25,10 @@
         }       
 
         if(div) {
-            $(div).zmenHtml(text);
-            mathjax();
-            menuNahore();
+            $(div).zmenHtml(text, function() {
+                mathjax();
+                menuNahore();                
+            });
         }
         else return hotovo(text);
     }

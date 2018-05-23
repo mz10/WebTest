@@ -268,14 +268,15 @@ function wsUdalosti() {
     });
 }
 
-$.fn.zmenHtml = function(html) {
+$.fn.zmenHtml = function(html, nacteno) {
     var objekt = this;
     objekt.css("transform","scale(0.0)"); 
     objekt.css("opacity",0); 
     setTimeout(function() {
         objekt.html(html);
+        if (nacteno) nacteno();        
         animace(objekt);
-    }, 500);    
+    }, 500); 
 };
 
 $.fn.nacti = function(adresa, nacteno) {
@@ -293,7 +294,9 @@ $.fn.nacti = function(adresa, nacteno) {
 //animace prvku
 function animace(div) {
     div = div[0];
+    /*
     var vyska = 0;
+
 
     $.each(div.children, secti);
     
@@ -303,7 +306,8 @@ function animace(div) {
     }
 
     //$(div).css("height",vyska+150);
-    
+    */
+
     $(div).css("transform","scale(1.0)"); 
     $(div).css("opacity",1); 
 }
