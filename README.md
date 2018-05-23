@@ -11,7 +11,6 @@ zaměřuje hlavně na (elektro-)technické úlohy. Tento projekt nabízí:
 * Možnost vložit do zadání náhodné číslo a očekávaný výsledek
   zapsat jako vzorec. 
 
-
 Proměnné
 --------
 Do editoru jdou zadávat proměnné, které můžeme použít v odpovědi jako vzorec. Proměnná musí začínat znakem $.
@@ -39,38 +38,38 @@ Funkce, které se dají zadávat do odpovědi a do editoru:
 Matematické funkce
 ---------------
 Příklady zápisu:
-[$a=Abs(-5)]		Absolutní hodnota -> 5
-[$a=Prumer(1,2,3,4)]	Průměr -> 2,5
-[$a=Jednotka(0.05,mV)]	Převede na správnou jednotku -> 50 µuV
-[$a=Max(1,4,3,2)]		Maximum nebo minimum -> 4 nebo 1
+* [$a=Abs(-5)]		           Absolutní hodnota -> 5
+* [$a=Prumer(1,2,3,4)]	     Průměr -> 2,5
+* [$a=Jednotka(0.05,mV)]	   Převede na správnou jednotku -> 50 µuV
+* [$a=Max(1,4,3,2)]		       Maximum nebo minimum -> 4 nebo 1
 
 Komplexní čísla
 ---------------
-[(-3-I)/(1+I)]		-2 + 1*I
-[I**3+I**6+I**9]		-1
+* [(-3-I)/(1+I)]		         -2 + 1*I
+* [I**3+I**6+I**9]		       -1
 
 Základní funkce
 ---------------
 Příklady zápisu a výsledek:
-[Prumer(1,2,3,4]        		Průměr -> 2.5
-[Max(2,45,4,8,7]        		Maximum nebo minimum -> 45 nebo 2
-[Jednotka(51234,µV)]            	Zobrazí číslo ve správné jednotce -> 51.234 mV
-[sin(3)]           		Sinus -> 0.1411
-[simplify(sin(3)*2)]        	Vypočítá výraz -> 0.2822
-[simplify(pi)]            		Konstanta pí    -> 3.14159
-[Abs(-5)]            		Absolutní hodnota -> 5
-[R(3/9)]            		Vytvoří zlomek -> 1/3
+* [Prumer(1,2,3,4]        		 Průměr -> 2.5
+* [Max(2,45,4,8,7]        		 Maximum nebo minimum -> 45 nebo 2
+* [Jednotka(51234,µV)]         Zobrazí číslo ve správné jednotce -> 51.234 mV
+* [sin(3)]           		       Sinus -> 0.1411
+* [simplify(sin(3)*2)]         Vypočítá výraz -> 0.2822
+* [simplify(pi)]            	 Konstanta pí    -> 3.14159
+* [Abs(-5)]            		     Absolutní hodnota -> 5
+* [R(3/9)]            		     Vytvoří zlomek -> 1/3
 
 Další funkce
 ---------------
-Derivace:			[diff(sin(x), x)]
-Integrál:			[integrate(x**2 * cos(x), x)]
-Limit:			[limit((sin(x)-x)/x**3, x, 0)]
+* Derivace:			               [diff(sin(x), x)]
+* Integrál:			               [integrate(x**2 * cos(x), x)]
+* Limit:			                 [limit((sin(x)-x)/x**3, x, 0)]
 
 Rovnice
 --------
 Příklad zápisu - výraz musí být mezi $$ $$, editor umí zobrazí náhled
-$$x = {[$a,20]  \over x} +  {[$a,20]  \over 5} - \sqrt{{x}  \over [$a,20]} $$
+* $$x = {[$a,20]  \over x} +  {[$a,20]  \over 5} - \sqrt{{x}  \over [$a,20]} $$
 
 Závislosti
 -----------
