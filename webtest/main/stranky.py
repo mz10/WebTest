@@ -338,6 +338,7 @@ def odU(sid):
     Uzivatel.odpojUzivatele(sid)
 
 @ws.on('nahled', namespace=nm)
+@db_session
 def nahled(zadani):
     try:
         return wsJSON({"odpoved": Otazka.nahled(zadani)})

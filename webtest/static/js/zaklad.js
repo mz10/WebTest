@@ -162,7 +162,7 @@ function dialog(zprava, ano, ne) {
 
     zrusit.onclick = function() {
         document.body.removeChild(obal);
-        ne();
+        if(ne) ne();
     };
 }
 

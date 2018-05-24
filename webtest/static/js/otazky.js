@@ -71,6 +71,9 @@ function otazkyUprav(idOtazky) {
         $(o.otevrenaZadano).each(function(i, o) {vlozitOdpoved("otevrena",o); });        
 
         vlozitOdpoved("seda","");
+        
+        //pokud je text dlouhy, bez toho by nebyla cast v editoru videt
+        Simplemde.codemirror.refresh();
     }
 }   
 
@@ -88,7 +91,7 @@ function vlozitOdpoved(trida, text) {
 }
 
 function otazkySmazatVsechny(e) {
-    dialog('Smazat všechny otázky?', ano, Function);
+    dialog('Smazat všechny otázky?', ano);
     
     var json = {
         akce:'smazatVsechny', 
@@ -162,7 +165,7 @@ function otazkyPridat() {
 }
 
 function otazkySmazat(idOtazky) {
-    dialog('Smazat otázku?', ano, Function);
+    dialog('Smazat otázku?', ano);
 
     var json = {
         akce:'smazat', 

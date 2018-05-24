@@ -34,7 +34,8 @@ function editor(el) {
         //podpora MathJax v nahledu
         previewRender: function(plainText) {
             var preview = document.getElementsByClassName("editor-preview-side")[0];
-            var text = this.parent.markdown(plainText);
+            //var text = this.parent.markdown(plainText);
+            var text = Simplemde.value();
 
             //odesle websocket se zadanim
             wsJSON(text, function(json) {

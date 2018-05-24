@@ -107,19 +107,25 @@ function menuNahore() {
     
     if(nabidka.length != 0)
         poziceNabidka = nabidka.offset().top-80;
-
+    
     $(window).scroll(function(e) {
         //menu
-        var fix = ($(this).scrollTop() > poziceMenu) ? true : false;	
-        menu.toggleClass("menu", fix);
-        
+        var fix = ($(this).scrollTop() > poziceMenu) ? true : false;
+
+        if($(menu).hasClass("menu") && fix) {
+            menu.toggleClass("menu", fix); 
+        }
+        else {
+            menu.toggleClass("menu", fix); 
+            if(fix) $(menu).animace(1.5); 
+        }
+
         //nabídka
         if(nabidka.length == 0) return;
         fix = ($(this).scrollTop() > poziceNabidka) ? true : false;	
-        nabidka.toggleClass("nahore", fix);   
-
+        cl(fix);
+        nabidka.toggleClass("nahore", fix);
     });
-
 }
 
 function nahodneLogo() {
@@ -275,7 +281,9 @@ $.fn.zmenHtml = function(html, nacteno) {
     setTimeout(function() {
         objekt.html(html);
         if (nacteno) nacteno();        
-        animace(objekt);
+        objekt.css("transform","scale(1.0)"); 
+        objekt.css("opacity",1);
+        objekt.css("transform","none"); 
     }, 500); 
 };
 
@@ -286,15 +294,33 @@ $.fn.nacti = function(adresa, nacteno) {
         objekt.css("opacity",0); 
         setTimeout(function() {
             if(nacteno) nacteno();
-            animace(objekt);
+            objekt.css("transform","scale(1.0)"); 
+            objekt.css("opacity",1);
+            objekt.css("transform","none"); 
         }, 500); 
     });
 };
 
+$.fn.animace = function(delka) {
+    var objekt = this;
+    objekt.css("transition","0s");      
+    objekt.css("opacity",0); 
+    
+    setTimeout(function() {
+        objekt.css("transition",delka + "s");        
+        objekt.css("opacity",1);  
+    }, 50);
+    
+    setTimeout(function() {
+        objekt.css("transition","0s");
+    }, delka*1000);
+};
+
+
+/*
 //animace prvku
 function animace(div) {
     div = div[0];
-    /*
     var vyska = 0;
 
 
@@ -306,8 +332,8 @@ function animace(div) {
     }
 
     //$(div).css("height",vyska+150);
-    */
 
     $(div).css("transform","scale(1.0)"); 
     $(div).css("opacity",1); 
 }
+*/

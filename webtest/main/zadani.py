@@ -20,7 +20,7 @@ class Zadani:
         m = zadani
 
         #vybere cizí slovo ze slovniku
-        m = re.compile("\$slovo[1-9]\.\w+.\w+?$", re.UNICODE).sub(Zadani.nahraditSlova,m)
+        m = re.compile("\$slovo[1-9]\.\w+.\w+", re.UNICODE).sub(Zadani.nahraditSlova,m)
 
         #nahradi textove promenne v [] nahodnymi cisly
         # příklad: [Proměnná123,10,20]     
@@ -58,7 +58,7 @@ class Zadani:
         m = re.compile('\[\$([A-ž]+[\d+]*,.*?)\]').sub(Zadani.nahodnePromenne,m)
 
         #vyhleda překlad cizího slova z databáze
-        m = re.compile("\$slovo[1-9]\.\w+").sub(Zadani.odpovediSlPromenne,m)
+        m = re.compile("\$slovo[1-9]\.\w+.\w+").sub(Zadani.odpovediSlPromenne,m)
 
         #nahradi vsechny promenne v []
         m = re.compile('\[(.*?)\]').sub(Zadani.odpovediPromenne,m)
@@ -221,7 +221,7 @@ class Zadani:
         
             return str(vysledek)
         except Exception as e:
-            return "[chyba ve výrazu 3]"  + str(e)
+            return "[chyba ve výrazu 3: " + str(e) + "]"
 
     def dosaditPromenne(m):
         promenne = Zadani.promenne      
@@ -255,6 +255,7 @@ class Zadani:
     def odpovediSlPromenne(m):
         promenne = Zadani.promenne       
         vyraz = m.group()
+
         try: vyraz = m.group(1)
         except: True
 
