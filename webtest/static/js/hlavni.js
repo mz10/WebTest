@@ -279,10 +279,12 @@ function zobrazPrihlasene(json) {
 /*********účet ***************/
 
 function ucetInfo() {
-    $(stranka).zmenHtml($("#ucet").html());
+    $(stranka).zmenHtml($("#ucet").html(),zmeneno);
 
-    $.getJSON("./ucet/", odpoved).fail(chybaIframe);
-    
+    function zmeneno() {
+        $.getJSON("./ucet/", odpoved).fail(chybaIframe);
+    }
+
     function odpoved(o) {
         pr("#ucLogin").text(o.prihlasen.login);
         pr("#ucJmeno").text(o.prihlasen.jmeno);

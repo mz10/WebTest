@@ -53,9 +53,9 @@ function zmenHash() {
             $("#uzivatele").show();
             break;
         case "DB":        
-            $(stranka).nacti("./tabulky/");
+            $(stranka).load("./tabulky/");
             intervalDb = setInterval(function() {
-                $(stranka).nacti("./tabulky/");
+                $(stranka).load("./tabulky/");
             }, 3000);        
             break;
         case "Otazky": 

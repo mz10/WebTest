@@ -41,13 +41,15 @@ function studentZobrazTabulku(nacteno) {
 function studentZobraz() {
     studentZobrazTabulku(function(tabulka) {
         var nadpis = "<h1>Studenti</h1>";
-        $(stranka).zmenHtml(nadpis + tabulka);
+        $(stranka).zmenHtml(nadpis + tabulka, zmeneno);
     
         var option = "";
 
-        $.getJSON("./json/tridy/", function (json) {
-            $.when($.each(json.tridy, nactiTridy)).done(nacteno);
-        }).fail(chybaIframe);
+        function zmeneno() {
+            $.getJSON("./json/tridy/", function (json) {
+                $.when($.each(json.tridy, nactiTridy)).done(nacteno);
+            }).fail(chybaIframe);
+        }
 
         function nactiTridy(i, t) {
             option += '<option value=' + t.id + '>' + t.poradi + t.nazev + '</option>';
