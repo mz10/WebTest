@@ -103,12 +103,7 @@ html, body, input, select, button {
   }
 
   a:hover {
-    text-decoration: underline;
-    transition: 
-  }
-
-  li:hover a {
-    //text-decoration: underline; 
+    text-decoration: underline; 
   }
 
 /* prichytavat menu nahore */
@@ -132,8 +127,6 @@ html, body, input, select, button {
 h1, h2, h3, h4, h5, h6 {
   font-weight: bold;
   color: #DD5500;
-  /*! margin-top: 1em; */
-  /*! margin-bottom: 1ex; */  
   padding: 0px;
   margin: 0px;  
   margin-top: 20px;
@@ -273,66 +266,6 @@ p.dobre {
   text-align: right;
   margin: 1em;
   margin-right: 2em; }
-
-.seznam_otazek li, .otazka li {
-  margin-bottom: 1em;
-  list-style-type: none;
-  border: 1px solid #660055;
-  -moz-border-radius: 8px;
-  -webkit-border-radius: 8px;
-  border-radius: 8px; 
-}
-
-  .seznam_otazek li:hover, .otazka li:hover {
-    background-color: #ddffaa; 
-  }
-
-  .seznam_otazek h2, .otazka h2 {
-    font-size: 105%;
-    color: #660055;
-    display: inline-block;
-    display: inline;
-    float: left;
-    width: 47.91667%;
-    margin: 0 1.04167%; 
-  }
-
-  .seznam_otazek .odkazy, .otazka .odkazy {
-    display: inline-block;
-    display: inline;
-    float: left;
-    width: 47.91667%;
-    margin: 0 1.04167%; 
-  }
-
-  .seznam_otazek a, .otazka a {
-    display: inline-block;
-    vertical-align: middle;
-    *vertical-align: auto;
-    *zoom: 1;
-    *display: inline;
-    padding: 3px 5px;
-    background: #eee;
-    color: #660055;
-    text-decoration: none;
-    -moz-border-radius: 5px;
-    -webkit-border-radius: 5px;
-    border-radius: 5px;
-    border: 2px ridge black; 
-  }
-
-  .seznam_otazek a:hover, .otazka a:hover {
-  background: #f3f3f3;
-  border-style: inset; 
-}
-
-.seznam_otazek p, .otazka p {
-  margin-left: 20px;
-  margin-right: 20px; 
-}
-
-.otazka .rendruj {
-  padding-top: 4em; }
 
 .anone {
   text-align: center;
@@ -610,6 +543,10 @@ table {
     display: block;
   }
 
+  .otZadani a {
+    color: white;
+    text-shadow: 0px 0px 2px black,1px 1px 2px black;
+  }
 
   .otazka.vybrana {
     background: yellow;
@@ -727,7 +664,8 @@ table {
 
 .otTlacitka, .ttTlacitka {
   float: right;
-  display: none;
+  opacity: 0;
+  transition: 0.5s;
 }
 
 .ttAutor, .ttOd, .ttDo, .ttLimit, .ttPokusu {
@@ -790,21 +728,54 @@ input.seda {
   color: blue;
 }
 
-.inputSpravna, .odDobre {
+.odDobre {
   color: green;
 }
 
-.inputSpatna, .odSpatne, .inputSmazat {
+.inputSmazat {
   color: red;
 }
 
-.inputSpravna, .inputSpatna, .inputSmazat {
-  padding-left: 5px;
+
+.inputSpatna {
+  background: red;
+  margin: 7px 5px;
+}
+
+.inputSpravna {
+  background: #01c01b;
+  margin: 7px 22px;
 }
 
 .inputTlacitka {
-  display: none;
+  opacity: 0;
+  transition: 0.5s;
 }
+
+.inputSpravna, .inputSpatna, .inputSmazat {
+  width: 15px;
+  height: 15px;
+  position: absolute;
+  border-radius: 100%;
+}
+
+.inputSmazat {
+  background: red;
+  position: absolute;
+  width: 5px;
+  margin: 7px 44px;
+  transform: rotate(45deg);
+  border-radius: 0%;
+}
+
+.inputSmazat:after { 
+  background: red; 
+  content: ""; 
+  height: 5px; 
+  width: 15px;  
+  position: absolute; 
+  margin: 5px -5px;
+} 
 
 .odpoved {
   cursor: pointer;
@@ -1262,14 +1233,16 @@ div.odDobre, div.odSpatne {
 }
 
 .otNabidka span {
-  border-radius: 50px;
+	border-radius: 50px;
 	box-shadow: inset 2px 2px 2px #d5af76;
 	margin: 0 auto;
 	padding: 5px 10px;
 	border: none;
 	background: orange;
-  box-shadow: inset 0px -9px 8px 2px #0006, inset 0px 10px 18px 0px #fff;
-  transition: 0.5s;
+	box-shadow: inset 0px -9px 8px 2px #0006, inset 0px 10px 18px 0px #fff;
+	transition: 0.5s;
+	text-shadow: 0px 0px 2px black,1px 1px 2px black;
+	color: white;
 }
 
 .otNabidka span:hover {

@@ -64,16 +64,16 @@ $(document).on("click", "#ttSkrytZadani", function(e) {
 
 //zobrazit tlacitka po najeti mysi - u otazek
 $(document).on("mouseenter", stranka + " > .otazka", function(e) {
-    $(this).children('.otTlacitka').css("display","block");
+    $(this).children('.otTlacitka').css("opacity","1");
 }).on("mouseleave", stranka + " > .otazka", function(e) {
-    $(this).children('.otTlacitka').css("display","none");
+    $(this).children('.otTlacitka').css("opacity","0");
 });
 
 //zobrazit tlacitka po najeti mysi - u testu
 $(document).on("mouseenter", ".test", function(e) {
-    $(this).children('.ttTlacitka').css("display","block");
+    $(this).children('.ttTlacitka').css("opacity","1");
 }).on("mouseleave", ".test", function(e) {
-    $(this).children('.ttTlacitka').css("display","none");
+    $(this).children('.ttTlacitka').css("opacity","0");
 });
   
 //smazat tabulku (databaze)
@@ -177,27 +177,13 @@ $(document).on("click", "#otPrSpatna", function(e) {
 });
 
 //input - tlacitka pro zmenu a smazani
-$(document).on("click", ".inputTlacitka", function(e) {
-    var trida = e.target.className;
-    var input = e.currentTarget.previousElementSibling;
-
-    cl(input.parentElement);
-
-    if(trida == "inputSpravna")
-        $(input).attr('class','dobre');
-    else if (trida == "inputSpatna")
-        $(input).attr('class','spatne');
-    else if (trida == "inputSmazat")
-        $(input.parentElement).remove();
-    else if (trida == "inputPridat")
-        $(input.parentElement).clone().insertAfter(input.parentElement);
-});
+$(document).on("click", ".inputTlacitka", otazkyOdpovedi);
 
 //zobrazit tlacitka po najeti mysi - u inputu
 $(document).on("mouseenter", ".inputLista", function(e) {
-    $(this).children('.inputTlacitka').css("display","inline");
+    $(this).children('.inputTlacitka').css("opacity","1");
 }).on("mouseleave", ".inputLista", function(e) {
-    $(this).children('.inputTlacitka').css("display","none");
+    $(this).children('.inputTlacitka').css("opacity","0");
 });
 
 $(document).on("keyup", "#vlozitOtazky input", otazkyVlozit);

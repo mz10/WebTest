@@ -35,15 +35,15 @@
 
     function foreach(i, o) {
         text += 
-            '<div class="otazka" cislo="' + o.id + '">\
-                ' + tlacitka + '\
-                <span class="otId">' + o.id + '. </span>\
-                <span class="otNazev">' + o.jmeno + '</span>\
-                <span class="otBodu">' + o.bodu + 'b</span>\
+            `<div class="otazka" cislo="${o.id}">\
+                ${tlacitka}
+                <span class="otId">${o.id}</span>\
+                <span class="otNazev">${o.jmeno}</span>\
+                <span class="otBodu">${o.bodu}b</span>\
                 <input class="otPocet" value="1" type="text">\
-                <span class="otZadani">' + o.zadaniHTML.replace("\n","<br>") + '</span>\
+                <span class="otZadani">${o.zadaniHTML.replace("\n","<br>")}</span>\
                 <div class="otOdpovedi"></div>\
-            </div>';
+            </div>`;
     };
 }
 
@@ -66,9 +66,9 @@ function otazkyUprav(idOtazky) {
         pr('#otZaokrouhlit').val(o.zaokrouhlit);
         pr('#otVyhodnotit').val(o.hodnotit);
 
-        $(o.spravneZadano).each(function(i, o)  {vlozitOdpoved("dobre",o); });
-        $(o.spatneZadano).each(function(i, o)   {vlozitOdpoved("spatne",o); });
-        $(o.otevrenaZadano).each(function(i, o) {vlozitOdpoved("otevrena",o); });        
+        $(o.spravneZadano).each(function(i, o)  { vlozitOdpoved("dobre",o);    });
+        $(o.spatneZadano).each(function(i, o)   { vlozitOdpoved("spatne",o);   });
+        $(o.otevrenaZadano).each(function(i, o) { vlozitOdpoved("otevrena",o); });        
 
         vlozitOdpoved("seda","");
         
@@ -77,15 +77,15 @@ function otazkyUprav(idOtazky) {
     }
 }   
 
-function vlozitOdpoved(trida, text) {   
-    var div = '<div class="inputLista">\
-                <input class="' + trida + '" type="text" value="' + text + '">\
+function vlozitOdpoved(typ, text) {   
+    var div = `<div class="inputLista">\
+                <input class="${typ}" type="text" value="${text}">\
                 <span class="inputTlacitka">\
-                    <span class="inputSpatna">o</span>\
-                    <span class="inputSpravna">o</span>\
-                    <span class="inputSmazat">x</span>\
+                    <span class="inputSpatna"></span>\
+                    <span class="inputSpravna"></span>\
+                    <span class="inputSmazat"></span>\
                 </span>\
-            </div>';
+            </div>`;
     
     $("#vlozitOtazky").append(div);        
 }
@@ -256,8 +256,8 @@ function otazkyOdeslat() {
 function otazkyVlozit(e) {
     var input = e.currentTarget;
     var hodnota = input.value;    
-    var inputy = e.currentTarget.parentElement.parentElement.children;
-    var posledni = e.currentTarget.parentElement.parentElement.lastElementChild;
+    var inputy = input.parentElement.parentElement.children;
+    var posledni = input.parentElement.parentElement.lastElementChild;
     var prvni = inputy[0].children[0];
 
     //pokud neni input prazdny, oznac jako spatnou
@@ -273,9 +273,8 @@ function otazkyVlozit(e) {
         $(input).removeClass().addClass("seda");
 
     //pokud je input prazdny, smaz posledni input
-    if(hodnota.length == 0 && posledni.children[0].className == "seda") {
+    if(hodnota.length == 0 && inputy.length > 2 && posledni.children[0].className == "seda")
         $(posledni).remove();
-    }
 
     if(inputy.length > 2) {
         prvni.className = "dobre";
@@ -286,4 +285,26 @@ function otazkyVlozit(e) {
         prvni.className = "otevrena";
         prvni.placeholder = "Otevřená"
     }    
+}
+
+function otazkyOdpovedi(e) {
+    var typ = e.target.className;
+    var input = e.currentTarget.previousElementSibling;
+    var inputy = input.parentElement.parentElement.children;
+    var prvni = inputy[0].children[0];
+
+    if(typ == "inputSpravna")
+        $(input).attr('class','dobre');
+    else if (typ == "inputSpatna")
+        $(input).attr('class','spatne');
+    else if (typ == "inputSmazat") {
+        if(inputy.length > 2) 
+            $(input.parentElement).remove();
+        if(inputy.length <= 2) {
+            prvni.className = "otevrena";
+            prvni.placeholder = "Otevřená"
+        }        
+    }
+    else if (typ == "inputPridat")
+        $(input.parentElement).clone().insertAfter(input.parentElement);
 }
