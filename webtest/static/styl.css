@@ -775,7 +775,29 @@ input.seda {
   width: 15px;  
   position: absolute; 
   margin: 5px -5px;
-} 
+}
+
+.inputSmazat.tridy {
+  margin: 7px 30px;
+}
+
+.inputPridat {
+	background: green;
+	position: absolute;
+	width: 15px;
+  height: 5px;
+	margin: 12px 5px;
+	border-radius: 0%;
+}
+
+.inputPridat::after {
+	background: green;
+	content: "";
+	height: 15px;
+	width: 5px;
+	position: absolute;
+	margin: -5px 5px;
+}
 
 .odpoved {
   cursor: pointer;

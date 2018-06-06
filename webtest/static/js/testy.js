@@ -250,6 +250,7 @@ function testyUprava(akce,idTestu) {
         otazkyZobraz(null,function(otazky){
             var dostupne = pr("#ttDostupne").html(otazky)[0].children;
             var zvolene = pr("#ttZvolene").html(otazky)[0].children;
+            pr(".otTlacitka").hide();
             $.each(dostupne, dostupneOtazky); 
             $.each(zvolene, zvoleneOtazky);
             mathjax();
